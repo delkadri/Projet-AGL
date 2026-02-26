@@ -11,3 +11,19 @@ services:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend-service
+    env_file:
+      - ./.env
+    ports:
+      - "${FRONT_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+    depends_on:
+      - backend
+    restart: unless-stopped
