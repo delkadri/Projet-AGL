@@ -24,7 +24,20 @@ export class AuthService {
             throw new BadRequestException(error.message);
         }
 
-        return data;
+        return {
+            user: {
+                id: data.user?.id,
+                email: data.user?.email,
+                email_confirmed_at: data.user?.email_confirmed_at,
+                last_sign_in_at: data.user?.last_sign_in_at,
+            },
+            session: data.session ? {
+                access_token: data.session.access_token,
+                token_type: data.session.token_type,
+                expires_in: data.session.expires_in,
+                expires_at: data.session.expires_at,
+            } : undefined,
+        };
     }
 
     async login(loginDto: LoginDto) {
@@ -44,6 +57,19 @@ export class AuthService {
             throw new UnauthorizedException(error.message);
         }
 
-        return data;
+        return {
+            user: {
+                id: data.user?.id,
+                email: data.user?.email,
+                email_confirmed_at: data.user?.email_confirmed_at,
+                last_sign_in_at: data.user?.last_sign_in_at,
+            },
+            session: data.session ? {
+                access_token: data.session.access_token,
+                token_type: data.session.token_type,
+                expires_in: data.session.expires_in,
+                expires_at: data.session.expires_at,
+            } : undefined,
+        };
     }
 }
