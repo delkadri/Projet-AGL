@@ -1,16 +1,21 @@
 import { cn } from '@/lib/utils'
 
+type QuestionMultipleChoiceOption = {
+  label: string
+  value: string
+}
+
 type QuestionMultipleChoiceProps = {
-  options: string[]
+  options: QuestionMultipleChoiceOption[]
   value: string[]
   onChange: (value: string[]) => void
 }
 
-function toggleOption(selected: string[], option: string): string[] {
-  if (selected.includes(option)) {
-    return selected.filter((s) => s !== option)
+function toggleOption(selected: string[], optionValue: string): string[] {
+  if (selected.includes(optionValue)) {
+    return selected.filter((s) => s !== optionValue)
   }
-  return [...selected, option]
+  return [...selected, optionValue]
 }
 
 export function QuestionMultipleChoice({
@@ -25,10 +30,10 @@ export function QuestionMultipleChoice({
       aria-label="Choisissez une ou plusieurs réponses"
     >
       {options.map((option) => {
-        const isSelected = value.includes(option)
+        const isSelected = value.includes(option.value)
         return (
           <button
-            key={option}
+            key={option.value}
             type="button"
             role="checkbox"
             aria-checked={isSelected}
@@ -38,9 +43,9 @@ export function QuestionMultipleChoice({
                 ? 'border-[#34C759] bg-[#34C759]/10'
                 : 'hover:bg-muted/50'
             )}
-            onClick={() => onChange(toggleOption(value, option))}
+            onClick={() => onChange(toggleOption(value, option.value))}
           >
-            {option}
+            {option.label}
           </button>
         )
       })}

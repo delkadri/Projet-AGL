@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import type { Quiz, QuizAnswers, Question } from '@/types/quiz'
-import { AuthBranding } from '@/components/AuthBranding'
 import { Button } from '@/components/ui/button'
 import { mockQuiz } from '@/data/mockQuiz'
 import { QuizProgress } from './QuizProgress'
@@ -69,7 +68,9 @@ export function QuizContainer() {
       return
     }
     // Dernière question du quiz
-    // TODO: soumettre les réponses à l'API
+    // TODO: construire un payload de type QuizSubmissionPayload et
+    // l'envoyer au backend pour calculer le score carbone (appel API à implémenter côté frontend/backend).
+
     navigate({ to: '/' })
   }
 
