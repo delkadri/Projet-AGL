@@ -1,0 +1,166 @@
+// TODO: remplacer par appel API (ex: getQuiz(id))
+import type { Quiz } from '@/types/quiz'
+
+export const mockQuiz: Quiz = {
+  id: 'quiz-1',
+  name: 'Bilan carbone',
+  categories: [
+    {
+      id: 'cat-1',
+      name: 'MOBILITÉ & TRANSPORT',
+      questions: [
+        {
+          id: 'q1',
+          type: 'single',
+          title:
+            'Comment vous rendez-vous principalement au travail ou à vos études ?',
+          options: [
+            {
+              label: 'Voiture individuelle (Diesel / Essence)',
+              value: 'voiture_diesel_essence',
+            },
+            {
+              label: 'Transport en commun',
+              value: 'transport_commun',
+            },
+            {
+              label: 'Vélo / Marche / Trotinette',
+              value: 'velo_marche_trottinette',
+            },
+            {
+              label: 'Covoiturage',
+              value: 'covoiturage',
+            },
+          ],
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'principal_mode',
+          },
+        },
+        {
+          id: 'q2',
+          type: 'single',
+          title: 'Combien de kilomètres parcourez-vous en moyenne par semaine ?',
+          options: [
+            {
+              label: 'Moins de 50 km',
+              value: 'moins_50',
+            },
+            {
+              label: '50–100 km',
+              value: '50_100',
+            },
+            {
+              label: '100–200 km',
+              value: '100_200',
+            },
+            {
+              label: 'Plus de 200 km',
+              value: 'plus_200',
+            },
+          ],
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'distance_km',
+          },
+        },
+        {
+          id: 'q3',
+          type: 'multiple',
+          title: 'Quels modes de transport utilisez-vous régulièrement ?',
+          options: [
+            {
+              label: 'Voiture',
+              value: 'voiture',
+            },
+            {
+              label: 'Train',
+              value: 'train',
+            },
+            {
+              label: 'Bus / Métro',
+              value: 'bus_metro',
+            },
+            {
+              label: 'Vélo',
+              value: 'velo',
+            },
+            {
+              label: 'Marche',
+              value: 'marche',
+            },
+            {
+              label: 'Trotinette',
+              value: 'trotinette',
+            },
+          ],
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'modes_used',
+          },
+        },
+        {
+          id: 'q4',
+          type: 'number',
+          title: "Nombre de trajets en avion par an (aller simple = 1 trajet) ?",
+          min: 0,
+          max: 20,
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'flight_count',
+          },
+        },
+        {
+          id: 'q4b',
+          type: 'single',
+          title: 'Pour vos trajets en avion, il s’agit plutôt de :',
+          options: [
+            {
+              label: 'Courts courriers (< 1000 km)',
+              value: 'court',
+            },
+            {
+              label: 'Moyens courriers (1000–3500 km)',
+              value: 'moyen',
+            },
+            {
+              label: 'Longs courriers (> 3500 km)',
+              value: 'long',
+            },
+          ],
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'flight_distance_class',
+          },
+        },
+        {
+          id: 'q5',
+          type: 'single',
+          title: 'Utilisez-vous le télétravail ?',
+          options: [
+            {
+              label: 'Jamais',
+              value: 'never',
+            },
+            {
+              label: '1 jour/semaine',
+              value: '1d',
+            },
+            {
+              label: '2–3 jours/semaine',
+              value: '2_3d',
+            },
+            {
+              label: 'Tous les jours',
+              value: 'everyday',
+            },
+          ],
+          carbonMeta: {
+            poste: '3.3',
+            dataType: 'telework_factor',
+          },
+        },
+      ],
+    },
+  ],
+}

@@ -1,16 +1,14 @@
 import { HeadContent, Outlet, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
 
-const AUTH_PATHS = ['/login', '/inscription'] as const
+const NO_HEADER_PATHS = ['/login', '/inscription', '/quiz'] as const
 
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const hideHeader = AUTH_PATHS.some((p) => pathname === p)
+  const hideHeader = NO_HEADER_PATHS.some((p) => pathname === p)
 
   return (
     <>
