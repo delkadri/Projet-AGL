@@ -25,7 +25,7 @@ function LoginPage() {
   return (
     <div className="flex h-screen flex-col items-center justify-center overflow-hidden bg-[#f0f7f0] px-4">
       <div className="w-full max-w-[340px]">
-        <AuthBranding title="Connexion" />
+        <AuthBranding />
 
         <form
           onSubmit={(e) => {
