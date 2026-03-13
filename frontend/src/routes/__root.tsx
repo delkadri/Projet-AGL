@@ -4,7 +4,7 @@ import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
 
-const NO_HEADER_PATHS = ['/login', '/inscription', '/quiz'] as const
+const NO_HEADER_PATHS = ['/login', '/inscription', '/quiz', '/parcours'] as const
 
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as ParcoursRouteImport } from './routes/parcours'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParcoursRoute = ParcoursRouteImport.update({
+  id: '/parcours',
+  path: '/parcours',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/parcours': typeof ParcoursRoute
   '/quiz': typeof QuizRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/parcours': typeof ParcoursRoute
   '/quiz': typeof QuizRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/parcours': typeof ParcoursRoute
   '/quiz': typeof QuizRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inscription' | '/login' | '/quiz'
+  fullPaths: '/' | '/inscription' | '/login' | '/parcours' | '/quiz'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inscription' | '/login' | '/quiz'
-  id: '__root__' | '/' | '/inscription' | '/login' | '/quiz'
+  to: '/' | '/inscription' | '/login' | '/parcours' | '/quiz'
+  id: '__root__' | '/' | '/inscription' | '/login' | '/parcours' | '/quiz'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
+  ParcoursRoute: typeof ParcoursRoute
   QuizRoute: typeof QuizRoute
 }
 
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz'
       fullPath: '/quiz'
       preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parcours': {
+      id: '/parcours'
+      path: '/parcours'
+      fullPath: '/parcours'
+      preLoaderRoute: typeof ParcoursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,
+  ParcoursRoute: ParcoursRoute,
   QuizRoute: QuizRoute,
 }
 export const routeTree = rootRouteImport
