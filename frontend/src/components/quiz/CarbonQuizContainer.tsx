@@ -70,8 +70,7 @@ export function CarbonQuizContainer() {
     // Dernière question du quiz carbone
     // TODO: construire un payload de type QuizSubmissionPayload avec les réponses du quiz carbone
     // TODO: envoyer le payload au backend pour calculer le score carbone et mettre à jour le profil utilisateur
-    // TODO: rediriger vers une page de résultat affichant le score carbone calculé
-    navigate({ to: '/' })
+    navigate({ to: '/carbon-quiz-results' })
   }
 
   if (!currentQuestion || !category) {

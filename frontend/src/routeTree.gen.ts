@@ -13,6 +13,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ParcoursRouteImport } from './routes/parcours'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as CarbonQuizResultsRouteImport } from './routes/carbon-quiz-results'
 import { Route as CarbonQuizQuestionsRouteImport } from './routes/carbon-quiz-questions'
 import { Route as CarbonQuizRouteImport } from './routes/carbon-quiz'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const InscriptionRoute = InscriptionRouteImport.update({
   path: '/inscription',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarbonQuizResultsRoute = CarbonQuizResultsRouteImport.update({
+  id: '/carbon-quiz-results',
+  path: '/carbon-quiz-results',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarbonQuizQuestionsRoute = CarbonQuizQuestionsRouteImport.update({
   id: '/carbon-quiz-questions',
   path: '/carbon-quiz-questions',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
+  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/parcours': typeof ParcoursRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
+  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/parcours': typeof ParcoursRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
+  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/parcours': typeof ParcoursRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
+    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
     | '/parcours'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
+    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
     | '/parcours'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
+    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
     | '/parcours'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CarbonQuizRoute: typeof CarbonQuizRoute
   CarbonQuizQuestionsRoute: typeof CarbonQuizQuestionsRoute
+  CarbonQuizResultsRoute: typeof CarbonQuizResultsRoute
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
   ParcoursRoute: typeof ParcoursRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/carbon-quiz-results': {
+      id: '/carbon-quiz-results'
+      path: '/carbon-quiz-results'
+      fullPath: '/carbon-quiz-results'
+      preLoaderRoute: typeof CarbonQuizResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/carbon-quiz-questions': {
       id: '/carbon-quiz-questions'
       path: '/carbon-quiz-questions'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CarbonQuizRoute: CarbonQuizRoute,
   CarbonQuizQuestionsRoute: CarbonQuizQuestionsRoute,
+  CarbonQuizResultsRoute: CarbonQuizResultsRoute,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,
   ParcoursRoute: ParcoursRoute,
