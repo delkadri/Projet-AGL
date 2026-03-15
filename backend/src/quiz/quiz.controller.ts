@@ -43,6 +43,21 @@ export class QuizController {
     };
   }
 
+  /**
+   * POST /api/quiz/:id/score
+   *
+   * Calcule le score carbone d'un quiz a partir des reponses utilisateur.
+   * - Parametre de route : id du quiz (ex: quiz-1)
+   * - Body attendu : { answers: { [questionId]: string | number | string[] } }
+   *
+   * Le calcul est delegue a QuizScoringService qui :
+   * - recupere la structure du quiz,
+   * - applique la logique de scoring (transport, avion, etc.),
+   * - interroge l'API ADEME Base Carbone pour les facteurs d'emission,
+   * - utilise des valeurs de repli si aucun facteur n'est trouve.
+   *
+   * Reponse : total en kgCO2e/an + niveau climatique + detail (breakdown).
+   */
   @Post(':id/score')
   async calculateScore(@Param('id') id: string, @Body() body: CalculateQuizScoreDto) {
     return this.quizScoringService.calculateScore(id, body.answers);
