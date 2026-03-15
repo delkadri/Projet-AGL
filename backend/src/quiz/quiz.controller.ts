@@ -1,9 +1,22 @@
-import { Controller, Get, Param, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import { CalculateQuizScoreDto } from './dto/calculate-quiz-score.dto';
+import { QuizScoringService } from './quiz-scoring.service';
 
 @Controller('quiz')
 export class QuizController {
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly quizScoringService: QuizScoringService,
+  ) {}
 
   @Get(':id')
   async getQuiz(@Param('id') id: string) {
@@ -28,5 +41,10 @@ export class QuizController {
       name: data.name,
       categories: data.content?.categories || []
     };
+  }
+
+  @Post(':id/score')
+  async calculateScore(@Param('id') id: string, @Body() body: CalculateQuizScoreDto) {
+    return this.quizScoringService.calculateScore(id, body.answers);
   }
 }
