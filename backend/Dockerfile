@@ -4,10 +4,11 @@ WORKDIR /app
 
 # Install dependencies first (better Docker cache usage)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
-# Copy application source
+# Copy application source and generate Prisma client for container platform
 COPY . .
+RUN npx prisma generate
 
 EXPOSE 8000
 

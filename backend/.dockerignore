@@ -2,8 +2,12 @@
 __pycache__
 *.pyc
 .env
+.env.*
 .git
 .gitignore
 .vscode
 .idea
 tests
+node_modules
+dist
+*.log
