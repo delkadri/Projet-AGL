@@ -9,25 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as QuizRouteImport } from './routes/quiz'
-import { Route as ParcoursRouteImport } from './routes/parcours'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionRouteImport } from './routes/inscription'
-import { Route as CarbonQuizResultsRouteImport } from './routes/carbon-quiz-results'
 import { Route as CarbonQuizQuestionsRouteImport } from './routes/carbon-quiz-questions'
 import { Route as CarbonQuizRouteImport } from './routes/carbon-quiz'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingQuizRouteImport } from './routes/onboarding/quiz'
+import { Route as OnboardingParcoursRouteImport } from './routes/onboarding/parcours'
 
-const QuizRoute = QuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParcoursRoute = ParcoursRouteImport.update({
-  id: '/parcours',
-  path: '/parcours',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -36,11 +25,6 @@ const LoginRoute = LoginRouteImport.update({
 const InscriptionRoute = InscriptionRouteImport.update({
   id: '/inscription',
   path: '/inscription',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarbonQuizResultsRoute = CarbonQuizResultsRouteImport.update({
-  id: '/carbon-quiz-results',
-  path: '/carbon-quiz-results',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarbonQuizQuestionsRoute = CarbonQuizQuestionsRouteImport.update({
@@ -58,37 +42,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingQuizRoute = OnboardingQuizRouteImport.update({
+  id: '/onboarding/quiz',
+  path: '/onboarding/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingParcoursRoute = OnboardingParcoursRouteImport.update({
+  id: '/onboarding/parcours',
+  path: '/onboarding/parcours',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
-  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
-  '/parcours': typeof ParcoursRoute
-  '/quiz': typeof QuizRoute
+  '/onboarding/parcours': typeof OnboardingParcoursRoute
+  '/onboarding/quiz': typeof OnboardingQuizRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
-  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
-  '/parcours': typeof ParcoursRoute
-  '/quiz': typeof QuizRoute
+  '/onboarding/parcours': typeof OnboardingParcoursRoute
+  '/onboarding/quiz': typeof OnboardingQuizRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/carbon-quiz': typeof CarbonQuizRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
-  '/carbon-quiz-results': typeof CarbonQuizResultsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
-  '/parcours': typeof ParcoursRoute
-  '/quiz': typeof QuizRoute
+  '/onboarding/parcours': typeof OnboardingParcoursRoute
+  '/onboarding/quiz': typeof OnboardingQuizRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,60 +87,42 @@ export interface FileRouteTypes {
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
-    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
-    | '/parcours'
-    | '/quiz'
+    | '/onboarding/parcours'
+    | '/onboarding/quiz'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
-    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
-    | '/parcours'
-    | '/quiz'
+    | '/onboarding/parcours'
+    | '/onboarding/quiz'
   id:
     | '__root__'
     | '/'
     | '/carbon-quiz'
     | '/carbon-quiz-questions'
-    | '/carbon-quiz-results'
     | '/inscription'
     | '/login'
-    | '/parcours'
-    | '/quiz'
+    | '/onboarding/parcours'
+    | '/onboarding/quiz'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CarbonQuizRoute: typeof CarbonQuizRoute
   CarbonQuizQuestionsRoute: typeof CarbonQuizQuestionsRoute
-  CarbonQuizResultsRoute: typeof CarbonQuizResultsRoute
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
-  ParcoursRoute: typeof ParcoursRoute
-  QuizRoute: typeof QuizRoute
+  OnboardingParcoursRoute: typeof OnboardingParcoursRoute
+  OnboardingQuizRoute: typeof OnboardingQuizRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/quiz': {
-      id: '/quiz'
-      path: '/quiz'
-      fullPath: '/quiz'
-      preLoaderRoute: typeof QuizRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parcours': {
-      id: '/parcours'
-      path: '/parcours'
-      fullPath: '/parcours'
-      preLoaderRoute: typeof ParcoursRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -162,13 +135,6 @@ declare module '@tanstack/react-router' {
       path: '/inscription'
       fullPath: '/inscription'
       preLoaderRoute: typeof InscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carbon-quiz-results': {
-      id: '/carbon-quiz-results'
-      path: '/carbon-quiz-results'
-      fullPath: '/carbon-quiz-results'
-      preLoaderRoute: typeof CarbonQuizResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carbon-quiz-questions': {
@@ -192,6 +158,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/quiz': {
+      id: '/onboarding/quiz'
+      path: '/onboarding/quiz'
+      fullPath: '/onboarding/quiz'
+      preLoaderRoute: typeof OnboardingQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/parcours': {
+      id: '/onboarding/parcours'
+      path: '/onboarding/parcours'
+      fullPath: '/onboarding/parcours'
+      preLoaderRoute: typeof OnboardingParcoursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -199,11 +179,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CarbonQuizRoute: CarbonQuizRoute,
   CarbonQuizQuestionsRoute: CarbonQuizQuestionsRoute,
-  CarbonQuizResultsRoute: CarbonQuizResultsRoute,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,
-  ParcoursRoute: ParcoursRoute,
-  QuizRoute: QuizRoute,
+  OnboardingParcoursRoute: OnboardingParcoursRoute,
+  OnboardingQuizRoute: OnboardingQuizRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
