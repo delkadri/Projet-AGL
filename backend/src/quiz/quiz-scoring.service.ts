@@ -78,13 +78,19 @@ export class QuizScoringService {
     const categories = this.buildCategoriesBilan(quiz, breakdown);
 
     if (userId) {
-      await this.prisma.score_history.create({
-        data: {
-          user_id: userId,
-          score: this.round2(total),
-          json_answers: answers as any,
-        }
-      });
+      await this.prisma.$transaction([
+        this.prisma.score_history.create({
+          data: {
+            user_id: userId,
+            score: this.round2(total),
+            json_answers: answers as any,
+          }
+        }),
+        this.prisma.users.update({
+          where: { id: userId },
+          data: { onboarding_completed: true }
+        })
+      ]);
     }
 
     return {
