@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { SupabaseService } from '../supabase/supabase.service';
+import { PrismaService } from 'nestjs-prisma';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -7,7 +7,7 @@ import * as path from 'path';
 export class QuizSeederService implements OnModuleInit {
   private readonly logger = new Logger(QuizSeederService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) { }
+  constructor(private readonly prisma: PrismaService) { }
 
   async onModuleInit() {
     this.logger.log('Démarrage de la synchronisation du quiz...');
@@ -25,45 +25,24 @@ export class QuizSeederService implements OnModuleInit {
       const fileContent = fs.readFileSync(filePath, 'utf-8');
       const quizJson = JSON.parse(fileContent);
 
-      const client = this.supabaseService.getClient();
-      if (!client) {
-        this.logger.error('Client Supabase non initialisé. Impossible de synchroniser le quiz.');
-        return;
-      }
-
       const { id, name, categories } = quizJson;
       const firstQuestionId = categories?.[0]?.questions?.[0]?.id ?? '?';
       this.logger.log(`[Seeder] Synchronisation de '${id}' — première question: ${firstQuestionId}`);
 
-      // Vérifie si le quiz existe déjà
-      const { data: existing } = await client
-        .from('quizzes')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle();
+      await this.prisma.quizzes.upsert({
+        where: { id },
+        update: {
+          name,
+          content: { categories }
+        },
+        create: {
+          id,
+          name,
+          content: { categories }
+        }
+      });
 
-      let error: { message: string } | null = null;
-
-      if (existing) {
-        // Mise à jour forcée du contenu
-        const { error: updateError } = await client
-          .from('quizzes')
-          .update({ name, content: { categories } })
-          .eq('id', id);
-        error = updateError;
-        if (!error) this.logger.log(`[Seeder] Quiz '${id}' mis à jour dans Supabase.`);
-      } else {
-        // Première insertion
-        const { error: insertError } = await client
-          .from('quizzes')
-          .insert({ id, name, content: { categories } });
-        error = insertError;
-        if (!error) this.logger.log(`[Seeder] Quiz '${id}' inséré dans Supabase.`);
-      }
-
-      if (error) {
-        this.logger.error(`Échec de la synchronisation du quiz '${id}': ${error.message}`);
-      }
+      this.logger.log(`Quiz '${id}' synchronisé avec succès sur Supabase via Prisma.`);
     } catch (error: any) {
       this.logger.error(`Erreur lors de la synchronisation du quiz: ${error.message}`);
     }

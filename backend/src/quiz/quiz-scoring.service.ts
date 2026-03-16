@@ -1,4 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Logger } from '@nestjs/common';
+import { PrismaService } from 'nestjs-prisma';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -26,22 +27,22 @@ export class QuizScoringService {
   private readonly logger = new Logger(QuizScoringService.name);
 
   constructor(
-    private readonly supabaseService: SupabaseService,
+    private readonly prisma: PrismaService,
     private readonly transportScorer: TransportScorer,
     private readonly housingScorer: HousingScorer,
     private readonly foodScorer: FoodScorer,
     private readonly consumptionScorer: ConsumptionScorer,
     private readonly digitalScorer: DigitalScorer,
     private readonly servicesScorer: ServicesScorer,
-  ) {}
+  ) { }
 
-  async calculateScore(quizId: string, answers: Record<string, unknown>) {
+  async calculateScore(quizId: string, answers: Record<string, unknown>, userId?: string) {
     const quiz = await this.getQuiz(quizId);
 
     // ── Diagnostic ──────────────────────────────────────────────────────────
     this.logger.log(
       `[Score] Quiz chargé: ${quiz.id} — ${quiz.categories.length} catégories, ` +
-        `${quiz.categories.flatMap((c) => c.questions).length} questions`,
+      `${quiz.categories.flatMap((c) => c.questions).length} questions`,
     );
     this.logger.log(
       `[Score] Réponses reçues (${Object.keys(answers).length} clés): ${JSON.stringify(answers)}`,
@@ -75,6 +76,16 @@ export class QuizScoringService {
     );
     const total = totalFromBreakdown + PUBLIC_SERVICES_FIXED_KG;
     const categories = this.buildCategoriesBilan(quiz, breakdown);
+
+    if (userId) {
+      await this.prisma.score_history.create({
+        data: {
+          user_id: userId,
+          score: this.round2(total),
+          json_answers: answers as any,
+        }
+      });
+    }
 
     return {
       quizId,
@@ -156,27 +167,16 @@ export class QuizScoringService {
   }
 
   private async getQuiz(quizId: string): Promise<QuizPayload> {
-    const client = this.supabaseService.getClient();
-    if (client) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { data, error } = await client
-        .from('quizzes')
-        .select('*')
-        .eq('id', quizId)
-        .single();
+    const data = await this.prisma.quizzes.findUnique({
+      where: { id: quizId },
+    });
 
-      if (!error && data) {
-        const row = data as {
-          id: string;
-          name: string;
-          content?: { categories?: QuizCategory[] };
-        };
-        return {
-          id: row.id,
-          name: row.name,
-          categories: row.content?.categories ?? [],
-        };
-      }
+    if (data) {
+      return {
+        id: data.id,
+        name: data.name || '',
+        categories: (data.content as any)?.categories ?? [],
+      };
     }
 
     const localQuiz = this.loadLocalQuizById(quizId);
