@@ -6,37 +6,33 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { SupabaseService } from '../supabase/supabase.service';
+import { PrismaService } from 'nestjs-prisma';
 import { CalculateQuizScoreDto } from './dto/calculate-quiz-score.dto';
 import { QuizScoringService } from './quiz-scoring.service';
+import { CurrentUser } from '../auth/decorators/user.decorator';
 import * as fs from 'fs';
 import * as path from 'path';
 
 @Controller('quiz')
 export class QuizController {
   constructor(
-    private readonly supabaseService: SupabaseService,
+    private readonly prisma: PrismaService,
     private readonly quizScoringService: QuizScoringService,
   ) { }
 
   @Get(':id')
   async getQuiz(@Param('id') id: string) {
-    const client = this.supabaseService.getClient();
-    if (client) {
-      const { data, error } = await client
-        .from('quizzes')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const data = await this.prisma.quizzes.findUnique({
+      where: { id },
+    });
 
-      if (!error && data) {
-        // On reformate l'objet pour correspondre au type TypeScript 'Quiz' du front
-        return {
-          id: data.id,
-          name: data.name,
-          categories: data.content?.categories || [],
-        };
-      }
+    if (data) {
+      // On reformate l'objet pour correspondre au type TypeScript 'Quiz' du front
+      return {
+        id: data.id,
+        name: data.name,
+        categories: (data.content as any)?.categories || [],
+      };
     }
 
     const localQuiz = this.loadLocalQuizById(id);
@@ -97,7 +93,11 @@ export class QuizController {
    * Reponse : total en kgCO2e/an + niveau climatique + detail (breakdown).
    */
   @Post(':id/score')
-  async calculateScore(@Param('id') id: string, @Body() body: CalculateQuizScoreDto) {
-    return this.quizScoringService.calculateScore(id, body.answers);
+  async calculateScore(
+    @Param('id') id: string,
+    @Body() body: CalculateQuizScoreDto,
+    @CurrentUser() user?: any
+  ) {
+    return this.quizScoringService.calculateScore(id, body.answers, user?.id);
   }
 }
