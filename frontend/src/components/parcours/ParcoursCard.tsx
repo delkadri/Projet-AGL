@@ -10,26 +10,26 @@ export const ParcoursCard = ({ parcours, onSelect, isSelected }: ParcoursCardPro
   const defisText = parcours.frequency?.defis || '0 défi'
   const quizzText = parcours.frequency?.quizz || '0 quizz'
 
-  const getBackgroundColor = (id: string) => {
-    switch (id) {
-      case 'parcours-1':
+  const getBackgroundColor = (slug: string) => {
+    switch (slug) {
+      case 'decouverte':
         return 'bg-[#AFD29C]'
-      case 'parcours-2':
+      case 'progression':
         return 'bg-[#5D963E]'
-      case 'parcours-3':
+      case 'challenge':
         return 'bg-[#559B63]'
       default:
         return 'bg-white'
     }
   }
 
-  const getImageBackgroundColor = (id: string) => {
-    switch (id) {
-      case 'parcours-1':
+  const getImageBackgroundColor = (slug: string) => {
+    switch (slug) {
+      case 'decouverte':
         return 'bg-[#AFD29C]'
-      case 'parcours-2':
+      case 'progression':
         return 'bg-[#5D963E]'
-      case 'parcours-3':
+      case 'challenge':
         return 'bg-[#559B63]'
       default:
         return 'bg-gray-100'
@@ -39,14 +39,14 @@ export const ParcoursCard = ({ parcours, onSelect, isSelected }: ParcoursCardPro
   return (
     <div
       onClick={() => onSelect(parcours.id)}
-      className={`flex border-2 rounded-lg overflow-hidden ${getBackgroundColor(parcours.id)} shadow-lg hover:shadow-xl transition-all cursor-pointer ${
+      className={`flex border-2 rounded-lg overflow-hidden ${getBackgroundColor(parcours.slug)} shadow-lg hover:shadow-xl transition-all cursor-pointer ${
         isSelected
           ? 'border-emerald-500 bg-opacity-75 shadow-dark-900 shadow-xl'
           : 'border-gray-200'
       }`}
     >
       {/* Left image column */}
-      <div className={`w-1/4 ${getImageBackgroundColor(parcours.id)} flex items-center justify-center px-2`}>
+      <div className={`w-1/4 ${getImageBackgroundColor(parcours.slug)} flex items-center justify-center px-2`}>
         <img
           src={parcours.imageUrl ?? '/placeholder.png'}
           alt={parcours.name}

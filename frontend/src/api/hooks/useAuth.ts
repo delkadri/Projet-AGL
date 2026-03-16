@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { ApiError } from '@/api/client'
 import { getCurrentUser, login, logout, register, type CurrentUser } from '@/api/auth'
@@ -14,16 +14,24 @@ export function useCurrentUserQuery() {
 }
 
 export function useLoginMutation() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['auth', 'login'],
     mutationFn: login,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY })
+    },
   })
 }
 
 export function useRegisterMutation() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['auth', 'register'],
     mutationFn: register,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY })
+    },
   })
 }
 

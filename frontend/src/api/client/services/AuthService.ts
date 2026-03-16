@@ -5,6 +5,7 @@
 import type { AuthResponseDto } from '../models/AuthResponseDto';
 import type { LoginDto } from '../models/LoginDto';
 import type { RegisterDto } from '../models/RegisterDto';
+import type { UserProfileResponseDto } from '../models/UserProfileResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -44,6 +45,20 @@ export class AuthService {
             url: '/auth/login',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized.`,
+            },
+        });
+    }
+    /**
+     * Get current user profile
+     * @returns UserProfileResponseDto Return the current user profile
+     * @throws ApiError
+     */
+    public static authControllerGetMe(): CancelablePromise<UserProfileResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/auth/me',
             errors: {
                 401: `Unauthorized.`,
             },

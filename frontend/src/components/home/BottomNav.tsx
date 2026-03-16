@@ -6,7 +6,7 @@ import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar'
 // TODO: Créer les routes /actualites, /donnees, /objectifs, /communautes quand les pages seront prêtes
 const navItems = [
   { to: '/' as const, label: 'Actualités', icon: FileText }, // placeholder
-  { to: '/' as const, label: 'Données', icon: PlusCircle }, // placeholder
+  { to: '/donnees' as const, label: 'Données', icon: PlusCircle },
   { to: '/' as const, label: 'Accueil', icon: Leaf },
   { to: '/' as const, label: 'Objectifs', icon: BarChart3 }, // placeholder
   { to: '/' as const, label: 'Communautés', icon: Users }, // placeholder
@@ -19,7 +19,7 @@ export default function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 z-40" role="navigation">
       <Menubar>
         {navItems.map(({ to, label, icon: Icon }) => {
-          const isActive = label === 'Accueil' && pathname === '/'
+          const isActive = label === 'Accueil' ? pathname === '/' : pathname === to
 
           return (
             <MenubarMenu key={label}>

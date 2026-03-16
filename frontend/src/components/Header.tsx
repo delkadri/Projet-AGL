@@ -1,16 +1,17 @@
 import { Link } from '@tanstack/react-router'
 import { User } from 'lucide-react'
-
-// TODO: Remplacer par les données utilisateur de l'API quand disponible
-const MOCK_USER = {
-  name: 'John Doe',
-  level: 3,
-  badge: 'Éco-explorateur',
-} as const
+import { useAuth } from '@/auth/AuthContext'
 
 export default function Header() {
+  const { user } = useAuth()
+
+  const displayName =
+    user?.firstName || user?.lastName
+      ? `${user.firstName ? String(user.firstName) : ''} ${user.lastName ? String(user.lastName) : ''}`.trim()
+      : user?.email?.split('@')[0] ?? 'Utilisateur'
+
   return (
-    <header className="w-full bg-[#e8f5e9] px-3 pt-2 pb-0">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#e8f5e9] px-3 pt-2 pb-0 mb-0">
       <div className="flex items-center justify-between gap-0 p-0.5">
         <Link to="/" className="flex items-center">
           <img
@@ -21,9 +22,9 @@ export default function Header() {
         </Link>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-medium text-black">{MOCK_USER.name}</p>
+            <p className="text-sm font-medium text-black">{displayName}</p>
             <p className="text-xs text-black">
-              Niveau {MOCK_USER.level} · {MOCK_USER.badge}
+              Niveau {user?.niveau ?? 1} · {user?.parcours?.name ?? 'Éco-explorateur'}
             </p>
           </div>
           <div

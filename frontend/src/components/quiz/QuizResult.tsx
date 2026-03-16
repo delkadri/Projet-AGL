@@ -91,16 +91,8 @@ export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: Qui
 
   return (
     <div className="flex min-h-screen flex-col overflow-y-auto bg-linear-to-b from-green-50 to-blue-50">
-      <div className="px-4 py-4">
-        <img
-          src="/logo-vertical.png"
-          alt="TerraScore"
-          className="mx-auto w-auto max-w-[200px] object-contain"
-        />
-      </div>
-
-      <div className="px-4 py-1 text-center">
-        <h1 className="text-xl font-bold text-gray-900">{quizName}</h1>
+      <div className="px-4 py-4 text-center">
+        <h1 className="text-2xl font-bold text-gray-900">{quizName}</h1>
       </div>
 
       <div className="px-4 py-2">
@@ -247,11 +239,10 @@ export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: Qui
           <button
             type="button"
             onClick={() => setDebugMode((v) => !v)}
-            className={`flex w-full items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-sm transition-colors ${
-              debugMode
-                ? 'border-amber-400 bg-amber-50 font-medium text-amber-700 hover:bg-amber-100'
-                : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'
-            }`}
+            className={`flex w-full items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-sm transition-colors ${debugMode
+              ? 'border-amber-400 bg-amber-50 font-medium text-amber-700 hover:bg-amber-100'
+              : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'
+              }`}
           >
             <Bug className="h-4 w-4" />
             {debugMode ? 'Masquer le mode debug' : 'Mode debug (détail calculs)'}

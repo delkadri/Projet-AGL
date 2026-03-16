@@ -10,11 +10,17 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { CalculateQuizScoreDto } from './models/CalculateQuizScoreDto';
 export type { LoginDto } from './models/LoginDto';
+export type { ParcoursDto } from './models/ParcoursDto';
 export type { RegisterDto } from './models/RegisterDto';
+export type { ScoreHistoryResponseDto } from './models/ScoreHistoryResponseDto';
 export type { SessionDto } from './models/SessionDto';
+export type { UpdateParcoursDto } from './models/UpdateParcoursDto';
 export type { UserDto } from './models/UserDto';
+export type { UserProfileResponseDto } from './models/UserProfileResponseDto';
 
 export { AppService } from './services/AppService';
 export { AuthService } from './services/AuthService';
 export { HealthService } from './services/HealthService';
+export { ParcoursService } from './services/ParcoursService';
 export { QuizService } from './services/QuizService';
+export { UsersService } from './services/UsersService';

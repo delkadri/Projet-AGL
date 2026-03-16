@@ -33,18 +33,16 @@ export const Route = createFileRoute('/')({
     }
 
     const onboardingCompleted = !!user.onboardingCompleted
-
-    if (onboardingCompleted) {
-      throw redirect({ to: '/' })
+    if (!onboardingCompleted) {
+      throw redirect({ to: '/onboarding/quiz' })
     }
-
-    throw redirect({ to: '/onboarding/quiz' })
+    // Sinon on reste sur / et on affiche la page home
   },
 })
 
 function HomePage() {
   return (
-    <div className="min-h-screen bg-[#f1f8e9]">
+    <div className="min-h-[calc(100vh-60px)] bg-[#f1f8e9]">
       <main className="mx-auto max-w-md px-4 pb-20 pt-4">
         <section className="flex flex-col gap-4">
           <ChallengesCard />

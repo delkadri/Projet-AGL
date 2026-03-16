@@ -8,7 +8,7 @@ import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
 
-const NO_HEADER_PATHS = ['/login', '/inscription', '/quiz', '/parcours', '/carbon-quiz', '/carbon-quiz-questions'] as const
+const NO_HEADER_PATHS = ['/login', '/inscription', '/carbon-quiz-questions'] as const
 
 // Configure the base URL for all generated API clients
 const apiPort = process.env?.API_PORT || '8000'
@@ -19,6 +19,19 @@ const apiBase =
     : `${window.location.protocol}//${window.location.hostname}:${apiPort}/api`
 
 OpenAPI.BASE = apiBase
+
+// Ensure the access token is sent on every request (e.g. /auth/me) by resolving it from storage at request time
+if (typeof window !== 'undefined') {
+  OpenAPI.TOKEN = async () => {
+    try {
+      const stored = window.localStorage.getItem('auth')
+      const parsed = stored ? (JSON.parse(stored) as { accessToken?: string }) : null
+      return parsed?.accessToken ?? ''
+    } catch {
+      return ''
+    }
+  }
+}
 
 const queryClient = new QueryClient()
 
@@ -33,20 +46,37 @@ function isPublicRoute(pathname: string): pathname is PublicRoutePath {
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const { isAuthenticated, isAuthLoading } = useAuth()
+  const { isAuthenticated, isAuthLoading, isOnboardingCompleted } = useAuth()
 
   const hideHeader = NO_HEADER_PATHS.some((p) => pathname === p)
 
-  if (!isAuthLoading && !isAuthenticated && !isPublicRoute(pathname)) {
-    void navigate({ to: '/login', replace: true })
+  useEffect(() => {
+    if (isAuthLoading) return
+
+    if (!isAuthenticated && !isPublicRoute(pathname)) {
+      void navigate({ to: '/login', replace: true })
+    } else if (isAuthenticated && isPublicRoute(pathname)) {
+      void navigate({ to: '/', replace: true })
+    } else if (isAuthenticated && isOnboardingCompleted && pathname.startsWith('/onboarding')) {
+      void navigate({ to: '/', replace: true })
+    }
+  }, [isAuthLoading, isAuthenticated, isOnboardingCompleted, pathname, navigate])
+
+  if (isAuthLoading) {
     return null
   }
 
+  if (!isAuthenticated && !isPublicRoute(pathname)) return null
+  if (isAuthenticated && isPublicRoute(pathname)) return null
+  if (isAuthenticated && isOnboardingCompleted && pathname.startsWith('/onboarding')) return null
+
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       {!hideHeader && <Header />}
-      {children}
-    </>
+      <main className={`flex-1 ${!hideHeader ? 'pt-[65px]' : ''}`}>
+        {children}
+      </main>
+    </div>
   )
 }
 

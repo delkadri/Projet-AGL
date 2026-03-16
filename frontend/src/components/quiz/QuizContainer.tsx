@@ -152,7 +152,9 @@ export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-6 pb-24">
         <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] overflow-hidden">
           <div className="overflow-hidden">
-            <img src="/logo-vertical.png" alt="TerraScore" className="w-auto max-w-[250px] mx-auto object-contain sm:h-20 sm:max-w-[250px]" />
+            <h1 className="text-2xl font-bold text-[#1C5138] text-center">
+              Calcul de votre score carbone
+            </h1>
           </div>
 
           <div className="overflow-hidden pt-4">

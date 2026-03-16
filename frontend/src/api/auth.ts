@@ -1,4 +1,9 @@
-import { AuthService, OpenAPI, type AuthResponseDto, type UserDto } from '@/api/client'
+import {
+  AuthService,
+  OpenAPI,
+  type AuthResponseDto,
+  type UserProfileResponseDto,
+} from '@/api/client'
 
 function applyAuthSession(response: AuthResponseDto) {
   if (!response.session?.access_token) return
@@ -31,7 +36,7 @@ export async function register(input: { email: string; password: string }) {
   return res
 }
 
-export type CurrentUser = (UserDto & { onboardingCompleted?: boolean }) | null
+export type CurrentUser = UserProfileResponseDto | null
 
 export async function getCurrentUser(): Promise<CurrentUser> {
   if (typeof window === 'undefined') {
@@ -40,23 +45,38 @@ export async function getCurrentUser(): Promise<CurrentUser> {
 
   try {
     const stored = window.localStorage.getItem('auth')
-    if (!stored) return null
+    const parsed = stored
+      ? (JSON.parse(stored) as { accessToken?: string })
+      : null
 
-    const parsed = JSON.parse(stored) as {
-      user?: UserDto & { onboardingCompleted?: boolean }
-      accessToken?: string
-      expiresAt?: number
-    }
-
-    if (!parsed.user || !parsed.accessToken) {
+    if (!parsed?.accessToken) {
       return null
     }
 
-    // Réinjecter le token dans OpenAPI si besoin
     OpenAPI.TOKEN = parsed.accessToken
+    const profile = await AuthService.authControllerGetMe()
 
-    return parsed.user
-  } catch {
+    try {
+      const current = JSON.parse(stored!) as Record<string, unknown>
+      window.localStorage.setItem(
+        'auth',
+        JSON.stringify({ ...current, user: profile }),
+      )
+    } catch {
+      // ignore storage errors
+    }
+
+    return profile
+  } catch (err: unknown) {
+    const status = (err as { status?: number })?.status
+    if (status === 401) {
+      try {
+        window.localStorage.removeItem('auth')
+      } catch {
+        // ignore
+      }
+      OpenAPI.TOKEN = undefined
+    }
     return null
   }
 }

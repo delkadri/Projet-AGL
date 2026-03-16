@@ -18,14 +18,14 @@ export class HealthService {
         });
     }
     /**
-     * Check Supabase connection status
-     * @returns any Supabase status retrieved
+     * Check Database connection status
+     * @returns any Database status retrieved
      * @throws ApiError
      */
-    public static healthControllerGetSupabaseStatus(): CancelablePromise<any> {
+    public static healthControllerGetDatabaseStatus(): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/health/supabase',
+            url: '/health/database',
         });
     }
 }
