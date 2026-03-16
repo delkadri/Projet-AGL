@@ -3,8 +3,6 @@ services:
     build:
       context: ./backend
     container_name: backend-service
-    env_file:
-      - ./.env
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
@@ -16,8 +14,6 @@ services:
     build:
       context: ./frontend
     container_name: frontend-service
-    env_file:
-      - ./.env
     ports:
       - "${FRONT_PORT:-3000}:3000"
     volumes:
