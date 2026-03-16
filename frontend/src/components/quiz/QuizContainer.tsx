@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import type { Quiz, QuizAnswers, Question } from '@/types/quiz'
 import { Button } from '@/components/ui/button'
-import { mockQuiz } from '@/data/mockQuiz'
 import { QuizProgress } from './QuizProgress'
 import { QuizQuestion } from './QuizQuestion'
 
-// TODO: charger le quiz via API (ex: useQuery getQuiz(id))
-const quiz: Quiz = mockQuiz
+type QuizContainerProps = {
+  quiz: Quiz
+}
 
 function getCurrentQuestion(
   quiz: Quiz,
@@ -31,7 +31,7 @@ function hasAnswer(question: Question, answers: QuizAnswers): boolean {
   return false
 }
 
-export function QuizContainer() {
+export function QuizContainer({ quiz }: QuizContainerProps) {
   const navigate = useNavigate()
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -70,8 +70,7 @@ export function QuizContainer() {
     // Dernière question du quiz
     // TODO: construire un payload de type QuizSubmissionPayload et
     // l'envoyer au backend pour calculer le score carbone (appel API à implémenter côté frontend/backend).
-
-    navigate({ to: '/' })
+    // TODO: rediriger vers la page de résultats du quiz
   }
 
   if (!currentQuestion || !category) {

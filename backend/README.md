@@ -83,6 +83,41 @@ Check out a few resources that may come in handy when working with NestJS:
 - To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
 - Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
 
+## Quiz Carbon Score API (ADEME Base Carbone)
+
+This backend exposes a scoring endpoint that computes a carbon score from quiz answers.
+
+- Route: `POST /api/quiz/:id/score`
+- Body:
+
+```json
+{
+  "answers": {
+    "q1": "voiture_diesel_essence",
+    "q2": "50_100",
+    "q3": ["voiture", "train"],
+    "q4": 2,
+    "q4b": "moyen",
+    "q5": "1d"
+  }
+}
+```
+
+The scorer queries ADEME Data-Fair (Base Carbone) to resolve emission factors:
+
+- Dataset default id: `base-carboner`
+- Endpoint pattern: `https://data.ademe.fr/data-fair/api/v1/datasets/{datasetId}/lines`
+
+Optional environment variables:
+
+- `ADEME_API_BASE_URL` (default: `https://data.ademe.fr/data-fair/api/v1/datasets`)
+- `ADEME_BASE_CARBONE_DATASET_ID` (default: `base-carboner`)
+- `ADEME_API_KEY` (if your ADEME access requires a key)
+- `ADEME_FACTOR_FIELD` (default: `Total_poste_non_décomposé`)
+- `ADEME_UNIT_FIELD` (default: `Unité_français`)
+
+If ADEME search cannot resolve a factor for a keyword, the scorer uses a conservative fallback factor and reports it in the response details.
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

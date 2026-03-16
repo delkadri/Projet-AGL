@@ -4,7 +4,7 @@ WORKDIR /app
 
 # deps d’abord (cache docker)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 # code
 COPY . .

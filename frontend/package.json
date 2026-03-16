@@ -9,7 +9,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:api": "npm run --prefix ../backend swagger:generate && openapi --input ../backend/openapi.json --output src/api/client --client fetch --useOptions"
   },
   "dependencies": {
     "@radix-ui/react-menubar": "^1.1.5",
@@ -33,6 +34,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "openapi-typescript-codegen": "^0.29.0",
     "@tanstack/devtools-vite": "^0.3.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
