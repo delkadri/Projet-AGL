@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Gauge } from 'lucide-react'
 
 // TODO: Remplacer par les données de l'API carbone quand disponible
 const MOCK_CARBON = {
@@ -10,7 +11,8 @@ const MOCK_CARBON = {
 export default function CarbonScoreCard() {
   return (
     <div className="overflow-hidden rounded-2xl bg-[linear-gradient(to_right,#e53935,#ff9800,#8bc34a)] p-4 shadow-md">
-      <h3 className="mb-4 text-base font-bold text-white">
+      <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-white">
+        <Gauge className="h-5 w-5" aria-hidden />
         Mon score carbone
       </h3>
       <div className="flex flex-row items-center gap-4">

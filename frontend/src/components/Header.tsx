@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Leaf, User } from 'lucide-react'
+import { User } from 'lucide-react'
 
 // TODO: Remplacer par les données utilisateur de l'API quand disponible
 const MOCK_USER = {
@@ -10,23 +10,14 @@ const MOCK_USER = {
 
 export default function Header() {
   return (
-    <header className="w-full bg-[#e8f5e9] px-4 py-3">
-      <div className="flex items-center justify-between">
-        <Link to="/" className="flex flex-col">
-          <span className="flex items-baseline font-bold text-[#1b5e20]">
-            Terr
-            <span className="relative">
-              a
-              <Leaf
-                className="absolute -right-1.5 -top-2.5 h-3.5 w-3.5 text-[#2e7d32]"
-                aria-hidden
-              />
-            </span>
-            Score
-          </span>
-          <span className="text-xs text-gray-500">
-            Mesurez. Réduisez. Respirez.
-          </span>
+    <header className="w-full bg-[#e8f5e9] px-3 pt-2 pb-0">
+      <div className="flex items-center justify-between gap-0 p-0.5">
+        <Link to="/" className="flex items-center">
+          <img
+            src="/logo-vertical.png"
+            alt="TerraScore - Mesurez. Réduisez. Respirez."
+            className="h-10 w-auto overflow-visible pl-1 pr-1"
+          />
         </Link>
         <div className="flex items-center gap-3">
           <div className="text-right">
