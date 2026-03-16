@@ -1,0 +1,28 @@
+---
+description: Préférer shadcn UI pour les composants d’interface React
+alwaysApply: true
+---
+
+# Utilisation de shadcn UI
+
+- **Privilégier les composants shadcn existants**
+  - Utiliser en priorité les composants déjà présents dans `src/components/ui/*` (par ex. `Button`, `Input`, `Label`, etc.) au lieu de recréer des boutons, champs ou modales maison.
+  - Avant d’écrire un composant bas niveau (bouton, champ texte, select, etc.), vérifier s’il existe un équivalent shadcn et le réutiliser.
+
+- **Nouveaux composants d’interface**
+  - Pour tout nouveau composant d’interface générique (boutons, inputs, selects, toggles, alerts, dialogs, sheets, etc.), partir des primitives shadcn (`@/components/ui/...`) quand c’est possible.
+  - Conserver la **palette Tailwind** déjà utilisée dans le projet, mais s’appuyer sur la structure, les variants et les patterns shadcn.
+
+- **Composition**
+  - Composer les écrans de l’app avec **des layouts maison** (div, flex, grid, etc.) qui orchestrent des **composants shadcn** pour les éléments interactifs.
+  - Ne pas dupliquer la logique de variants/états d’un composant shadcn (disabled, loading, destructive, etc.) : étendre ou composer avec le composant existant plutôt que le réimplémenter.
+
+- **Quand ne pas utiliser shadcn**
+  - On peut s’en écarter uniquement si :
+    - aucune primitive ne couvre le besoin spécifique,
+    - ou une contrainte de design impose un markup très particulier.
+  - Dans ce cas, rester cohérent avec la typographie, les rayons de bordure et les couleurs existants.
+
+- **Serveur MCP shadcn**
+  - Quand tu dois ajouter un nouveau composant shadcn ou adapter un pattern existant, utiliser en priorité le **serveur MCP `shadcn`** (s’il est disponible dans le projet) pour générer ou proposer le composant, puis l’adapter au design TerraScore.
+
