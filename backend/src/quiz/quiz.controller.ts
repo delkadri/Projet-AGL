@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -10,6 +9,8 @@ import {
 import { SupabaseService } from '../supabase/supabase.service';
 import { CalculateQuizScoreDto } from './dto/calculate-quiz-score.dto';
 import { QuizScoringService } from './quiz-scoring.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Controller('quiz')
 export class QuizController {
@@ -21,26 +22,63 @@ export class QuizController {
   @Get(':id')
   async getQuiz(@Param('id') id: string) {
     const client = this.supabaseService.getClient();
-    if (!client) {
-      throw new InternalServerErrorException('Supabase client not initialized');
+    if (client) {
+      const { data, error } = await client
+        .from('quizzes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!error && data) {
+        // On reformate l'objet pour correspondre au type TypeScript 'Quiz' du front
+        return {
+          id: data.id,
+          name: data.name,
+          categories: data.content?.categories || [],
+        };
+      }
     }
 
-    const { data, error } = await client
-      .from('quizzes')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error || !data) {
-      throw new NotFoundException(`Quiz avec l'id '${id}' introuvable`);
+    const localQuiz = this.loadLocalQuizById(id);
+    if (localQuiz) {
+      return localQuiz;
     }
 
-    // On reformate l'objet pour correspondre au type TypeScript 'Quiz' du front
-    return {
-      id: data.id,
-      name: data.name,
-      categories: data.content?.categories || []
-    };
+    throw new NotFoundException(`Quiz avec l'id '${id}' introuvable`);
+  }
+
+  private loadLocalQuizById(id: string) {
+    const candidatePaths = [
+      path.join(process.cwd(), 'src', 'quiz', 'data', 'quiz-init.json'),
+      path.join(__dirname, 'data', 'quiz-init.json'),
+    ];
+
+    for (const filePath of candidatePaths) {
+      if (!fs.existsSync(filePath)) {
+        continue;
+      }
+
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const quizJson = JSON.parse(fileContent) as {
+          id?: string;
+          name?: string;
+          categories?: unknown[];
+        };
+
+        if (quizJson.id === id) {
+          return {
+            id: quizJson.id,
+            name: quizJson.name,
+            categories: quizJson.categories ?? [],
+          };
+        }
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   /**

@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { AdemeBaseCarboneService, FactorLookupResult } from './ademe-base-carbone.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 type QuizQuestion = {
   id: string;
@@ -147,21 +149,53 @@ export class QuizScoringService {
 
   private async getQuiz(quizId: string): Promise<QuizPayload> {
     const client = this.supabaseService.getClient();
-    if (!client) {
-      throw new InternalServerErrorException('Supabase client not initialized');
+    if (client) {
+      const { data, error } = await client.from('quizzes').select('*').eq('id', quizId).single();
+
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          categories: data.content?.categories ?? [],
+        };
+      }
     }
 
-    const { data, error } = await client.from('quizzes').select('*').eq('id', quizId).single();
-
-    if (error || !data) {
-      throw new NotFoundException(`Quiz avec l'id '${quizId}' introuvable`);
+    const localQuiz = this.loadLocalQuizById(quizId);
+    if (localQuiz) {
+      return localQuiz;
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      categories: data.content?.categories ?? [],
-    };
+    throw new NotFoundException(`Quiz avec l'id '${quizId}' introuvable`);
+  }
+
+  private loadLocalQuizById(quizId: string): QuizPayload | null {
+    const candidatePaths = [
+      path.join(process.cwd(), 'src', 'quiz', 'data', 'quiz-init.json'),
+      path.join(__dirname, 'data', 'quiz-init.json'),
+    ];
+
+    for (const filePath of candidatePaths) {
+      if (!fs.existsSync(filePath)) {
+        continue;
+      }
+
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const quizJson = JSON.parse(fileContent) as QuizPayload;
+        if (quizJson.id === quizId) {
+          return {
+            id: quizJson.id,
+            name: quizJson.name,
+            categories: quizJson.categories ?? [],
+          };
+        }
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   private flattenQuestions(quiz: QuizPayload): QuizQuestion[] {
