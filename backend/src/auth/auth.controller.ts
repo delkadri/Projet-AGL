@@ -1,5 +1,19 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+    Controller,
+    Post,
+    Body,
+    HttpCode,
+    HttpStatus,
+    Get,
+    UseGuards,
+    UnauthorizedException,
+} from '@nestjs/common';
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -14,7 +28,11 @@ export class AuthController {
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
-    @ApiResponse({ status: 201, description: 'The user has been successfully registered.', type: AuthResponseDto })
+    @ApiResponse({
+        status: 201,
+        description: 'The user has been successfully registered.',
+        type: AuthResponseDto,
+    })
     @ApiResponse({ status: 400, description: 'Bad Request.' })
     async register(@Body() registerDto: RegisterDto) {
         return this.authService.register(registerDto);
@@ -23,7 +41,11 @@ export class AuthController {
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login an existing user' })
-    @ApiResponse({ status: 200, description: 'The user has been successfully logged in.', type: AuthResponseDto })
+    @ApiResponse({
+        status: 200,
+        description: 'The user has been successfully logged in.',
+        type: AuthResponseDto,
+    })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     async login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
@@ -32,9 +54,18 @@ export class AuthController {
     @UseGuards(SupabaseAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get current user profile' })
-    @ApiResponse({ status: 200, description: 'Return the current user profile', type: UserProfileResponseDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Return the current user profile',
+        type: UserProfileResponseDto,
+    })
     @ApiResponse({ status: 401, description: 'Unauthorized.' })
     async getMe(@CurrentUser() user: any) {
-        return this.authService.getCurrentUser(user.id, user.email);
+        if (!user?.id) {
+            throw new UnauthorizedException('Invalid token: user id missing');
+        }
+        const email =
+            user?.email ?? user?.user_metadata?.email ?? null;
+        return this.authService.getCurrentUser(user.id, email);
     }
 }

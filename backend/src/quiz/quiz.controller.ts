@@ -5,11 +5,13 @@ import {
   NotFoundException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CalculateQuizScoreDto } from './dto/calculate-quiz-score.dto';
 import { QuizScoringService } from './quiz-scoring.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -93,10 +95,11 @@ export class QuizController {
    * Reponse : total en kgCO2e/an + niveau climatique + detail (breakdown).
    */
   @Post(':id/score')
+  @UseGuards(SupabaseAuthGuard)
   async calculateScore(
     @Param('id') id: string,
     @Body() body: CalculateQuizScoreDto,
-    @CurrentUser() user?: any
+    @CurrentUser() user: any
   ) {
     return this.quizScoringService.calculateScore(id, body.answers, user?.id);
   }

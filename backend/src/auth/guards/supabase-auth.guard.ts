@@ -9,11 +9,15 @@ export class SupabaseAuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
 
-        if (!authHeader) {
+        if (!authHeader || typeof authHeader !== 'string') {
             throw new UnauthorizedException('Missing Authorization header');
         }
 
-        const token = authHeader.split(' ')[1];
+        const parts = authHeader.trim().split(/\s+/);
+        if (parts.length < 2 || parts[0].toLowerCase() !== 'bearer') {
+            throw new UnauthorizedException('Invalid token format');
+        }
+        const token = parts[1];
         if (!token) {
             throw new UnauthorizedException('Invalid token format');
         }
@@ -23,14 +27,18 @@ export class SupabaseAuthGuard implements CanActivate {
             throw new UnauthorizedException('Supabase client not initialized');
         }
 
-        const { data, error } = await client.auth.getUser(token);
+        try {
+            const { data, error } = await client.auth.getUser(token);
 
-        if (error || !data.user) {
+            if (error || !data?.user) {
+                throw new UnauthorizedException(error?.message ?? 'Invalid or expired token');
+            }
+
+            request.user = data.user;
+            return true;
+        } catch (err) {
+            if (err instanceof UnauthorizedException) throw err;
             throw new UnauthorizedException('Invalid or expired token');
         }
-
-        // Attach user to request
-        request.user = data.user;
-        return true;
     }
 }
