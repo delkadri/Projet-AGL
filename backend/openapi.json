@@ -30,16 +30,16 @@
         ]
       }
     },
-    "/health/supabase": {
+    "/health/database": {
       "get": {
-        "operationId": "HealthController_getSupabaseStatus",
+        "operationId": "HealthController_getDatabaseStatus",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Supabase status retrieved"
+            "description": "Database status retrieved"
           }
         },
-        "summary": "Check Supabase connection status",
+        "summary": "Check Database connection status",
         "tags": [
           "health"
         ]
@@ -115,6 +115,36 @@
         ]
       }
     },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return the current user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/quiz/{id}": {
       "get": {
         "operationId": "QuizController_getQuiz",
@@ -168,6 +198,111 @@
         },
         "tags": [
           "Quiz"
+        ]
+      }
+    },
+    "/users/me/parcours": {
+      "patch": {
+        "operationId": "UserController_updateParcours",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParcoursDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le parcours a été mis à jour."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mettre à jour le parcours de l'utilisateur",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/me/onboarding/complete": {
+      "patch": {
+        "operationId": "UserController_completeOnboarding",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "L'onboarding a été marqué comme terminé."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marquer l'onboarding comme complété",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/me/scores": {
+      "get": {
+        "operationId": "UserController_getScoreHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Historique des scores récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScoreHistoryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Récupérer l'historique des scores carbone de l'utilisateur",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/parcours": {
+      "get": {
+        "operationId": "ParcoursController_getAllParcours",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des parcours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcoursDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Récupérer la liste des parcours disponibles",
+        "tags": [
+          "parcours"
         ]
       }
     }
@@ -299,6 +434,98 @@
           "password"
         ]
       },
+      "ParcoursDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "de879435-0ee4-42db-84f0-4150fa0593f3"
+          },
+          "slug": {
+            "type": "string",
+            "example": "decouverte"
+          },
+          "name": {
+            "type": "string",
+            "example": "DÉCOUVERTE"
+          },
+          "description": {
+            "type": "string",
+            "example": "L’essentiel rapidement. Comprendre mon score sans surcharge avec des défis simples."
+          },
+          "defis_per_period": {
+            "type": "number",
+            "example": 1
+          },
+          "quizz_per_period": {
+            "type": "number",
+            "example": 1
+          },
+          "period_type": {
+            "type": "string",
+            "example": "WEEK"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "defis_per_period",
+          "quizz_per_period",
+          "period_type"
+        ]
+      },
+      "UserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "dc147d80-0ee4-42db-84f0-4150fa0593f3"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "firstName": {
+            "type": "object",
+            "nullable": true,
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "object",
+            "nullable": true,
+            "example": "Dupont"
+          },
+          "feuilles": {
+            "type": "number",
+            "example": 450
+          },
+          "niveau": {
+            "type": "number",
+            "example": 5
+          },
+          "onboardingCompleted": {
+            "type": "boolean",
+            "example": true
+          },
+          "parcours": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ParcoursDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "feuilles",
+          "niveau",
+          "onboardingCompleted"
+        ]
+      },
       "CalculateQuizScoreDto": {
         "type": "object",
         "properties": {
@@ -320,6 +547,45 @@
         },
         "required": [
           "answers"
+        ]
+      },
+      "UpdateParcoursDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "string",
+            "description": "ID du parcours choisi",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+          }
+        },
+        "required": [
+          "parcoursId"
+        ]
+      },
+      "ScoreHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID de l'entrée d'historique",
+            "example": "f839d-21cd-40b9-a212-32a2f81903fa"
+          },
+          "score": {
+            "type": "number",
+            "description": "Score carbone obtenu",
+            "example": 1450.5
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Date de l'enregistrement",
+            "example": "2026-03-16T18:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "score",
+          "created_at"
         ]
       }
     }
