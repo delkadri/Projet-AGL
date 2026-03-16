@@ -1,67 +1,49 @@
 import { Link } from '@tanstack/react-router'
+import { Leaf, User } from 'lucide-react'
 
-import { useState } from 'react'
-import { Home, Menu, X } from 'lucide-react'
+// TODO: Remplacer par les données utilisateur de l'API quand disponible
+const MOCK_USER = {
+  name: 'John Doe',
+  level: 3,
+  badge: 'Éco-explorateur',
+} as const
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false)
-
   return (
-    <>
-      <header className="p-4 flex items-center bg-gray-800 text-white shadow-lg">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            <img
-              src="/tanstack-word-logo-white.svg"
-              alt="TanStack Logo"
-              className="h-10"
-            />
-          </Link>
-        </h1>
-      </header>
-
-      <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Navigation</h2>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            aria-label="Close menu"
+    <header className="w-full bg-[#e8f5e9] px-4 py-3">
+      <div className="flex items-center justify-between">
+        <Link to="/" className="flex flex-col">
+          <span className="flex items-baseline font-bold text-[#1b5e20]">
+            Terr
+            <span className="relative">
+              a
+              <Leaf
+                className="absolute -right-1.5 -top-2.5 h-3.5 w-3.5 text-[#2e7d32]"
+                aria-hidden
+              />
+            </span>
+            Score
+          </span>
+          <span className="text-xs text-gray-500">
+            Mesurez. Réduisez. Respirez.
+          </span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-sm font-medium text-black">{MOCK_USER.name}</p>
+            <p className="text-xs text-black">
+              Niveau {MOCK_USER.level} · {MOCK_USER.badge}
+            </p>
+          </div>
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1b5e20] text-white"
+            aria-hidden
           >
-            <X size={24} />
-          </button>
+            <User className="h-5 w-5" />
+          </div>
         </div>
-
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </Link>
-
-          {/* Demo Links Start */}
-
-          {/* Demo Links End */}
-        </nav>
-      </aside>
-    </>
+      </div>
+      <div className="mt-3 h-px bg-gray-200" role="separator" />
+    </header>
   )
 }
