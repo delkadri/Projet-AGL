@@ -7,13 +7,18 @@ export type QuizOption = {
 /** Optional carbon-related metadata to help backend/APIs map questions to ADEME/Base Carbone logic */
 export type QuestionCarbonMeta = {
   poste?: string
-  dataType:
-    | 'principal_mode'
-    | 'distance_km'
-    | 'modes_used'
-    | 'flight_count'
-    | 'flight_distance_class'
-    | 'telework_factor'
+  /** Free-form identifier used by the backend scorer (e.g. 'principal_mode', 'diet_type'…). */
+  dataType: string
+}
+
+/** Condition to show a question only when another answer matches (e.g. show motorisation only if mode = car). */
+export type QuestionShowIf = {
+  /** Id of the question whose answer controls visibility. */
+  questionId: string
+  /** If set, visibility depends on equality (single/multiple) or, with operator, on numeric comparison. */
+  value?: string | number | string[]
+  /** For numeric comparison: gt, gte. For equality: neq = show when answer is not equal to value. */
+  operator?: 'gt' | 'gte' | 'neq'
 }
 
 /** Question with single choice (one option) */
@@ -23,6 +28,8 @@ export type QuestionSingle = {
   title: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
+  /** If set, this question is only shown when the condition is satisfied. */
+  showIf?: QuestionShowIf
 }
 
 /** Question with multiple choice (several options) */
@@ -32,6 +39,7 @@ export type QuestionMultiple = {
   title: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
+  showIf?: QuestionShowIf
 }
 
 /** Question with numeric answer in a range */
@@ -42,6 +50,7 @@ export type QuestionNumber = {
   min: number
   max: number
   carbonMeta?: QuestionCarbonMeta
+  showIf?: QuestionShowIf
 }
 
 export type Question = QuestionSingle | QuestionMultiple | QuestionNumber

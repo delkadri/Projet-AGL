@@ -1,15 +1,34 @@
 interface CarbonScoreCircleProps {
   score: number
+  climateLevel?: string
   message?: string
 }
 
-export function CarbonScoreCircle({ score, message }: CarbonScoreCircleProps) {
+function getCircleClassName(climateLevel?: string): string {
+  switch (climateLevel) {
+    case 'low':
+      return 'bg-gradient-to-br from-green-400 to-green-600'
+    case 'medium':
+      return 'bg-gradient-to-br from-orange-400 to-orange-600'
+    case 'high':
+      return 'bg-gradient-to-br from-red-400 to-red-600'
+    default:
+      return 'bg-gradient-to-br from-green-400 to-green-600'
+  }
+}
+
+export function CarbonScoreCircle({ score, climateLevel, message }: CarbonScoreCircleProps) {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Score Circle */}
-      <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex flex-col items-center justify-center shadow-lg">
+      <div
+        className={[
+          'relative w-40 h-40 rounded-full flex flex-col items-center justify-center shadow-lg',
+          getCircleClassName(climateLevel),
+        ].join(' ')}
+      >
         <div className="text-center">
-          <div className="text-4xl font-bold text-white">{score.toFixed(1)}</div>
+          <div className="text-4xl font-bold text-white">{Math.round(score) / 1000} t</div>
           <div className="text-xs font-semibold text-white mt-1">CO2e/an</div>
         </div>
       </div>

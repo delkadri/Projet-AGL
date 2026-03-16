@@ -1,12 +1,57 @@
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
 import type { Quiz, QuizAnswers, Question } from '@/types/quiz'
 import { Button } from '@/components/ui/button'
 import { QuizProgress } from './QuizProgress'
 import { QuizQuestion } from './QuizQuestion'
+import { QuizResult } from './QuizResult'
+import { QuizService } from '@/api/client'
+import type { ApiError } from '@/api/client'
+import type { QuizCalculateScoreResponse } from './QuizResult'
+
+export type QuizFinishAction = {
+  label: string
+  to: string
+}
 
 type QuizContainerProps = {
   quiz: Quiz
+  /** Action affichée dans le bilan à la fin du quiz (bouton). Si absent, redirection vers / */
+  onFinishQuiz?: QuizFinishAction
+}
+
+/** Visible step: (categoryIndex, questionIndex) into quiz.categories[].questions[]. */
+type VisibleStep = { categoryIndex: number; questionIndex: number }
+
+function isQuestionVisible(question: Question, answers: QuizAnswers): boolean {
+  const showIf = question.showIf
+  if (!showIf) return true
+  const depAnswer = answers[showIf.questionId]
+  if (showIf.operator === 'gt' && typeof showIf.value === 'number') {
+    const num = typeof depAnswer === 'number' ? depAnswer : typeof depAnswer === 'string' ? parseInt(depAnswer, 10) : NaN
+    return Number.isFinite(num) && num > showIf.value
+  }
+  if (showIf.operator === 'gte' && typeof showIf.value === 'number') {
+    const num = typeof depAnswer === 'number' ? depAnswer : typeof depAnswer === 'string' ? parseInt(depAnswer, 10) : NaN
+    return Number.isFinite(num) && num >= showIf.value
+  }
+  if (showIf.operator === 'neq' && showIf.value !== undefined) {
+    return depAnswer !== showIf.value
+  }
+  if (showIf.value !== undefined) {
+    if (Array.isArray(showIf.value)) return Array.isArray(depAnswer) && showIf.value.some((v) => depAnswer.includes(v))
+    return depAnswer === showIf.value
+  }
+  return depAnswer !== undefined && depAnswer !== null && depAnswer !== ''
+}
+
+function getVisibleSteps(quiz: Quiz, answers: QuizAnswers): VisibleStep[] {
+  const steps: VisibleStep[] = []
+  quiz.categories.forEach((category, categoryIndex) => {
+    category.questions.forEach((question, questionIndex) => {
+      if (isQuestionVisible(question, answers)) steps.push({ categoryIndex, questionIndex })
+    })
+  })
+  return steps
 }
 
 function getCurrentQuestion(
@@ -31,49 +76,70 @@ function hasAnswer(question: Question, answers: QuizAnswers): boolean {
   return false
 }
 
-export function QuizContainer({ quiz }: QuizContainerProps) {
-  const navigate = useNavigate()
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [result, setResult] = useState<QuizCalculateScoreResponse | null>(null)
 
-  const category = quiz.categories[currentCategoryIndex]
-  const questions = category?.questions ?? []
-  const totalSteps = questions.length
-  const currentQuestion = getCurrentQuestion(
-    quiz,
-    currentCategoryIndex,
-    currentQuestionIndex
-  )
+  const visibleSteps = useMemo(() => getVisibleSteps(quiz, answers), [quiz, answers])
+  const totalSteps = visibleSteps.length
 
   const setAnswer = (questionId: string, value: QuizAnswers[string]) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
-  const canContinue = currentQuestion
-    ? hasAnswer(currentQuestion, answers)
+  // If current step is past the end (e.g. a question was hidden after answer change), clamp to last visible step
+  const safeStepIndex = currentStepIndex >= visibleSteps.length ? Math.max(0, visibleSteps.length - 1) : currentStepIndex
+  const effectiveStep = visibleSteps[safeStepIndex] ?? null
+  const effectiveCategory = effectiveStep ? quiz.categories[effectiveStep.categoryIndex] : null
+  const effectiveQuestion = effectiveStep
+    ? getCurrentQuestion(quiz, effectiveStep.categoryIndex, effectiveStep.questionIndex)
+    : null
+
+  const canContinue = effectiveQuestion
+    ? hasAnswer(effectiveQuestion, answers)
     : false
 
-  const goNext = () => {
-    if (!category) return
-    const nextQuestionIndex = currentQuestionIndex + 1
-    if (nextQuestionIndex < questions.length) {
-      setCurrentQuestionIndex(nextQuestionIndex)
+  const goNext = async () => {
+    if (!effectiveCategory || !effectiveQuestion) return
+    setSubmitError(null)
+    const nextStepIndex = safeStepIndex + 1
+    if (nextStepIndex < visibleSteps.length) {
+      setCurrentStepIndex(nextStepIndex)
       return
     }
-    const nextCategoryIndex = currentCategoryIndex + 1
-    if (nextCategoryIndex < quiz.categories.length) {
-      setCurrentCategoryIndex(nextCategoryIndex)
-      setCurrentQuestionIndex(0)
-      return
+    // Dernière question du quiz: soumettre les réponses et afficher le résultat
+    try {
+      setIsSubmitting(true)
+      const scoreResult = (await QuizService.quizControllerCalculateScore({
+        id: quiz.id,
+        requestBody: { answers },
+      })) as QuizCalculateScoreResponse
+      setResult(scoreResult)
+    } catch (err) {
+      const apiErr = err as ApiError | undefined
+      if (apiErr?.status === 400) {
+        setSubmitError("Certaines réponses ne sont pas valides. Veuillez réessayer.")
+      } else {
+        setSubmitError("Une erreur est survenue lors du calcul du score. Veuillez réessayer.")
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-    // Dernière question du quiz
-    // TODO: construire un payload de type QuizSubmissionPayload et
-    // l'envoyer au backend pour calculer le score carbone (appel API à implémenter côté frontend/backend).
-    // TODO: rediriger vers la page de résultats du quiz
   }
 
-  if (!currentQuestion || !category) {
+  if (result) {
+    return (
+      <QuizResult
+        result={result}
+        finishAction={onFinishQuiz ?? { label: 'Retour à l’accueil', to: '/' }}
+      />
+    )
+  }
+
+  if (!effectiveQuestion || !effectiveCategory || totalSteps === 0) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center p-4">
         <p className="text-muted-foreground">Aucune question disponible.</p>
@@ -91,17 +157,17 @@ export function QuizContainer({ quiz }: QuizContainerProps) {
 
           <div className="overflow-hidden pt-4">
             <QuizProgress
-              categoryName={category.name}
-              currentStep={currentQuestionIndex + 1}
+              categoryName={effectiveCategory.name}
+              currentStep={safeStepIndex + 1}
               totalSteps={totalSteps}
             />
           </div>
 
           <div className="min-h-0 overflow-hidden pt-6">
             <QuizQuestion
-              question={currentQuestion}
-              value={answers[currentQuestion.id]}
-              onChange={(value) => setAnswer(currentQuestion.id, value)}
+              question={effectiveQuestion}
+              value={answers[effectiveQuestion.id]}
+              onChange={(value) => setAnswer(effectiveQuestion.id, value)}
               className="grid h-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
             />
           </div>
@@ -109,13 +175,18 @@ export function QuizContainer({ quiz }: QuizContainerProps) {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-[#f0f7f0] px-4 pb-6 pt-4">
+        {submitError && (
+          <p className="mb-3 text-sm font-medium text-red-700">
+            {submitError}
+          </p>
+        )}
         <Button
           type="button"
-          disabled={!canContinue}
+          disabled={!canContinue || isSubmitting}
           className="w-full rounded-xl bg-emerald-700 text-white hover:bg-emerald-800"
           onClick={goNext}
         >
-          Continuer
+          {isSubmitting ? 'Calcul en cours…' : 'Continuer'}
         </Button>
       </div>
     </div>

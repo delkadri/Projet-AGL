@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CarbonQuizContainer } from '@/components/quiz/CarbonQuizContainer'
+import { QuizContainer } from '@/components/quiz/QuizContainer'
+import { mockCarbonQuizData } from '@/data/mockCarbonQuizData'
 
 export const Route = createFileRoute('/carbon-quiz-questions')({
   component: CarbonQuizQuestionsPage,
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/carbon-quiz-questions')({
 function CarbonQuizQuestionsPage() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#f0f7f0]">
-      <CarbonQuizContainer />
+      <QuizContainer quiz={mockCarbonQuizData} />
     </div>
   )
 }
