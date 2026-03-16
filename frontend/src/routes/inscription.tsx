@@ -1,6 +1,8 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import { useState } from 'react'
 
+import { useRegisterMutation, getAuthErrorMessage } from '@/api/hooks/useAuth'
 import { AuthBranding } from '@/components/AuthBranding'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +13,13 @@ export const Route = createFileRoute('/inscription')({
 })
 
 function InscriptionPage() {
+  const navigate = useNavigate()
+  const registerMutation = useRegisterMutation()
+  const [formError, setFormError] = useState<string | null>(null)
+  const apiErrorMessage =
+    registerMutation.error != null ? getAuthErrorMessage(registerMutation.error) : null
+  const errorMessage = formError ?? apiErrorMessage
+
   const form = useForm({
     defaultValues: {
       email: '',
@@ -18,8 +27,26 @@ function InscriptionPage() {
       confirmPassword: '',
     },
     onSubmit: async ({ value }) => {
-      // TODO: appeler l'API d'inscription (TER-10)
-      console.log(value)
+      setFormError(null)
+
+      if (value.password !== value.confirmPassword) {
+        setFormError('Les mots de passe ne correspondent pas.')
+        return
+      }
+      if (value.password.length < 8) {
+        setFormError('Le mot de passe doit contenir au moins 8 caractères.')
+        return
+      }
+
+      try {
+        await registerMutation.mutateAsync({
+          email: value.email,
+          password: value.password,
+        })
+        navigate({ to: '/' })
+      } catch {
+        // l'erreur est gérée par TanStack Query via registerMutation.error
+      }
     },
   })
 
@@ -102,9 +129,15 @@ function InscriptionPage() {
           <Button
             type="submit"
             className="mt-2 h-12 rounded-xl bg-[#1A4D3E] text-white hover:bg-[#153d30]"
+            disabled={registerMutation.isPending}
           >
-            S'inscrire
+            {registerMutation.isPending ? "Création du compte..." : "S'inscrire"}
           </Button>
+          {errorMessage && typeof errorMessage === 'string' && (
+            <p className="mt-2 text-sm text-red-600">
+              {errorMessage}
+            </p>
+          )}
         </form>
 
         <p className="mt-4 text-center text-sm text-[#4a5568]">Ou s'inscrire avec</p>

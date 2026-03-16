@@ -1,6 +1,7 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 
+import { useLoginMutation, getAuthErrorMessage } from '@/api/hooks/useAuth'
 import { AuthBranding } from '@/components/AuthBranding'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,14 +12,26 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginPage() {
+  const navigate = useNavigate()
+  const loginMutation = useLoginMutation()
+  const errorMessage =
+    loginMutation.error != null ? getAuthErrorMessage(loginMutation.error) : null
+
   const form = useForm({
     defaultValues: {
       email: '',
       password: '',
     },
     onSubmit: async ({ value }) => {
-      // TODO: appeler l'API de connexion (TER-10)
-      console.log(value)
+      try {
+        await loginMutation.mutateAsync({
+          email: value.email,
+          password: value.password,
+        })
+        navigate({ to: '/' })
+      } catch {
+        // l'erreur est gérée par TanStack Query via loginMutation.error
+      }
     },
   })
 
@@ -80,9 +93,15 @@ function LoginPage() {
           <Button
             type="submit"
             className="mt-2 h-12 rounded-xl bg-[#1A4D3E] text-white hover:bg-[#153d30]"
+            disabled={loginMutation.isPending}
           >
-            Se connecter
+            {loginMutation.isPending ? 'Connexion...' : 'Se connecter'}
           </Button>
+          {errorMessage && typeof errorMessage === 'string' && (
+            <p className="mt-2 text-sm text-red-600">
+              {errorMessage}
+            </p>
+          )}
         </form>
 
         <p className="mt-4 text-center text-sm text-[#4a5568]">Ou se connecter avec</p>
