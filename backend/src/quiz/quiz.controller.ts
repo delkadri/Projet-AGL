@@ -17,7 +17,7 @@ export class QuizController {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly quizScoringService: QuizScoringService,
-  ) {}
+  ) { }
 
   @Get(':id')
   async getQuiz(@Param('id') id: string) {

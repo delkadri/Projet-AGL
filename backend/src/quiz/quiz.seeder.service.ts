@@ -7,7 +7,7 @@ import * as path from 'path';
 export class QuizSeederService implements OnModuleInit {
   private readonly logger = new Logger(QuizSeederService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(private readonly supabaseService: SupabaseService) { }
 
   async onModuleInit() {
     this.logger.log('Démarrage de la synchronisation du quiz...');
@@ -32,19 +32,37 @@ export class QuizSeederService implements OnModuleInit {
       }
 
       const { id, name, categories } = quizJson;
+      const firstQuestionId = categories?.[0]?.questions?.[0]?.id ?? '?';
+      this.logger.log(`[Seeder] Synchronisation de '${id}' — première question: ${firstQuestionId}`);
 
-      const { error } = await client
+      // Vérifie si le quiz existe déjà
+      const { data: existing } = await client
         .from('quizzes')
-        .upsert({
-          id,
-          name,
-          content: { categories }
-        });
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+      let error: { message: string } | null = null;
+
+      if (existing) {
+        // Mise à jour forcée du contenu
+        const { error: updateError } = await client
+          .from('quizzes')
+          .update({ name, content: { categories } })
+          .eq('id', id);
+        error = updateError;
+        if (!error) this.logger.log(`[Seeder] Quiz '${id}' mis à jour dans Supabase.`);
+      } else {
+        // Première insertion
+        const { error: insertError } = await client
+          .from('quizzes')
+          .insert({ id, name, content: { categories } });
+        error = insertError;
+        if (!error) this.logger.log(`[Seeder] Quiz '${id}' inséré dans Supabase.`);
+      }
 
       if (error) {
         this.logger.error(`Échec de la synchronisation du quiz '${id}': ${error.message}`);
-      } else {
-        this.logger.log(`Quiz '${id}' synchronisé avec succès sur Supabase.`);
       }
     } catch (error: any) {
       this.logger.error(`Erreur lors de la synchronisation du quiz: ${error.message}`);
