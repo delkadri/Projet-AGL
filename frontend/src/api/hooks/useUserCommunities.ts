@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { MOCK_USER_COMMUNITIES } from '@/data/mockCommunities'
+import { getAllMockMemberships } from '@/data/mockCommunities'
 import type { UserCommunityMembershipDto } from '@/types/community'
 
 const USER_COMMUNITIES_QUERY_KEY = ['communities', 'mine'] as const
@@ -15,7 +15,7 @@ export function useUserCommunities() {
     queryKey: USER_COMMUNITIES_QUERY_KEY,
     queryFn: async () => {
       await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS))
-      return MOCK_USER_COMMUNITIES
+      return getAllMockMemberships()
     },
   })
 }

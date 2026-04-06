@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { OpenAPI } from '@/api/client'
 import { AuthProvider, useAuth } from '@/auth/AuthContext'
 import Header from '../components/Header'
+import { Toaster } from '@/components/ui/sonner'
 
 import appCss from '../styles.css?url'
 
@@ -91,6 +92,7 @@ function RootLayout() {
         <AuthGuard>
           <Outlet />
         </AuthGuard>
+        <Toaster position="top-center" richColors closeButton />
       </AuthProvider>
     </QueryClientProvider>
   )

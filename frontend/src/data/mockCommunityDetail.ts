@@ -17,6 +17,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       description:
         'Équipe entreprise : défis hebdo et partage de bons gestes au bureau et à la maison.',
       member_count: 42,
+      is_private: false,
       created_at: '2025-09-01T08:00:00.000Z',
       updated_at: '2026-04-01T10:00:00.000Z',
     },
@@ -56,6 +57,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       description:
         'Groupe de voisin·e·s pour compost, consigne et ateliers réparation.',
       member_count: 128,
+      is_private: false,
       created_at: '2025-06-20T12:00:00.000Z',
       updated_at: '2026-03-28T16:20:00.000Z',
     },
@@ -93,6 +95,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       name: 'Cyclo club TerraScore',
       description: 'Challenges kilomètres à vélo et covoiturage doux.',
       member_count: 67,
+      is_private: true,
       created_at: '2025-12-01T00:00:00.000Z',
       updated_at: '2026-04-05T08:00:00.000Z',
     },
