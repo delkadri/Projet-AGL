@@ -36,6 +36,37 @@ export class QuizScoringService {
     private readonly servicesScorer: ServicesScorer,
   ) { }
 
+  /**
+   * Calcule un aperçu du score carbone pour des réponses partielles ou complètes.
+   * Ne requiert pas d'authentification et ne persiste aucune donnée.
+   */
+  async previewScore(quizId: string, answers: Record<string, unknown>) {
+    const quiz = await this.getQuiz(quizId);
+    const ctx = this.buildScorerContext(quiz, answers);
+
+    const breakdownChunks = await Promise.all([
+      this.transportScorer.compute(ctx),
+      this.housingScorer.compute(ctx),
+      Promise.resolve(this.foodScorer.compute(ctx)),
+      this.consumptionScorer.compute(ctx),
+      Promise.resolve(this.digitalScorer.compute(ctx)),
+      Promise.resolve(this.servicesScorer.compute(ctx)),
+    ]);
+
+    const breakdown: BreakdownItem[] = breakdownChunks.flat();
+    const categories = this.buildCategoriesBilan(quiz, breakdown);
+
+    return {
+      categories: categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        totalKgCo2ePerYear: this.round2(
+          cat.items.reduce((acc, item) => acc + item.valueKgCo2ePerYear, 0),
+        ),
+      })),
+    };
+  }
+
   async calculateScore(quizId: string, answers: Record<string, unknown>, userId?: string) {
     const quiz = await this.getQuiz(quizId);
 

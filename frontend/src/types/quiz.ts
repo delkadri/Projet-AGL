@@ -2,6 +2,8 @@
 export type QuizOption = {
   label: string
   value: string
+  /** Short educational hint shown when this option is selected (before clicking Continue). */
+  description?: string
 }
 
 /** Optional carbon-related metadata to help backend/APIs map questions to ADEME/Base Carbone logic */
@@ -26,6 +28,8 @@ export type QuestionSingle = {
   id: string
   type: 'single'
   title: string
+  /** Optional short educational text about the carbon impact context for this question. */
+  description?: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
   /** If set, this question is only shown when the condition is satisfied. */
@@ -37,6 +41,8 @@ export type QuestionMultiple = {
   id: string
   type: 'multiple'
   title: string
+  /** Optional short educational text about the carbon impact context for this question. */
+  description?: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
   showIf?: QuestionShowIf
@@ -47,6 +53,8 @@ export type QuestionNumber = {
   id: string
   type: 'number'
   title: string
+  /** Optional short educational text about the carbon impact context for this question. */
+  description?: string
   min: number
   max: number
   carbonMeta?: QuestionCarbonMeta
