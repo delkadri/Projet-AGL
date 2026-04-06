@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import type { Parcours } from '@/types/parcours'
 
 interface ParcoursCardProps {
@@ -6,81 +7,78 @@ interface ParcoursCardProps {
   isSelected: boolean
 }
 
-export const ParcoursCard = ({ parcours, onSelect, isSelected }: ParcoursCardProps) => {
-  const defisText = parcours.frequency?.defis || '0 défi'
-  const quizzText = parcours.frequency?.quizz || '0 quizz'
+type SlugTheme = {
+  gradient: string
+  ring: string
+  checkBg: string
+}
 
-  const getBackgroundColor = (slug: string) => {
-    switch (slug) {
-      case 'decouverte':
-        return 'bg-[#AFD29C]'
-      case 'progression':
-        return 'bg-[#5D963E]'
-      case 'challenge':
-        return 'bg-[#559B63]'
-      default:
-        return 'bg-white'
-    }
+function getSlugTheme(slug: string): SlugTheme {
+  switch (slug) {
+    case 'decouverte':
+      return {
+        gradient: 'from-[#d4edbc] to-[#8fc96b]',
+        ring: 'ring-[#5d8c3e]',
+        checkBg: 'bg-[#5d8c3e]',
+      }
+    case 'progression':
+      return {
+        gradient: 'from-[#7bb85a] to-[#3d6228]',
+        ring: 'ring-[#3d6228]',
+        checkBg: 'bg-[#3d6228]',
+      }
+    case 'challenge':
+      return {
+        gradient: 'from-[#74ba82] to-[#2f6b3f]',
+        ring: 'ring-[#2f6b3f]',
+        checkBg: 'bg-[#2f6b3f]',
+      }
+    default:
+      return {
+        gradient: 'from-slate-200 to-slate-300',
+        ring: 'ring-slate-500',
+        checkBg: 'bg-slate-600',
+      }
   }
+}
 
-  const getImageBackgroundColor = (slug: string) => {
-    switch (slug) {
-      case 'decouverte':
-        return 'bg-[#AFD29C]'
-      case 'progression':
-        return 'bg-[#5D963E]'
-      case 'challenge':
-        return 'bg-[#559B63]'
-      default:
-        return 'bg-gray-100'
-    }
-  }
+export function ParcoursCard({ parcours, onSelect, isSelected }: ParcoursCardProps) {
+  const theme = getSlugTheme(parcours.slug)
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onSelect(parcours.id)}
-      className={`flex border-2 rounded-lg overflow-hidden ${getBackgroundColor(parcours.slug)} shadow-lg hover:shadow-xl transition-all cursor-pointer ${
-        isSelected
-          ? 'border-emerald-500 bg-opacity-75 shadow-dark-900 shadow-xl'
-          : 'border-gray-200'
-      }`}
+      aria-pressed={isSelected}
+      className="flex flex-col items-center gap-2.5 focus-visible:outline-none"
     >
-      {/* Left image column */}
-      <div className={`w-1/4 ${getImageBackgroundColor(parcours.slug)} flex items-center justify-center px-2`}>
+      <div
+        className={`relative flex h-[88px] w-[88px] items-center justify-center rounded-2xl bg-linear-to-b p-3 shadow-md transition-all duration-200 ${theme.gradient} ${
+          isSelected
+            ? `ring-[3px] ${theme.ring} scale-110 shadow-lg`
+            : 'ring-2 ring-transparent opacity-70 hover:opacity-100 hover:scale-105'
+        }`}
+      >
         <img
           src={parcours.imageUrl ?? '/placeholder.png'}
           alt={parcours.name}
-          className="object-contain w-full max-h-20 rounded-lg shadow-lg"
+          className="h-13 w-13 object-contain drop-shadow"
         />
+        {isSelected && (
+          <span
+            className={`absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full shadow ${theme.checkBg}`}
+          >
+            <Check className="h-3 w-3 text-white" strokeWidth={3} />
+          </span>
+        )}
       </div>
-
-      {/* Right content column */}
-      <div className="flex-1 p-2 flex flex-col justify-between">
-        <div>
-          {/* Title */}
-          <h2 className="text-lg font-bold text-[#1E1E1E]">
-            {parcours.name}
-          </h2>
-
-          {/* Pills row */}
-          <div className="flex gap-1 mt-0">
-            <span className="px-1 py-0.5 bg-[#322F35] rounded-sm text-[9px] text-white">
-              {defisText}
-            </span>
-            <span className="px-1 py-0.5 bg-[#322F35] rounded-sm text-[9px] text-white">
-              {quizzText}
-            </span>
-          </div>
-
-          {/* Summary/description */}
-          <p className="text-xs text-[#1E1E1E] mt-0.5">
-            {parcours.summary ?? parcours.description}
-          </p>
-        </div>
-
-        {/* placeholder for spacing; no button anymore */}
-        <div className="mt-1" />
-      </div>
-    </div>
+      <span
+        className={`max-w-[88px] text-center text-[11px] font-semibold leading-tight transition-colors duration-200 ${
+          isSelected ? 'text-[#1A4D3E]' : 'text-slate-400'
+        }`}
+      >
+        {parcours.name}
+      </span>
+    </button>
   )
 }
