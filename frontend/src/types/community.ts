@@ -32,6 +32,14 @@ export interface CommunityDto {
     updated_at: string;
 }
 
+/** Visibilité (future API / colonne `communities.visibility`). */
+export type CommunityVisibility = "public" | "private";
+
+/** Entrée d’annuaire ou de recherche (GET /communities). */
+export interface CommunityDirectoryEntryDto extends CommunityDto {
+    visibility: CommunityVisibility;
+}
+
 export interface UserCommunityMembershipDto {
     community: CommunityDto;
     /** Rôle côté API (non affiché sur la liste). */
