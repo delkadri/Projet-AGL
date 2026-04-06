@@ -49,6 +49,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isAuthLoading, isOnboardingCompleted } = useAuth()
 
   const hideHeader = NO_HEADER_PATHS.some((p) => pathname === p)
+  /** Évite que le `<main>` défile en entier sur la page chat (hauteur verrouillée + scroll interne). */
+  const lockMainVerticalScroll = /^\/communautes\/[^/]+$/.test(pathname)
 
   useEffect(() => {
     if (isAuthLoading) return
@@ -71,9 +73,11 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   if (isAuthenticated && isOnboardingCompleted && pathname.startsWith('/onboarding')) return null
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden">
       {!hideHeader && <Header />}
-      <main className={`flex-1 ${!hideHeader ? 'pt-[65px]' : ''}`}>
+      <main
+        className={`flex min-h-0 flex-1 flex-col overflow-x-hidden ${lockMainVerticalScroll ? 'overflow-y-hidden' : 'overflow-y-auto'} ${!hideHeader ? 'bg-[#f1f8e9] pt-[calc(5.25rem+env(safe-area-inset-top,0px))]' : ''}`}
+      >
         {children}
       </main>
     </div>

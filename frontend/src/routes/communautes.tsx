@@ -1,14 +1,32 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useChildMatches } from '@tanstack/react-router'
 import { ChevronRight, Plus, Target, UserPlus, Users } from 'lucide-react'
 
 import { useUserCommunities } from '@/api/hooks/useUserCommunities'
 import BottomNav from '@/components/home/BottomNav'
 import { Button } from '@/components/ui/button'
+
 export const Route = createFileRoute('/communautes')({
-  component: CommunautesPage,
+  component: CommunautesLayout,
 })
 
-function CommunautesPage() {
+/**
+ * Route parente de `/communautes` et `/communautes/$communityId`.
+ * Sans `<Outlet />`, la page détail ne s’affichait jamais (URL seulement).
+ */
+function CommunautesLayout() {
+  const childMatches = useChildMatches()
+  const hasDetailChild = childMatches.length > 0
+
+  return hasDetailChild ? (
+    <div className="flex min-h-0 min-w-0 max-h-full flex-1 flex-col self-stretch overflow-hidden">
+      <Outlet />
+    </div>
+  ) : (
+    <CommunautesListPage />
+  )
+}
+
+function CommunautesListPage() {
   const { data: memberships, isPending, isError } = useUserCommunities()
 
   return (
