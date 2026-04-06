@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Check } from 'lucide-react'
-import { type FormEvent, useId, useState } from 'react'
+import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useCreateCommunity } from '@/api/hooks/useCreateCommunity'
+import { useAuth } from '@/auth/AuthContext'
 import BottomNav from '@/components/home/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,9 +17,25 @@ export const Route = createFileRoute('/communautes/creation')({
 const fieldClass =
   'rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base text-gray-900 shadow-none placeholder:text-gray-400 focus-visible:border-[#1b5e20]/50 focus-visible:ring-[#1b5e20]/25 md:text-sm'
 
+const MIN_LEVEL_CREATE_COMMUNITY = 3
+
 function CreationGroupePage() {
   const navigate = useNavigate()
+  const { user, isAuthLoading } = useAuth()
+  const notifiedRedirectRef = useRef(false)
   const { mutate, isPending, isError, error, reset } = useCreateCommunity()
+
+  useEffect(() => {
+    if (isAuthLoading || !user) return
+    if (user.niveau >= MIN_LEVEL_CREATE_COMMUNITY) return
+    if (!notifiedRedirectRef.current) {
+      notifiedRedirectRef.current = true
+      toast.error('Vous devez être niveau 3 pour créer une communauté.', {
+        id: 'communaute-creation-niveau',
+      })
+      void navigate({ to: '/communautes', replace: true })
+    }
+  }, [isAuthLoading, user, navigate])
 
   const nameId = useId()
   const descId = useId()
@@ -40,6 +58,8 @@ function CreationGroupePage() {
     setTouchedSubmit(true)
     reset()
 
+    if (!user || user.niveau < MIN_LEVEL_CREATE_COMMUNITY) return
+
     if (name.trim().length < 2) return
     if (isPrivate && password.trim().length < 4) return
 
@@ -58,6 +78,14 @@ function CreationGroupePage() {
           })
         },
       },
+    )
+  }
+
+  if (isAuthLoading || !user || user.niveau < MIN_LEVEL_CREATE_COMMUNITY) {
+    return (
+      <div className="min-h-[calc(100vh-70px)] w-full bg-[#f1f8e9] pb-40 pt-4">
+        <BottomNav />
+      </div>
     )
   }
 
