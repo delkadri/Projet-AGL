@@ -36,10 +36,18 @@ export interface CommunityDto {
 
 /** Corps attendu pour un futur POST /communities (mot de passe en clair côté client, hash côté serveur). */
 export interface CreateCommunityPayload {
-  name: string
-  description: string
-  is_private: boolean
-  join_password?: string
+    name: string;
+    description: string;
+    is_private: boolean;
+    join_password?: string;
+}
+
+/** Visibilité (future API / colonne `communities.visibility`). */
+export type CommunityVisibility = "public" | "private";
+
+/** Entrée d’annuaire ou de recherche (GET /communities). */
+export interface CommunityDirectoryEntryDto extends CommunityDto {
+    visibility: CommunityVisibility;
 }
 
 export interface UserCommunityMembershipDto {

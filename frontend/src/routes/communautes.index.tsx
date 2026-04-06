@@ -37,12 +37,12 @@ function CommunautesPage() {
             type="button"
             variant="outline"
             className="h-11 w-full border-[#1b5e20]/40 bg-white text-[#1b5e20] hover:bg-[#e8f5e9]"
-            onClick={() => {
-              /* TODO: flux rejoindre une communauté */
-            }}
+            asChild
           >
-            <UserPlus className="size-4" />
-            Rejoindre une communauté
+            <Link to="/communautes/rejoindre">
+              <UserPlus className="size-4" />
+              Rejoindre une communauté
+            </Link>
           </Button>
           <Button
             type="button"

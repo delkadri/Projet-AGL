@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunautesIndexRouteImport } from './routes/communautes.index'
 import { Route as OnboardingQuizRouteImport } from './routes/onboarding/quiz'
 import { Route as OnboardingParcoursRouteImport } from './routes/onboarding/parcours'
+import { Route as CommunautesRejoindreRouteImport } from './routes/communautes.rejoindre'
 import { Route as CommunautesCreationRouteImport } from './routes/communautes.creation'
 import { Route as CommunautesCommunityIdRouteImport } from './routes/communautes.$communityId'
 
@@ -66,6 +67,11 @@ const OnboardingParcoursRoute = OnboardingParcoursRouteImport.update({
   path: '/onboarding/parcours',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunautesRejoindreRoute = CommunautesRejoindreRouteImport.update({
+  id: '/rejoindre',
+  path: '/rejoindre',
+  getParentRoute: () => CommunautesRoute,
+} as any)
 const CommunautesCreationRoute = CommunautesCreationRouteImport.update({
   id: '/creation',
   path: '/creation',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes/': typeof CommunautesIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes': typeof CommunautesIndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes/': typeof CommunautesIndexRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/communautes/$communityId'
     | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/communautes/$communityId'
     | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/communautes/$communityId'
     | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes/'
@@ -233,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingParcoursRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communautes/rejoindre': {
+      id: '/communautes/rejoindre'
+      path: '/rejoindre'
+      fullPath: '/communautes/rejoindre'
+      preLoaderRoute: typeof CommunautesRejoindreRouteImport
+      parentRoute: typeof CommunautesRoute
+    }
     '/communautes/creation': {
       id: '/communautes/creation'
       path: '/creation'
@@ -253,12 +272,14 @@ declare module '@tanstack/react-router' {
 interface CommunautesRouteChildren {
   CommunautesCommunityIdRoute: typeof CommunautesCommunityIdRoute
   CommunautesCreationRoute: typeof CommunautesCreationRoute
+  CommunautesRejoindreRoute: typeof CommunautesRejoindreRoute
   CommunautesIndexRoute: typeof CommunautesIndexRoute
 }
 
 const CommunautesRouteChildren: CommunautesRouteChildren = {
   CommunautesCommunityIdRoute: CommunautesCommunityIdRoute,
   CommunautesCreationRoute: CommunautesCreationRoute,
+  CommunautesRejoindreRoute: CommunautesRejoindreRoute,
   CommunautesIndexRoute: CommunautesIndexRoute,
 }
 
