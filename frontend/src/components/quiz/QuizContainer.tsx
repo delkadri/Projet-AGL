@@ -8,7 +8,7 @@ import { QuizResult } from './QuizResult'
 import { QuizService } from '@/api/client'
 import type { ApiError } from '@/api/client'
 import type { QuizCalculateScoreResponse } from './QuizResult'
-import { TrendingUp, TrendingDown, Minus, Loader2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type QuizFinishAction = {
@@ -77,6 +77,10 @@ function formatDelta(kg: number): string {
   if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(1)} t CO₂e/an`
   return `${sign}${Math.round(abs)} kg CO₂e/an`
 }
+
+/** Quand le score catégorie ne bouge pas encore (ex. distance non renseignée), pas de verdict chiffré. */
+const NEUTRAL_DELTA_FALLBACK =
+  "L'impact sur cette catégorie sera calculé après les prochaines questions."
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -205,6 +209,9 @@ export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
   const deltaNegative = categoryDeltaKg !== null && categoryDeltaKg < -NEUTRAL_THRESHOLD_KG
   const deltaNeutral = categoryDeltaKg !== null && !deltaPositive && !deltaNegative
 
+  const panelSecondaryLine =
+    selectedDescription ?? (deltaNeutral ? NEUTRAL_DELTA_FALLBACK : null)
+
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#f0f7f0]">
       {/* Scrollable content — extra bottom padding when panel is visible */}
@@ -260,8 +267,8 @@ export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
               </div>
             ) : (
               <div className="flex flex-col gap-1">
-                {/* Row 1: arrow + delta */}
-                {categoryDeltaKg !== null && (
+                {/* Verdict chiffré uniquement si le breakdown catégorie bouge vraiment */}
+                {categoryDeltaKg !== null && !deltaNeutral && (
                   <div
                     className={cn(
                       'flex items-center gap-1.5',
@@ -274,20 +281,12 @@ export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
                   >
                     {deltaPositive && <TrendingUp className="h-4 w-4 shrink-0" />}
                     {deltaNegative && <TrendingDown className="h-4 w-4 shrink-0" />}
-                    {deltaNeutral && <Minus className="h-4 w-4 shrink-0" />}
-                    <span className="text-sm font-bold">
-                      {deltaNeutral ? 'Impact faible' : formatDelta(categoryDeltaKg)}
-                    </span>
-                    {!deltaNeutral && (
-                      <span className="text-xs opacity-70">
-                        sur {category.name.toLowerCase()}
-                      </span>
-                    )}
+                    <span className="text-sm font-bold">{formatDelta(categoryDeltaKg)}</span>
+                    <span className="text-xs opacity-70">sur {category.name.toLowerCase()}</span>
                   </div>
                 )}
 
-                {/* Row 2: option / question description */}
-                {selectedDescription && (
+                {panelSecondaryLine && (
                   <p
                     className={cn(
                       'line-clamp-2 text-xs leading-snug',
@@ -298,7 +297,7 @@ export function QuizContainer({ quiz, onFinishQuiz }: QuizContainerProps) {
                           : 'text-gray-600',
                     )}
                   >
-                    {selectedDescription}
+                    {panelSecondaryLine}
                   </p>
                 )}
               </div>
