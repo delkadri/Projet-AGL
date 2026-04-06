@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { createFileRoute, Link, Outlet, useChildMatches } from '@tanstack/react-router'
-import { ChevronRight, Plus, Target, UserPlus, Users } from 'lucide-react'
+import { BarChart3, ChevronRight, Plus, Target, UserPlus, Users } from 'lucide-react'
 
 import { useUserCommunities } from '@/api/hooks/useUserCommunities'
 import BottomNav from '@/components/home/BottomNav'
+import { InterCommunityRankingDialog } from '@/components/home/InterCommunityRankingDialog'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/communautes')({
@@ -28,6 +30,7 @@ function CommunautesLayout() {
 
 function CommunautesListPage() {
   const { data: memberships, isPending, isError } = useUserCommunities()
+  const [rankingOpen, setRankingOpen] = useState(false)
 
   return (
     <div className="min-h-[calc(100vh-70px)] w-full bg-[#f1f8e9] px-4 pb-24 pt-4">
@@ -35,6 +38,16 @@ function CommunautesListPage() {
         <header className="mb-5">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">Communautés</h1>
         </header>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="mb-5 h-11 w-full border-[#1b5e20]/45 bg-white/90 text-[#1b5e20] hover:bg-[#e8f5e9]"
+          onClick={() => setRankingOpen(true)}
+        >
+          <BarChart3 className="size-4" />
+          Classement inter-communautés
+        </Button>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
           <Button
@@ -124,6 +137,7 @@ function CommunautesListPage() {
           )}
         </section>
       </div>
+      <InterCommunityRankingDialog open={rankingOpen} onOpenChange={setRankingOpen} />
       <BottomNav />
     </div>
   )
