@@ -10,12 +10,13 @@
           "id": "q-transport-mode",
           "type": "single",
           "title": "Comment vous rendez-vous principalement au travail ou à vos études ?",
+          "description": "Le transport représente ~30 % de l'empreinte carbone française.",
           "options": [
-            { "label": "Voiture individuelle", "value": "voiture_diesel_essence" },
-            { "label": "Transport en commun (bus, métro, RER…)", "value": "transport_commun" },
-            { "label": "Vélo / Marche / Trottinette", "value": "velo_marche_trottinette" },
-            { "label": "Deux-roues motorisé (moto, scooter)", "value": "deux_roues_motorise" },
-            { "label": "Covoiturage", "value": "covoiturage" }
+            { "label": "Voiture individuelle", "value": "voiture_diesel_essence", "description": "Le mode le plus émetteur : ~193 g CO₂e/km en moyenne" },
+            { "label": "Transport en commun (bus, métro, RER…)", "value": "transport_commun", "description": "Jusqu'à 10× moins émetteur que la voiture thermique" },
+            { "label": "Vélo / Marche / Trottinette", "value": "velo_marche_trottinette", "description": "Impact quasi nul — le choix zéro carbone" },
+            { "label": "Deux-roues motorisé (moto, scooter)", "value": "deux_roues_motorise", "description": "Moins émetteur qu'une voiture (~113 g CO₂e/km)" },
+            { "label": "Covoiturage", "value": "covoiturage", "description": "Partager le trajet divise les émissions par passager" }
           ],
           "carbonMeta": { "dataType": "principal_mode" }
         },
@@ -23,14 +24,15 @@
           "id": "q-vehicle-fuel",
           "type": "single",
           "title": "Si vous utilisez une voiture, quel est son type de motorisation ?",
+          "description": "Le type de motorisation détermine fortement l'empreinte de vos trajets.",
           "showIf": { "questionId": "q-transport-mode", "value": "voiture_diesel_essence" },
           "options": [
-            { "label": "Diesel", "value": "diesel" },
-            { "label": "Essence", "value": "essence" },
-            { "label": "Hybride (non rechargeable)", "value": "hybride" },
-            { "label": "Hybride rechargeable", "value": "hybride_rechargeable" },
-            { "label": "Électrique", "value": "electrique" },
-            { "label": "Je n'utilise pas de voiture", "value": "none" }
+            { "label": "Diesel", "value": "diesel", "description": "~193 g CO₂e/km — le plus répandu en France" },
+            { "label": "Essence", "value": "essence", "description": "~190 g CO₂e/km — comparable au diesel" },
+            { "label": "Hybride (non rechargeable)", "value": "hybride", "description": "~135 g CO₂e/km — 30 % de mieux qu'un thermique" },
+            { "label": "Hybride rechargeable", "value": "hybride_rechargeable", "description": "~95 g CO₂e/km si rechargé régulièrement" },
+            { "label": "Électrique", "value": "electrique", "description": "~22 g CO₂e/km grâce au mix électrique français" },
+            { "label": "Je n'utilise pas de voiture", "value": "none", "description": "Pas d'impact lié au type de carburant" }
           ],
           "carbonMeta": { "dataType": "vehicle_fuel_type" }
         },
@@ -38,11 +40,12 @@
           "id": "q-transport-distance",
           "type": "single",
           "title": "Quelle distance parcourez-vous pour ce trajet (aller-retour par jour travaillé) ?",
+          "description": "Chaque km en voiture thermique ajoute ~193 g CO₂e, multiplié par ~235 jours/an.",
           "options": [
-            { "label": "Moins de 20 km", "value": "moins_20" },
-            { "label": "20–50 km", "value": "20_50" },
-            { "label": "50–100 km", "value": "50_100" },
-            { "label": "Plus de 100 km", "value": "plus_100" }
+            { "label": "Moins de 20 km", "value": "moins_20", "description": "Trajet court — impact limité même en voiture" },
+            { "label": "20–50 km", "value": "20_50", "description": "Représente environ 1 à 2 t CO₂e/an en voiture" },
+            { "label": "50–100 km", "value": "50_100", "description": "Trajet important — jusqu'à 3 t CO₂e/an en voiture" },
+            { "label": "Plus de 100 km", "value": "plus_100", "description": "Très long trajet — peut dépasser 4 t CO₂e/an" }
           ],
           "carbonMeta": { "dataType": "distance_km" }
         },
@@ -50,11 +53,12 @@
           "id": "q-transport-telework",
           "type": "single",
           "title": "Combien de jours par semaine êtes-vous en télétravail ?",
+          "description": "Chaque jour de télétravail réduit votre empreinte domicile-travail d'environ 20 %.",
           "options": [
-            { "label": "Jamais (0 jour)", "value": "never" },
-            { "label": "1 jour/semaine", "value": "1d" },
-            { "label": "2–3 jours/semaine", "value": "2_3d" },
-            { "label": "Tous les jours (full remote)", "value": "everyday" }
+            { "label": "Jamais (0 jour)", "value": "never", "description": "Présence 5 j/sem = impact transport maximal" },
+            { "label": "1 jour/semaine", "value": "1d", "description": "20 % d'impact transport en moins" },
+            { "label": "2–3 jours/semaine", "value": "2_3d", "description": "Réduit votre empreinte transport de 40 à 60 %" },
+            { "label": "Tous les jours (full remote)", "value": "everyday", "description": "Zéro émission liée aux trajets domicile-travail" }
           ],
           "carbonMeta": { "dataType": "telework_factor" }
         },
@@ -62,6 +66,7 @@
           "id": "q-flight-count",
           "type": "number",
           "title": "Combien de trajets en avion faites-vous par an ? (aller simple = 1 trajet)",
+          "description": "Un aller-retour Paris–New York émet ~1 800 kg CO₂e, soit presque l'objectif annuel des Accords de Paris.",
           "min": 0,
           "max": 30,
           "carbonMeta": { "dataType": "flight_count" }
@@ -70,11 +75,12 @@
           "id": "q-flight-class",
           "type": "single",
           "title": "Pour vos trajets en avion, il s'agit principalement de :",
+          "description": "La distance du vol amplifie considérablement l'empreinte totale.",
           "showIf": { "questionId": "q-flight-count", "operator": "gt", "value": 0 },
           "options": [
-            { "label": "Courts courriers (< 1 000 km, ex : Paris–Nice)", "value": "court" },
-            { "label": "Moyens courriers (1 000–3 500 km, ex : Paris–Maroc)", "value": "moyen" },
-            { "label": "Longs courriers (> 3 500 km, ex : Paris–New York)", "value": "long" }
+            { "label": "Courts courriers (< 1 000 km, ex : Paris–Nice)", "value": "court", "description": "~258 g CO₂e/passager.km — courts mais fréquents" },
+            { "label": "Moyens courriers (1 000–3 500 km, ex : Paris–Maroc)", "value": "moyen", "description": "~187 g CO₂e/passager.km — impact intermédiaire" },
+            { "label": "Longs courriers (> 3 500 km, ex : Paris–New York)", "value": "long", "description": "Distances immenses — impact total très élevé" }
           ],
           "carbonMeta": { "dataType": "flight_distance_class" }
         },
@@ -82,6 +88,7 @@
           "id": "q-transport-train",
           "type": "single",
           "title": "Combien de kilomètres parcourez-vous en train (TGV, Intercités) par an ?",
+          "description": "Le TGV émet ~2,9 g CO₂e/km contre 193 g pour une voiture thermique.",
           "options": [
             { "label": "Presque pas (moins de 500 km)", "value": "moins_500" },
             { "label": "Modéré (500 - 2 000 km)", "value": "500_2000" },
@@ -94,6 +101,7 @@
           "id": "q-transport-voiture-vacances",
           "type": "single",
           "title": "Au-delà de vos trajets quotidiens, combien de kilomètres parcourez-vous en voiture pour vos week-ends et vacances (par an) ?",
+          "description": "Les déplacements loisirs peuvent représenter autant que les trajets quotidiens.",
           "options": [
             { "label": "Moins de 1 000 km", "value": "moins_1000" },
             { "label": "1 000 à 5 000 km", "value": "1000_5000" },
@@ -112,11 +120,12 @@
           "id": "q-housing-surface",
           "type": "single",
           "title": "Quelle est la surface de votre logement ?",
+          "description": "L'empreinte chauffage est partagée entre occupants et dépend de la surface.",
           "options": [
-            { "label": "Moins de 30 m²", "value": "moins_30" },
-            { "label": "30–60 m²", "value": "30_60" },
-            { "label": "60–120 m²", "value": "60_120" },
-            { "label": "Plus de 120 m²", "value": "plus_120" }
+            { "label": "Moins de 30 m²", "value": "moins_30", "description": "Surface compacte — faible consommation de chauffage" },
+            { "label": "30–60 m²", "value": "30_60", "description": "Surface standard — consommation modérée" },
+            { "label": "60–120 m²", "value": "60_120", "description": "Grand logement — chauffage plus énergivore" },
+            { "label": "Plus de 120 m²", "value": "plus_120", "description": "Très grande surface — impact chauffage élevé" }
           ],
           "carbonMeta": { "dataType": "housing_surface" }
         },
@@ -124,13 +133,14 @@
           "id": "q-heating-type",
           "type": "single",
           "title": "Quel est votre principal moyen de chauffage ?",
+          "description": "La PAC est ~5× moins émettrice que le gaz, grâce au mix électrique français.",
           "options": [
-            { "label": "Gaz naturel", "value": "gaz" },
-            { "label": "Électricité (convecteurs, radiateurs)", "value": "electricite" },
-            { "label": "Pompe à chaleur (PAC)", "value": "pac" },
-            { "label": "Fioul", "value": "fioul" },
-            { "label": "Bois / Pellets", "value": "bois" },
-            { "label": "Réseau de chaleur urbain", "value": "reseau_chaleur" }
+            { "label": "Gaz naturel", "value": "gaz", "description": "~234 g CO₂e/kWh — émetteur mais répandu" },
+            { "label": "Électricité (convecteurs, radiateurs)", "value": "electricite", "description": "~52 g CO₂e/kWh grâce au nucléaire français" },
+            { "label": "Pompe à chaleur (PAC)", "value": "pac", "description": "Très efficace — 3× moins émetteur que l'électricité directe" },
+            { "label": "Fioul", "value": "fioul", "description": "~324 g CO₂e/kWh — le plus émetteur des systèmes courants" },
+            { "label": "Bois / Pellets", "value": "bois", "description": "Quasi neutre en carbone si gestion durable de la forêt" },
+            { "label": "Réseau de chaleur urbain", "value": "reseau_chaleur", "description": "Variable selon la ville — souvent assez bas en France" }
           ],
           "carbonMeta": { "dataType": "heating_type" }
         },
@@ -138,10 +148,11 @@
           "id": "q-housing-insulation",
           "type": "single",
           "title": "Comment qualifieriez-vous l'isolation de votre logement ?",
+          "description": "Un logement mal isolé consomme 2 à 3× plus d'énergie qu'un bâtiment BBC.",
           "options": [
-            { "label": "Bien isolé (BBC, RT 2012 ou mieux)", "value": "bien_isole" },
-            { "label": "Standard (isolation correcte mais pas récente)", "value": "standard" },
-            { "label": "Peu isolé (vieux logement, courants d'air, simple vitrage)", "value": "peu_isole" }
+            { "label": "Bien isolé (BBC, RT 2012 ou mieux)", "value": "bien_isole", "description": "Consommation réduite — conforme aux standards récents" },
+            { "label": "Standard (isolation correcte mais pas récente)", "value": "standard", "description": "Consommation intermédiaire" },
+            { "label": "Peu isolé (vieux logement, courants d'air, simple vitrage)", "value": "peu_isole", "description": "Pertes thermiques élevées — impact chauffage fort" }
           ],
           "carbonMeta": { "dataType": "housing_insulation" }
         },
@@ -149,11 +160,12 @@
           "id": "q-housing-occupants",
           "type": "single",
           "title": "Combien de personnes vivent dans votre logement (vous compris) ?",
+          "description": "L'empreinte logement est divisée entre tous les occupants.",
           "options": [
-            { "label": "1 personne", "value": "1" },
-            { "label": "2 personnes", "value": "2" },
-            { "label": "3–4 personnes", "value": "3_4" },
-            { "label": "5 personnes ou plus", "value": "5_plus" }
+            { "label": "1 personne", "value": "1", "description": "Vous supportez seul l'intégralité de l'empreinte" },
+            { "label": "2 personnes", "value": "2", "description": "Empreinte par personne réduite de moitié" },
+            { "label": "3–4 personnes", "value": "3_4", "description": "Bonne mutualisation des ressources" },
+            { "label": "5 personnes ou plus", "value": "5_plus", "description": "Impact individuel très faible pour ce poste" }
           ],
           "carbonMeta": { "dataType": "housing_occupants" }
         },
@@ -161,10 +173,11 @@
           "id": "q-housing-ac",
           "type": "single",
           "title": "Votre logement est-il équipé de la climatisation ?",
+          "description": "La climatisation peut représenter une part significative de la consommation électrique.",
           "options": [
             { "label": "Non", "value": "non" },
-            { "label": "Oui, et je l'utilise quelques jours par an", "value": "oui_peu" },
-            { "label": "Oui, et je l'utilise tout l'été", "value": "oui_beaucoup" }
+            { "label": "Oui, et je l'utilise quelques jours par an", "value": "oui_peu", "description": "Consommation ponctuelle — impact limité" },
+            { "label": "Oui, et je l'utilise tout l'été", "value": "oui_beaucoup", "description": "Usage intensif — augmente l'empreinte électrique" }
           ],
           "carbonMeta": { "dataType": "housing_ac_usage" }
         },
@@ -172,10 +185,11 @@
           "id": "q-housing-age",
           "type": "single",
           "title": "De quand date la construction de votre logement ?",
+          "description": "Les bâtiments d'avant 1975 consomment en moyenne 3× plus que les constructions récentes.",
           "options": [
-            { "label": "Avant 1975 (avant les réglementations thermiques)", "value": "avant_1975" },
-            { "label": "Entre 1975 et 2012", "value": "1975_2012" },
-            { "label": "Après 2012 (RT2012, RE2020, très bien isolé)", "value": "apres_2012" },
+            { "label": "Avant 1975 (avant les réglementations thermiques)", "value": "avant_1975", "description": "Pas de réglementation thermique — isolation souvent faible" },
+            { "label": "Entre 1975 et 2012", "value": "1975_2012", "description": "Isolation variable selon les travaux de rénovation" },
+            { "label": "Après 2012 (RT2012, RE2020, très bien isolé)", "value": "apres_2012", "description": "Bâtiment performant — faible empreinte chauffage" },
             { "label": "Je ne sais pas", "value": "inconnu" }
           ],
           "carbonMeta": { "dataType": "housing_construction_era" }
@@ -190,11 +204,12 @@
           "id": "q-diet-type",
           "type": "single",
           "title": "Comment décririez-vous votre alimentation ?",
+          "description": "L'alimentation représente ~25 % de l'empreinte carbone moyenne française.",
           "options": [
-            { "label": "Omnivore (je mange de tout, y compris viande et poisson)", "value": "omnivore" },
-            { "label": "Flexitarien (je limite la viande, moins de 3 fois/semaine)", "value": "flexitarien" },
-            { "label": "Végétarien (pas de viande ni poisson)", "value": "vegetarien" },
-            { "label": "Végétalien / Vegan (aucun produit animal)", "value": "vegan" }
+            { "label": "Omnivore (je mange de tout, y compris viande et poisson)", "value": "omnivore", "description": "Alimentation la plus émettrice (~2,5 t CO₂e/an)" },
+            { "label": "Flexitarien (je limite la viande, moins de 3 fois/semaine)", "value": "flexitarien", "description": "Économise ~500 kg CO₂e/an vs un régime omnivore" },
+            { "label": "Végétarien (pas de viande ni poisson)", "value": "vegetarien", "description": "~1,5 t CO₂e/an — 40 % de moins qu'omnivore" },
+            { "label": "Végétalien / Vegan (aucun produit animal)", "value": "vegan", "description": "~1 t CO₂e/an — le régime le moins émetteur" }
           ],
           "carbonMeta": { "dataType": "diet_type" }
         },
@@ -202,12 +217,13 @@
           "id": "q-red-meat-frequency",
           "type": "single",
           "title": "À quelle fréquence consommez-vous de la viande rouge (bœuf, agneau, porc) ?",
+          "description": "Produire 1 kg de bœuf émet ~25 kg CO₂e — 100× plus que des légumes.",
           "options": [
-            { "label": "Tous les jours ou presque", "value": "quotidien" },
-            { "label": "Plusieurs fois par semaine", "value": "plusieurs_semaine" },
-            { "label": "Une fois par semaine environ", "value": "une_semaine" },
-            { "label": "Rarement (moins d'une fois par semaine)", "value": "rarement" },
-            { "label": "Jamais", "value": "jamais" }
+            { "label": "Tous les jours ou presque", "value": "quotidien", "description": "Bœuf quotidien ≈ 600+ kg CO₂e/an rien qu'en viande rouge" },
+            { "label": "Plusieurs fois par semaine", "value": "plusieurs_semaine", "description": "Contribution importante à l'empreinte alimentaire" },
+            { "label": "Une fois par semaine environ", "value": "une_semaine", "description": "Consommation modérée — bon compromis" },
+            { "label": "Rarement (moins d'une fois par semaine)", "value": "rarement", "description": "Très faible impact dû à la viande rouge" },
+            { "label": "Jamais", "value": "jamais", "description": "Impact quasi nul pour ce poste" }
           ],
           "carbonMeta": { "dataType": "red_meat_frequency" }
         },
@@ -215,11 +231,12 @@
           "id": "q-dairy-frequency",
           "type": "single",
           "title": "À quelle fréquence consommez-vous des produits laitiers (lait, fromage, yaourt) ?",
+          "description": "Les laitages contribuent à ~15 % de l'empreinte alimentaire mondiale.",
           "options": [
-            { "label": "Tous les jours ou presque", "value": "quotidien" },
-            { "label": "Plusieurs fois par semaine", "value": "plusieurs_semaine" },
-            { "label": "Une fois par semaine environ", "value": "une_semaine" },
-            { "label": "Jamais ou très rarement", "value": "jamais" }
+            { "label": "Tous les jours ou presque", "value": "quotidien", "description": "Consommation élevée — impact laitier notable" },
+            { "label": "Plusieurs fois par semaine", "value": "plusieurs_semaine", "description": "Consommation modérée" },
+            { "label": "Une fois par semaine environ", "value": "une_semaine", "description": "Faible consommation — impact limité" },
+            { "label": "Jamais ou très rarement", "value": "jamais", "description": "Impact quasi nul pour les produits laitiers" }
           ],
           "carbonMeta": { "dataType": "dairy_frequency" }
         },
@@ -227,11 +244,12 @@
           "id": "q-local-food",
           "type": "single",
           "title": "Quelle part de votre alimentation est locale et de saison ?",
+          "description": "Acheter local et de saison réduit les émissions de transport et de production.",
           "options": [
-            { "label": "Presque toujours (marchés, AMAP, jardin…)", "value": "toujours" },
+            { "label": "Presque toujours (marchés, AMAP, jardin…)", "value": "toujours", "description": "Très bonne pratique pour réduire l'empreinte alimentaire" },
             { "label": "Souvent", "value": "souvent" },
             { "label": "Parfois", "value": "parfois" },
-            { "label": "Rarement ou jamais", "value": "jamais" }
+            { "label": "Rarement ou jamais", "value": "jamais", "description": "Alimentation importée hors saison — impact accru" }
           ],
           "carbonMeta": { "dataType": "local_food_share" }
         },
@@ -239,10 +257,11 @@
           "id": "q-drinks-bottled-water",
           "type": "single",
           "title": "Que buvez-vous principalement comme eau ?",
+          "description": "L'eau en bouteille émet 1 000× plus de CO₂e que l'eau du robinet.",
           "options": [
-            { "label": "Eau du robinet (exclusivement ou presque)", "value": "robinet" },
+            { "label": "Eau du robinet (exclusivement ou presque)", "value": "robinet", "description": "~0,3 g CO₂e/L — le choix le plus sobre" },
             { "label": "Moitié robinet, moitié bouteille", "value": "mixte" },
-            { "label": "Eau en bouteille (exclusivement ou presque)", "value": "bouteille" }
+            { "label": "Eau en bouteille (exclusivement ou presque)", "value": "bouteille", "description": "~300 g CO₂e/L — 1 000× plus que le robinet" }
           ],
           "carbonMeta": { "dataType": "bottled_water_consumption" }
         },
@@ -250,10 +269,11 @@
           "id": "q-drinks-alcohol-coffee",
           "type": "single",
           "title": "Quelle est votre consommation de boissons chaudes (café/thé) ou d'alcool (bière, vin) ?",
+          "description": "La production de café représente ~5 à 10 kg CO₂e/kg torréfié.",
           "options": [
-            { "label": "Je n'en bois pas ou très occasionnellement", "value": "faible" },
+            { "label": "Je n'en bois pas ou très occasionnellement", "value": "faible", "description": "Impact quasi nul pour ce poste" },
             { "label": "Modérée (1 à 2 tasses/verres par jour)", "value": "moderee" },
-            { "label": "Importante (plus de 3 tasses/verres par jour)", "value": "importante" }
+            { "label": "Importante (plus de 3 tasses/verres par jour)", "value": "importante", "description": "Consommation élevée — impact cumulé notable" }
           ],
           "carbonMeta": { "dataType": "hot_drinks_alcohol" }
         }
@@ -267,10 +287,11 @@
           "id": "q-clothes",
           "type": "single",
           "title": "Combien de vêtements neufs achetez-vous par an environ ?",
+          "description": "Fabriquer un jean neuf émet ~33 kg CO₂e. Préférer l'occasion aide beaucoup.",
           "options": [
-            { "label": "Très peu (moins de 5 pièces)", "value": "peu" },
+            { "label": "Très peu (moins de 5 pièces)", "value": "peu", "description": "Consommation sobre — faible impact textile" },
             { "label": "Modéré (5 à 15 pièces)", "value": "moyen" },
-            { "label": "Beaucoup (plus de 15 pièces)", "value": "beaucoup" }
+            { "label": "Beaucoup (plus de 15 pièces)", "value": "beaucoup", "description": "Impact textile élevé — la fast fashion pèse lourd" }
           ],
           "carbonMeta": { "dataType": "new_clothes_per_year" }
         },
@@ -278,11 +299,12 @@
           "id": "q-electronics",
           "type": "single",
           "title": "À quelle fréquence achetez-vous des appareils électroniques (smartphone, ordinateur, TV…) ?",
+          "description": "80 % de l'empreinte d'un smartphone vient de sa fabrication.",
           "options": [
-            { "label": "Jamais ou très rarement (1 achat tous les 5 ans ou plus)", "value": "jamais" },
-            { "label": "Rarement (1 achat tous les 3–4 ans)", "value": "rarement" },
-            { "label": "Parfois (1 achat par an)", "value": "parfois" },
-            { "label": "Souvent (2 achats ou plus par an)", "value": "souvent" }
+            { "label": "Jamais ou très rarement (1 achat tous les 5 ans ou plus)", "value": "jamais", "description": "Excellente pratique — minimise l'empreinte numérique" },
+            { "label": "Rarement (1 achat tous les 3–4 ans)", "value": "rarement", "description": "Rythme raisonnable pour ce poste" },
+            { "label": "Parfois (1 achat par an)", "value": "parfois", "description": "Un smartphone/an = ~70 kg CO₂e/an rien que pour la fabrication" },
+            { "label": "Souvent (2 achats ou plus par an)", "value": "souvent", "description": "Renouvellement fréquent — impact fabrication très élevé" }
           ],
           "carbonMeta": { "dataType": "electronics_frequency" }
         },
@@ -290,11 +312,12 @@
           "id": "q-second-hand",
           "type": "single",
           "title": "Quelle est votre pratique de l'achat d'occasion / seconde main ?",
+          "description": "Acheter d'occasion évite la production d'un nouvel objet.",
           "options": [
-            { "label": "Presque toujours (Vinted, brocantes, réparation…)", "value": "toujours" },
+            { "label": "Presque toujours (Vinted, brocantes, réparation…)", "value": "toujours", "description": "Économise jusqu'à 50 % de l'empreinte consommation" },
             { "label": "Souvent", "value": "souvent" },
             { "label": "Parfois", "value": "parfois" },
-            { "label": "Jamais ou presque", "value": "jamais" }
+            { "label": "Jamais ou presque", "value": "jamais", "description": "Tout neuf — impact consommation maximisé" }
           ],
           "carbonMeta": { "dataType": "second_hand_practice" }
         },
@@ -302,10 +325,11 @@
           "id": "q-furniture",
           "type": "single",
           "title": "À quelle fréquence achetez-vous des meubles ou équipements pour la maison (neufs) ?",
+          "description": "Un canapé neuf émet en moyenne 150 à 300 kg CO₂e selon les matériaux.",
           "options": [
-            { "label": "Très rarement (occasion ou rien depuis des années)", "value": "rare" },
+            { "label": "Très rarement (occasion ou rien depuis des années)", "value": "rare", "description": "Impact ameublement quasi nul" },
             { "label": "Occasion principalement, quelques neufs", "value": "occasion" },
-            { "label": "Régulièrement du neuf (aménagement, renouvellement)", "value": "neuf_regulier" }
+            { "label": "Régulièrement du neuf (aménagement, renouvellement)", "value": "neuf_regulier", "description": "Achat régulier de neuf — impact ameublement élevé" }
           ],
           "carbonMeta": { "dataType": "furniture_purchase_frequency" }
         }
@@ -319,11 +343,12 @@
           "id": "q-device-renewal",
           "type": "single",
           "title": "À quelle fréquence renouvelez-vous vos appareils numériques (smartphone, PC, tablette…) ?",
+          "description": "80 % de l'empreinte d'un smartphone vient de sa fabrication, pas de son usage.",
           "options": [
-            { "label": "Jamais ou très rarement (plus de 10 ans)", "value": "jamais" },
-            { "label": "Tous les 5 ans environ", "value": "tous_5ans" },
-            { "label": "Tous les 3 ans environ (rythme moyen en France)", "value": "tous_3ans" },
-            { "label": "Tous les 1–2 ans", "value": "tous_ans" }
+            { "label": "Jamais ou très rarement (plus de 10 ans)", "value": "jamais", "description": "Excellent — impact numérique très faible" },
+            { "label": "Tous les 5 ans environ", "value": "tous_5ans", "description": "Rythme sobre — bien en dessous de la moyenne" },
+            { "label": "Tous les 3 ans environ (rythme moyen en France)", "value": "tous_3ans", "description": "Rythme moyen français — des efforts restent possibles" },
+            { "label": "Tous les 1–2 ans", "value": "tous_ans", "description": "Renouvellement rapide — impact fabrication élevé" }
           ],
           "carbonMeta": { "dataType": "device_renewal" }
         },
@@ -331,11 +356,12 @@
           "id": "q-streaming",
           "type": "single",
           "title": "Combien d'heures par semaine regardez-vous des vidéos en streaming (Netflix, YouTube, etc.) ?",
+          "description": "1 h de streaming HD émet ~36 g CO₂e — cumulé, l'impact peut être notable.",
           "options": [
-            { "label": "Moins de 5 h/semaine", "value": "moins_5" },
+            { "label": "Moins de 5 h/semaine", "value": "moins_5", "description": "Faible usage — impact streaming limité" },
             { "label": "5–15 h/semaine", "value": "5_15" },
-            { "label": "15–30 h/semaine", "value": "15_30" },
-            { "label": "Plus de 30 h/semaine", "value": "plus_30" }
+            { "label": "15–30 h/semaine", "value": "15_30", "description": "Usage important — représente plusieurs kg CO₂e/an" },
+            { "label": "Plus de 30 h/semaine", "value": "plus_30", "description": "Usage très élevé — impact streaming significatif" }
           ],
           "carbonMeta": { "dataType": "streaming_hours_per_week" }
         },
@@ -343,11 +369,12 @@
           "id": "q-visio-hours",
           "type": "single",
           "title": "Combien d'heures par semaine passez-vous en visioconférence (travail, réunions, formations) ?",
+          "description": "1 h de visio émet 50 à 150 g CO₂e selon la qualité vidéo.",
           "options": [
             { "label": "Moins de 2 h/semaine", "value": "moins_2" },
             { "label": "2–5 h/semaine", "value": "2_5" },
-            { "label": "5–10 h/semaine", "value": "5_10" },
-            { "label": "Plus de 10 h/semaine", "value": "plus_10" }
+            { "label": "5–10 h/semaine", "value": "5_10", "description": "Usage pro régulier — impact visio notable" },
+            { "label": "Plus de 10 h/semaine", "value": "plus_10", "description": "Nombreuses visios — impact cumulé élevé" }
           ],
           "carbonMeta": { "dataType": "visio_hours_per_week" }
         },
@@ -355,10 +382,11 @@
           "id": "q-cloud-storage",
           "type": "single",
           "title": "Quel est votre usage du stockage cloud (Google Drive, OneDrive, iCloud, etc.) ?",
+          "description": "100 Go dans le cloud émettent ~0,3 à 3 kg CO₂e/an selon les data centers.",
           "options": [
-            { "label": "Peu ou pas (moins de 10 Go)", "value": "peu" },
+            { "label": "Peu ou pas (moins de 10 Go)", "value": "peu", "description": "Impact stockage cloud minimal" },
             { "label": "Modéré (10–100 Go)", "value": "moyen" },
-            { "label": "Important (plus de 100 Go, sauvegardes, partage)", "value": "beaucoup" }
+            { "label": "Important (plus de 100 Go, sauvegardes, partage)", "value": "beaucoup", "description": "Stockage intensif — impact cloud plus élevé" }
           ],
           "carbonMeta": { "dataType": "cloud_storage_usage" }
         },
@@ -366,11 +394,12 @@
           "id": "q-tv-size",
           "type": "single",
           "title": "Quelle est la taille de votre télévision principale ?",
+          "description": "Une TV 55'' consomme 2 à 3× plus d'électricité qu'une TV 32''.",
           "options": [
-            { "label": "Je n'ai pas de TV", "value": "none" },
-            { "label": "Petite (moins de 32 pouces / 80 cm)", "value": "petite" },
+            { "label": "Je n'ai pas de TV", "value": "none", "description": "Zéro impact lié à la télévision" },
+            { "label": "Petite (moins de 32 pouces / 80 cm)", "value": "petite", "description": "Faible consommation électrique" },
             { "label": "Moyenne (32 à 50 pouces / 80 à 127 cm)", "value": "moyenne" },
-            { "label": "Grande (plus de 50 pouces / 127 cm)", "value": "grande" }
+            { "label": "Grande (plus de 50 pouces / 127 cm)", "value": "grande", "description": "Forte consommation — impact TV élevé" }
           ],
           "carbonMeta": { "dataType": "tv_screen_size" }
         }
@@ -384,10 +413,11 @@
           "id": "q-savings-amount",
           "type": "single",
           "title": "Quel est le montant approximatif de votre épargne (Livret A, assurance vie, PEA…) ?",
+          "description": "L'épargne dans des banques classiques finance souvent des projets incluant des énergies fossiles.",
           "options": [
-            { "label": "Moins de 10 000 €", "value": "moins_10k" },
+            { "label": "Moins de 10 000 €", "value": "moins_10k", "description": "Épargne faible — impact financé limité" },
             { "label": "Entre 10 000 € et 50 000 €", "value": "10k_50k" },
-            { "label": "Plus de 50 000 €", "value": "plus_50k" }
+            { "label": "Plus de 50 000 €", "value": "plus_50k", "description": "Épargne importante — les investissements comptent davantage" }
           ],
           "carbonMeta": { "dataType": "savings_volume" }
         },
@@ -395,11 +425,12 @@
           "id": "q-savings-green",
           "type": "single",
           "title": "Avez-vous placé votre épargne dans des fonds ou des banques spécifiquement responsables/verts ?",
+          "description": "Les banques éthiques excluent les investissements dans les énergies fossiles.",
           "showIf": { "questionId": "q-savings-amount", "operator": "neq", "value": "moins_10k" },
           "options": [
-            { "label": "Non, dans une banque classique", "value": "classique" },
-            { "label": "Une partie (Livret LDDS, quelques fonds ISR)", "value": "mixte" },
-            { "label": "Oui, majorité dans une banque éthique (Nef, Crédit Coopératif, Helios…)", "value": "ethique" }
+            { "label": "Non, dans une banque classique", "value": "classique", "description": "Les banques classiques financent souvent des projets fossiles" },
+            { "label": "Une partie (Livret LDDS, quelques fonds ISR)", "value": "mixte", "description": "Démarche partielle — déjà un bon début" },
+            { "label": "Oui, majorité dans une banque éthique (Nef, Crédit Coopératif, Helios…)", "value": "ethique", "description": "Excellente pratique — empreinte financée réduite" }
           ],
           "carbonMeta": { "dataType": "savings_green_ratio" }
         }

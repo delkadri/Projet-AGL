@@ -105,9 +105,16 @@ export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: Qui
 
       {categories && categories.length > 0 ? (
         <div className="space-y-3 px-4 py-3">
-          {categories.map((category) => {
+          {[...categories]
+            .sort((a, b) => {
+              const aTotal = a.items.reduce((s, i) => s + i.valueKgCo2ePerYear, 0)
+              const bTotal = b.items.reduce((s, i) => s + i.valueKgCo2ePerYear, 0)
+              return bTotal - aTotal
+            })
+            .map((category) => {
             const { id: categoryId, name, items } = category
-            const categoryTotalKg = items.reduce((s, i) => s + i.valueKgCo2ePerYear, 0)
+            const sortedItems = [...items].sort((a, b) => b.valueKgCo2ePerYear - a.valueKgCo2ePerYear)
+            const categoryTotalKg = sortedItems.reduce((s, i) => s + i.valueKgCo2ePerYear, 0)
             const categoryTotalT = categoryTotalKg / 1000
             const percentage = totalKg > 0 ? Math.round((categoryTotalKg / totalKg) * 100) : 0
             const isExpanded = expandedCategoryId === categoryId
@@ -116,7 +123,7 @@ export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: Qui
               <>
                 <p className="mb-1.5 text-xs font-medium text-gray-600">Répartition</p>
                 <div className="space-y-3">
-                  {items.map((item) => {
+                  {sortedItems.map((item) => {
                     const itemT = item.valueKgCo2ePerYear / 1000
                     const itemPct =
                       categoryTotalKg > 0

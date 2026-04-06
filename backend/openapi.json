@@ -168,6 +168,39 @@
         ]
       }
     },
+    "/quiz/{id}/preview": {
+      "post": {
+        "operationId": "QuizController_previewScore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewQuizScoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Quiz"
+        ]
+      }
+    },
     "/quiz/{id}/score": {
       "post": {
         "operationId": "QuizController_calculateScore",
@@ -524,6 +557,22 @@
           "feuilles",
           "niveau",
           "onboardingCompleted"
+        ]
+      },
+      "PreviewQuizScoreDto": {
+        "type": "object",
+        "properties": {
+          "answers": {
+            "type": "object",
+            "description": "Réponses partielles ou complètes du quiz. Clé = questionId, valeur = string | number | string[]. Peut être vide.",
+            "example": {
+              "q-transport-mode": "voiture_diesel_essence",
+              "q-transport-distance": "50_100"
+            }
+          }
+        },
+        "required": [
+          "answers"
         ]
       },
       "CalculateQuizScoreDto": {

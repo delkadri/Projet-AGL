@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CalculateQuizScoreDto } from './dto/calculate-quiz-score.dto';
+import { PreviewQuizScoreDto } from './dto/preview-quiz-score.dto';
 import { QuizScoringService } from './quiz-scoring.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
@@ -77,6 +78,20 @@ export class QuizController {
     }
 
     return null;
+  }
+
+  /**
+   * POST /api/quiz/:id/preview
+   *
+   * Retourne un aperçu de l'empreinte carbone par catégorie à partir de réponses partielles.
+   * Pas d'authentification requise, ne persiste aucune donnée.
+   */
+  @Post(':id/preview')
+  async previewScore(
+    @Param('id') id: string,
+    @Body() body: PreviewQuizScoreDto,
+  ) {
+    return this.quizScoringService.previewScore(id, body.answers);
   }
 
   /**

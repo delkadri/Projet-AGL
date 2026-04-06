@@ -11,6 +11,7 @@ export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { CalculateQuizScoreDto } from './models/CalculateQuizScoreDto';
 export type { LoginDto } from './models/LoginDto';
 export type { ParcoursDto } from './models/ParcoursDto';
+export type { PreviewQuizScoreDto } from './models/PreviewQuizScoreDto';
 export type { RegisterDto } from './models/RegisterDto';
 export type { ScoreHistoryResponseDto } from './models/ScoreHistoryResponseDto';
 export type { SessionDto } from './models/SessionDto';

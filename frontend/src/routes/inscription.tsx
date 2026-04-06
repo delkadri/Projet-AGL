@@ -140,6 +140,7 @@ function InscriptionPage() {
           )}
         </form>
 
+        {/* OAuth providers (Google, Apple, LinkedIn) — désactivé pour l’instant (TER-10)
         <p className="mt-4 text-center text-sm text-[#4a5568]">Ou s'inscrire avec</p>
         <div className="mt-2 flex justify-center gap-5">
           <button
@@ -173,6 +174,7 @@ function InscriptionPage() {
             <img src="/socials/linkedin.png" alt="" className="size-8 object-contain" />
           </button>
         </div>
+        */}
 
         <p className="mt-5 text-center text-sm text-[#4a5568]">
           Déjà un compte ?{' '}
