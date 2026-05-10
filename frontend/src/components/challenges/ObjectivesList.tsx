@@ -167,6 +167,13 @@ export function ObjectivesList() {
           )}
         </div>
       </div>
+
+      {/* Challenge détails popup */}
+      <ChallengeDetailsPopup
+        challenge={selectedChallenge}
+        onClose={() => setSelectedChallengeId(null)}
+        onComplete={handleCompleteChallenge}
+      />
     </div>
   )
 }
