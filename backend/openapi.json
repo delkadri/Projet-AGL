@@ -234,6 +234,83 @@
         ]
       }
     },
+    "/monthly-quiz/current": {
+      "get": {
+        "operationId": "MonthlyQuizController_getCurrentMonthlyQuiz",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Quiz du mois ou null si le quiz mensuel a deja ete complete ce mois.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/MonthlyQuizResponseDto"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retourne le quiz mensuel (questions des 4 pires categories) ou null si deja complete",
+        "tags": [
+          "monthly-quiz"
+        ]
+      }
+    },
+    "/monthly-quiz/{id}/submit": {
+      "post": {
+        "operationId": "MonthlyQuizController_submitMonthlyQuiz",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identifiant du quiz (ex: quiz-1).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitMonthlyQuizDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Score carbone recalcule et enregistre dans l'historique utilisateur."
+          },
+          "409": {
+            "description": "Quiz mensuel deja complete ce mois."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soumet les reponses du quiz mensuel et declenche le recalcul du score",
+        "tags": [
+          "monthly-quiz"
+        ]
+      }
+    },
     "/users/me/parcours": {
       "patch": {
         "operationId": "UserController_updateParcours",
@@ -353,6 +430,10 @@
     },
     {
       "name": "health",
+      "description": ""
+    },
+    {
+      "name": "monthly-quiz",
       "description": ""
     }
   ],
@@ -591,6 +672,138 @@
               "q4": 2,
               "q4b": "moyen",
               "q5": "1d"
+            }
+          }
+        },
+        "required": [
+          "answers"
+        ]
+      },
+      "MonthlyQuizOptionDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Voiture individuelle"
+          },
+          "value": {
+            "type": "string",
+            "example": "voiture_diesel_essence"
+          },
+          "description": {
+            "type": "string",
+            "example": "Le mode le plus emetteur."
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ]
+      },
+      "MonthlyQuizQuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "q-transport-mode"
+          },
+          "type": {
+            "type": "string",
+            "example": "single"
+          },
+          "title": {
+            "type": "string",
+            "example": "Comment vous rendez-vous au travail ?"
+          },
+          "description": {
+            "type": "string",
+            "example": "Le transport represente ~30 %."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyQuizOptionDto"
+            }
+          },
+          "min": {
+            "type": "number",
+            "example": 0
+          },
+          "max": {
+            "type": "number",
+            "example": 30
+          },
+          "showIf": {
+            "type": "object"
+          },
+          "carbonMeta": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ]
+      },
+      "MonthlyQuizCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cat-transport"
+          },
+          "name": {
+            "type": "string",
+            "example": "MOBILITE & TRANSPORT"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyQuizQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "questions"
+        ]
+      },
+      "MonthlyQuizResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "quiz-1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Bilan carbone"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyQuizCategoryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "categories"
+        ]
+      },
+      "SubmitMonthlyQuizDto": {
+        "type": "object",
+        "properties": {
+          "answers": {
+            "type": "object",
+            "description": "Map des reponses du quiz mensuel. Cle = questionId, valeur = string | number | string[]",
+            "example": {
+              "q-transport-mode": "voiture_diesel_essence",
+              "q-transport-distance": "50_100",
+              "q-housing-surface": 45
             }
           }
         },

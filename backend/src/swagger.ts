@@ -13,6 +13,7 @@ async function generateSwagger() {
     .setVersion('1.0')
     .addTag('auth')
     .addTag('health')
+    .addTag('monthly-quiz')
     .addBearerAuth()
     .build();
 

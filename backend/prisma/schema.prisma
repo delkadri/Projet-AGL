@@ -23,6 +23,7 @@ model users {
   last_name            String?
   feuilles             Int             @default(0)
   onboarding_completed Boolean         @default(false)
+  last_monthly_quiz_at DateTime?
   parcours_id          String?
   parcours             parcours?       @relation(fields: [parcours_id], references: [id])
   score_history        score_history[]

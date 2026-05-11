@@ -11,6 +11,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { SeedModule } from './seed/seed.module';
 import { UserModule } from './user/user.module';
 import { ParcoursModule } from './parcours/parcours.module';
+import { MonthlyQuizModule } from './monthly-quiz/monthly-quiz.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ParcoursModule } from './parcours/parcours.module';
     SupabaseModule,
     AuthModule,
     QuizModule,
+    MonthlyQuizModule,
     SeedModule,
     UserModule,
     ParcoursModule,

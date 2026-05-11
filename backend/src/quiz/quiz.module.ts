@@ -25,5 +25,6 @@ import { ServicesScorer } from './scoring/scorers/services.scorer';
     ServicesScorer,
     QuizScoringService,
   ],
+  exports: [QuizScoringService],
 })
 export class QuizModule {}
