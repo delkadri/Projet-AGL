@@ -7,12 +7,18 @@ import * as path from 'path';
 export class QuizSeederService implements OnModuleInit {
   private readonly logger = new Logger(QuizSeederService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit() {
     this.logger.log('Démarrage de la synchronisation du quiz...');
     try {
-      let filePath = path.join(process.cwd(), 'src', 'quiz', 'data', 'quiz-init.json');
+      let filePath = path.join(
+        process.cwd(),
+        'src',
+        'quiz',
+        'data',
+        'quiz-init.json',
+      );
       if (!fs.existsSync(filePath)) {
         filePath = path.join(__dirname, 'data', 'quiz-init.json');
       }
@@ -27,24 +33,30 @@ export class QuizSeederService implements OnModuleInit {
 
       const { id, name, categories } = quizJson;
       const firstQuestionId = categories?.[0]?.questions?.[0]?.id ?? '?';
-      this.logger.log(`[Seeder] Synchronisation de '${id}' — première question: ${firstQuestionId}`);
+      this.logger.log(
+        `[Seeder] Synchronisation de '${id}' — première question: ${firstQuestionId}`,
+      );
 
       await this.prisma.quizzes.upsert({
         where: { id },
         update: {
           name,
-          content: { categories }
+          content: { categories },
         },
         create: {
           id,
           name,
-          content: { categories }
-        }
+          content: { categories },
+        },
       });
 
-      this.logger.log(`Quiz '${id}' synchronisé avec succès sur Supabase via Prisma.`);
+      this.logger.log(
+        `Quiz '${id}' synchronisé avec succès sur Supabase via Prisma.`,
+      );
     } catch (error: any) {
-      this.logger.error(`Erreur lors de la synchronisation du quiz: ${error.message}`);
+      this.logger.error(
+        `Erreur lors de la synchronisation du quiz: ${error.message}`,
+      );
     }
   }
 }

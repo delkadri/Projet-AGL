@@ -45,6 +45,13 @@ export class UserProfileResponseDto {
     @ApiProperty({ example: true })
     onboardingCompleted!: boolean;
 
+    @ApiProperty({
+        description:
+            'Au moins un bilan carbone enregistré en base (ex. quiz d’onboarding soumis), indépendamment du choix de parcours.',
+        example: true,
+    })
+    hasOnboardingBilan!: boolean;
+
     @ApiProperty({ type: ParcoursDto, required: false, nullable: true })
     parcours!: ParcoursDto | null;
 }

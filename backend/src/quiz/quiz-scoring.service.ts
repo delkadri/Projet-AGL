@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { SupabaseService } from '../supabase/supabase.service';
 import { TransportScorer } from './scoring/scorers/transport.scorer';
 import { HousingScorer } from './scoring/scorers/housing.scorer';
 import { FoodScorer } from './scoring/scorers/food.scorer';
@@ -18,6 +22,7 @@ import {
   CategoryBilan,
   ScorerContext,
 } from './scoring/scoring.types';
+import { NationalFootprintReferenceService } from './national-footprint-reference.service';
 
 /** Part fixe ADEME : services publics (hôpitaux, routes, écoles, administration) — 1.1 à 1.5 tCO2e/hab/an. Ajoutée de manière invisible au total. */
 const PUBLIC_SERVICES_FIXED_KG = 1300;
@@ -34,7 +39,57 @@ export class QuizScoringService {
     private readonly consumptionScorer: ConsumptionScorer,
     private readonly digitalScorer: DigitalScorer,
     private readonly servicesScorer: ServicesScorer,
+    private readonly nationalFootprintReference: NationalFootprintReferenceService,
   ) { }
+
+  /** Charge la structure du quiz (DB ou fichier local `quiz-init.json`). */
+  async getQuizPayload(quizId: string): Promise<QuizPayload> {
+    return this.getQuiz(quizId);
+  }
+
+  /**
+   * Recalcule le bilan carbone à partir du **dernier** score enregistré (historique),
+   * sans nouvelle persistance. Les comparaisons nationales utilisent les données à jour.
+   */
+  async getOnboardingDisplayForUser(userId: string) {
+    return this.getDisplayForHistory(userId);
+  }
+
+  /**
+   * Recalcule le bilan carbone pour une entrée `score_history` donnée. Sans `scoreHistoryId`,
+   * cible la plus récente (rétro-compat avec `getOnboardingDisplayForUser`). Avec un id,
+   * vérifie l’appartenance à l’utilisateur (sinon 404).
+   */
+  async getDisplayForHistory(userId: string, scoreHistoryId?: string) {
+    const entry = scoreHistoryId
+      ? await this.prisma.score_history.findFirst({
+          where: { id: scoreHistoryId, user_id: userId },
+          select: { id: true, json_answers: true, created_at: true },
+        })
+      : await this.prisma.score_history.findFirst({
+          where: { user_id: userId },
+          orderBy: { created_at: 'desc' },
+          select: { id: true, json_answers: true, created_at: true },
+        });
+
+    if (!entry?.json_answers || typeof entry.json_answers !== 'object') {
+      throw new NotFoundException(
+        scoreHistoryId
+          ? 'Bilan introuvable ou inaccessible.'
+          : 'Aucun bilan enregistré. Complétez d’abord le quiz d’onboarding.',
+      );
+    }
+
+    const answers = entry.json_answers as Record<string, unknown>;
+    const quizId = 'quiz-1';
+    const result = await this.calculateScore(quizId, answers, undefined);
+
+    return {
+      ...result,
+      savedAt: entry.created_at.toISOString(),
+      scoreHistoryId: entry.id,
+    };
+  }
 
   /**
    * Calcule un aperçu du score carbone pour des réponses partielles ou complètes.
@@ -67,7 +122,11 @@ export class QuizScoringService {
     };
   }
 
-  async calculateScore(quizId: string, answers: Record<string, unknown>, userId?: string) {
+  async calculateScore(
+    quizId: string,
+    answers: Record<string, unknown>,
+    userId?: string,
+  ) {
     const quiz = await this.getQuiz(quizId);
 
     // ── Diagnostic ──────────────────────────────────────────────────────────
@@ -80,7 +139,9 @@ export class QuizScoringService {
     );
     const ctx = this.buildScorerContext(quiz, answers);
     const dtMap: Record<string, string> = {};
-    ctx.questionByDataType.forEach((q, k) => { dtMap[k] = q.id; });
+    ctx.questionByDataType.forEach((q, k) => {
+      dtMap[k] = q.id;
+    });
     this.logger.log(`[Score] questionByDataType: ${JSON.stringify(dtMap)}`);
     // ────────────────────────────────────────────────────────────────────────
 
@@ -108,30 +169,70 @@ export class QuizScoringService {
     const total = totalFromBreakdown + PUBLIC_SERVICES_FIXED_KG;
     const categories = this.buildCategoriesBilan(quiz, breakdown);
 
-    if (userId) {
-      const categoriesScores = categories.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        totalKgCo2ePerYear: this.round2(
-          cat.items.reduce((acc, item) => acc + item.valueKgCo2ePerYear, 0),
-        ),
-      }));
+    const categoriesScores = categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      totalKgCo2ePerYear: this.round2(
+        cat.items.reduce((acc, item) => acc + item.valueKgCo2ePerYear, 0),
+      ),
+    }));
 
-      await this.prisma.$transaction([
-        this.prisma.score_history.create({
-          data: {
-            user_id: userId,
-            score: this.round2(total),
-            json_answers: answers as any,
-            categories_scores: categoriesScores,
+    const userKgByCategoryId = new Map<string, number>(
+      categories.map((cat) => {
+        const kg = cat.items.reduce(
+          (acc, item) => acc + item.valueKgCo2ePerYear,
+          0,
+        );
+        return [cat.id, this.round2(kg)];
+      }),
+    );
+
+    const onboardingPromise = this.nationalFootprintReference
+      .buildOnboardingBilan(quiz.categories ?? [], userKgByCategoryId)
+      .catch((err: unknown) => {
+        this.logger.warn(
+          `[Score] Bilan national: repli hors ligne (${err instanceof Error ? err.message : String(err)})`,
+        );
+        return this.nationalFootprintReference.buildOnboardingBilanOffline(
+          quiz.categories ?? [],
+          userKgByCategoryId,
+        );
+      });
+
+    const persistTx = userId
+      ? this.prisma.$transaction(
+        async (tx) => {
+          const now = new Date();
+          const monthStart = this.utcMonthStart(now);
+          const monthEnd = this.utcMonthEnd(now);
+          const existingThisUtcMonth = await tx.score_history.findFirst({
+            where: {
+              user_id: userId,
+              created_at: { gte: monthStart, lte: monthEnd },
+            },
+            select: { id: true },
+          });
+          if (existingThisUtcMonth) {
+            throw new ConflictException(
+              'Un bilan a déjà été enregistré pour ce mois civil (UTC). Un seul enregistrement par mois et par année est autorisé.',
+            );
           }
-        }),
-        this.prisma.users.update({
-          where: { id: userId },
-          data: { onboarding_completed: true }
-        })
-      ]);
-    }
+
+          await tx.score_history.create({
+            data: {
+              user_id: userId,
+              score: this.round2(total),
+              json_answers: answers as any,
+              categories_scores: categoriesScores,
+            },
+          });
+          /** `onboarding_completed` est réservé à la fin du parcours d’accueil (choix du parcours), via `UserService.completeOnboarding`. */
+        },
+        { timeout: 25_000, maxWait: 10_000 },
+      )
+      : Promise.resolve(null);
+
+    const [onboardingBilan] = await Promise.all([onboardingPromise, persistTx]);
 
     return {
       quizId,
@@ -143,6 +244,7 @@ export class QuizScoringService {
         publicServicesFixedKg: PUBLIC_SERVICES_FIXED_KG,
       },
       categories,
+      onboardingBilan,
     };
   }
 
@@ -272,5 +374,26 @@ export class QuizScoringService {
 
   private round2(value: number): number {
     return Math.round(value * 100) / 100;
+  }
+
+  /** Aligné sur le quiz mensuel : mois civil en UTC. */
+  private utcMonthStart(ref: Date): Date {
+    return new Date(
+      Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), 1, 0, 0, 0, 0),
+    );
+  }
+
+  private utcMonthEnd(ref: Date): Date {
+    return new Date(
+      Date.UTC(
+        ref.getUTCFullYear(),
+        ref.getUTCMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999,
+      ),
+    );
   }
 }

@@ -112,7 +112,8 @@ export function getNumberAnswer(
   if (value === undefined || value === null) return undefined;
   // Tolérance : convertit les strings numériques
   const num = typeof value === 'string' ? parseFloat(value) : (value as number);
-  if (typeof num !== 'number' || !Number.isFinite(num) || num < 0) return undefined;
+  if (typeof num !== 'number' || !Number.isFinite(num) || num < 0)
+    return undefined;
   return num;
 }
 

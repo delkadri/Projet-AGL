@@ -42,7 +42,7 @@ function ParcoursPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-linear-to-b from-green-50 to-blue-50">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#f0f7f0]">
       <ParcoursList
         selectedParcoursId={selectedParcoursId}
         onSelectParcours={setSelectedParcoursId}
@@ -50,12 +50,15 @@ function ParcoursPage() {
         isLoading={isLoading}
         error={isError ? (error instanceof Error ? error.message : 'Erreur lors du chargement des parcours') : null}
       />
-      <div className="fixed bottom-0 left-0 right-0 border-t border-slate-200/70 bg-white/85 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-[#1A4D3E]/10 bg-[#f0f7f0] px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
         {updateParcoursMutation.isError && (
           <p className="mb-2 text-center text-sm text-red-600">
             Impossible de mettre à jour le parcours. Réessayez.
           </p>
         )}
+        <p className="mb-3 text-center text-sm leading-snug text-slate-500">
+          Le choix du parcours n&apos;est pas définitif.
+        </p>
         <Button
           type="button"
           disabled={!selectedParcoursId || updateParcoursMutation.isPending}

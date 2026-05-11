@@ -11,6 +11,7 @@
           "type": "single",
           "title": "Comment vous rendez-vous principalement au travail ou à vos études ?",
           "description": "Le transport représente ~30 % de l'empreinte carbone française.",
+          "clarification": "Choisissez le mode utilisé le plus souvent sur la semaine. Si vous en combinez plusieurs, prenez celui des plus longs trajets.",
           "options": [
             { "label": "Voiture individuelle", "value": "voiture_diesel_essence", "description": "Le mode le plus émetteur : ~193 g CO₂e/km en moyenne" },
             { "label": "Transport en commun (bus, métro, RER…)", "value": "transport_commun", "description": "Jusqu'à 10× moins émetteur que la voiture thermique" },
@@ -41,6 +42,7 @@
           "type": "single",
           "title": "Quelle distance parcourez-vous pour ce trajet (aller-retour par jour travaillé) ?",
           "description": "Chaque km en voiture thermique ajoute ~193 g CO₂e, multiplié par ~235 jours/an.",
+          "clarification": "Aller + retour cumulés sur une journée moyenne, porte-à-porte. Sans les détours (courses, enfants…).",
           "options": [
             { "label": "Moins de 20 km", "value": "moins_20", "description": "Trajet court — impact limité même en voiture" },
             { "label": "20–50 km", "value": "20_50", "description": "Représente environ 1 à 2 t CO₂e/an en voiture" },
@@ -67,6 +69,7 @@
           "type": "number",
           "title": "Combien de trajets en avion faites-vous par an ? (aller simple = 1 trajet)",
           "description": "Un aller-retour Paris–New York émet ~1 800 kg CO₂e, soit presque l'objectif annuel des Accords de Paris.",
+          "clarification": "Aller simple = 1 trajet, aller-retour = 2. Une escale ne compte pas en plus. Incluez loisirs, famille et déplacements pro.",
           "min": 0,
           "max": 30,
           "carbonMeta": { "dataType": "flight_count" }
@@ -102,6 +105,7 @@
           "type": "single",
           "title": "Au-delà de vos trajets quotidiens, combien de kilomètres parcourez-vous en voiture pour vos week-ends et vacances (par an) ?",
           "description": "Les déplacements loisirs peuvent représenter autant que les trajets quotidiens.",
+          "clarification": "Tous vos km en voiture hors domicile-travail : week-ends, vacances, visites. Conducteur ou passager. Repère : AR Paris-Marseille ≈ 1 500 km.",
           "options": [
             { "label": "Moins de 1 000 km", "value": "moins_1000" },
             { "label": "1 000 à 5 000 km", "value": "1000_5000" },
@@ -117,10 +121,23 @@
       "name": "LOGEMENT",
       "questions": [
         {
+          "id": "q-housing-building-type",
+          "type": "single",
+          "title": "Vivez-vous plutôt en appartement ou en maison ?",
+          "description": "Les déperditions thermiques diffèrent : un pavillon a en général plus de murs exposés au froid qu'un appartement entouré d'autres logements.",
+          "clarification": "Maison mitoyenne : mur commun avec un voisin (jumelée, en bande). Maison individuelle : pavillon ou maison avec quatre façades exposées.",
+          "options": [
+            { "label": "Appartement (copropriété)", "value": "appartement", "description": "Moins de parois vers l'extérieur — besoins de chauffage souvent plus faibles à surface égale" },
+            { "label": "Maison mitoyenne", "value": "maison_mitoyenne", "description": "Un mur en moins vers l'extérieur qu'une maison isolée" },
+            { "label": "Maison individuelle (pavillon)", "value": "maison_isolee", "description": "Plus de surface déperditive — chauffage souvent plus exigeant" }
+          ],
+          "carbonMeta": { "dataType": "housing_building_type" }
+        },
+        {
           "id": "q-housing-surface",
           "type": "single",
-          "title": "Quelle est la surface de votre logement ?",
-          "description": "L'empreinte chauffage est partagée entre occupants et dépend de la surface.",
+          "title": "Quelle est la surface habitable de votre logement (hors caves, garage) ?",
+          "description": "Le besoin en chauffage est lié à la surface chauffée et au nombre d'occupants.",
           "options": [
             { "label": "Moins de 30 m²", "value": "moins_30", "description": "Surface compacte — faible consommation de chauffage" },
             { "label": "30–60 m²", "value": "30_60", "description": "Surface standard — consommation modérée" },
@@ -130,25 +147,25 @@
           "carbonMeta": { "dataType": "housing_surface" }
         },
         {
-          "id": "q-heating-type",
+          "id": "q-housing-age",
           "type": "single",
-          "title": "Quel est votre principal moyen de chauffage ?",
-          "description": "La PAC est ~5× moins émettrice que le gaz, grâce au mix électrique français.",
+          "title": "De quand date la construction de votre logement (ou la dernière grosse rénovation thermique) ?",
+          "description": "Les normes d'isolation ont fortement évolué : un logement récent consomme en moyenne beaucoup moins qu'avant 1975.",
+          "clarification": "Si vous avez refait l'isolation (ITE, toiture, menuiseries) de façon équivalente à du neuf, choisissez la tranche qui correspond à ce niveau de performance.",
           "options": [
-            { "label": "Gaz naturel", "value": "gaz", "description": "~234 g CO₂e/kWh — émetteur mais répandu" },
-            { "label": "Électricité (convecteurs, radiateurs)", "value": "electricite", "description": "~52 g CO₂e/kWh grâce au nucléaire français" },
-            { "label": "Pompe à chaleur (PAC)", "value": "pac", "description": "Très efficace — 3× moins émetteur que l'électricité directe" },
-            { "label": "Fioul", "value": "fioul", "description": "~324 g CO₂e/kWh — le plus émetteur des systèmes courants" },
-            { "label": "Bois / Pellets", "value": "bois", "description": "Quasi neutre en carbone si gestion durable de la forêt" },
-            { "label": "Réseau de chaleur urbain", "value": "reseau_chaleur", "description": "Variable selon la ville — souvent assez bas en France" }
+            { "label": "Avant 1975 (avant les réglementations thermiques)", "value": "avant_1975", "description": "Pas de réglementation thermique — isolation souvent faible si non rénové" },
+            { "label": "Entre 1975 et 2012", "value": "1975_2012", "description": "Isolation variable selon les travaux de rénovation" },
+            { "label": "Après 2012 (RT2012, RE2020, très bien isolé)", "value": "apres_2012", "description": "Bâtiment performant — faible empreinte chauffage" },
+            { "label": "Je ne sais pas", "value": "inconnu" }
           ],
-          "carbonMeta": { "dataType": "heating_type" }
+          "carbonMeta": { "dataType": "housing_construction_era" }
         },
         {
           "id": "q-housing-insulation",
           "type": "single",
-          "title": "Comment qualifieriez-vous l'isolation de votre logement ?",
-          "description": "Un logement mal isolé consomme 2 à 3× plus d'énergie qu'un bâtiment BBC.",
+          "title": "Comment qualifieriez-vous l'isolation et l'étanchéité à l'air de votre logement aujourd'hui ?",
+          "description": "Un logement mal isolé peut consommer 2 à 3× plus d'énergie qu'un bâtiment performant à surface égale.",
+          "clarification": "Si vous avez déjà répondu sur l'âge du bâtiment, cette question affine le niveau réel (travaux, double vitrage, ponts thermiques). BBC / RT 2012 / RE 2020 : DPE plutôt A–C. Standard : DPE D–E. Peu isolé : simple vitrage, courants d'air, DPE F–G.",
           "options": [
             { "label": "Bien isolé (BBC, RT 2012 ou mieux)", "value": "bien_isole", "description": "Consommation réduite — conforme aux standards récents" },
             { "label": "Standard (isolation correcte mais pas récente)", "value": "standard", "description": "Consommation intermédiaire" },
@@ -157,42 +174,73 @@
           "carbonMeta": { "dataType": "housing_insulation" }
         },
         {
+          "id": "q-heating-type",
+          "type": "single",
+          "title": "Quel est votre principal moyen de chauffage des pièces vécues ?",
+          "description": "La PAC est en général beaucoup moins émettrice que le gaz ou le fioul, grâce au rendement et au mix électrique français.",
+          "clarification": "Si vous avez plusieurs sources (ex. chaudière + poêle d'appoint), choisissez celle qui couvre la majeure partie des besoins en hiver.",
+          "options": [
+            { "label": "Gaz naturel", "value": "gaz", "description": "Chaudière ou convecteurs gaz — facteur d'émission élevé au kWh" },
+            { "label": "Électricité (convecteurs, radiateurs)", "value": "electricite", "description": "~52 g CO₂e/kWh grâce au mix électrique français" },
+            { "label": "Pompe à chaleur (PAC) air/eau ou géothermie", "value": "pac", "description": "Très efficace pour chauffer à partir du réseau électrique" },
+            { "label": "Fioul", "value": "fioul", "description": "Très émetteur au kWh — souvent dans les maisons anciennes" },
+            { "label": "Bois / Pellets", "value": "bois", "description": "Émissions de combustion modérées ; bilan forêt selon gestion durable" },
+            { "label": "Réseau de chaleur urbain", "value": "reseau_chaleur", "description": "Variable selon la ville — souvent intermédiaire en France" }
+          ],
+          "carbonMeta": { "dataType": "heating_type" }
+        },
+        {
+          "id": "q-housing-hot-water",
+          "type": "single",
+          "title": "Comment est produite votre eau chaude sanitaire (douche, bain, cuisine) ?",
+          "description": "L'eau chaude représente souvent plusieurs centaines de kg CO₂e/an en plus du chauffage des pièces.",
+          "clarification": "« Même système que le chauffage » : chaudière gaz ou fioul qui fait aussi l'eau chaude, ou PAC double service. Ballon électrique : cumulus branché sur le réseau électrique seulement.",
+          "options": [
+            { "label": "Par le même système que le chauffage (chaudière, PAC double service…)", "value": "meme_que_chauffage", "description": "Une partie de l'énergie du chauffage sert aussi à l'eau chaude" },
+            { "label": "Ballon ou cumulus électrique", "value": "ballon_electrique", "description": "Consommation électrique dédiée — à compter en plus du chauffage" },
+            { "label": "PAC ou ballon thermodynamique dédié à l'eau chaude", "value": "pac_eau_chaude", "description": "Peu d'électricité pour beaucoup de chaleur utile" },
+            { "label": "Solaire thermique (majoritaire sur l'année)", "value": "solaire", "description": "Impact très faible pour ce poste" },
+            { "label": "Je ne sais pas", "value": "ne_sais_pas", "description": "Estimation prudente basée sur le nombre d'occupants" }
+          ],
+          "carbonMeta": { "dataType": "housing_hot_water" }
+        },
+        {
           "id": "q-housing-occupants",
           "type": "single",
           "title": "Combien de personnes vivent dans votre logement (vous compris) ?",
-          "description": "L'empreinte logement est divisée entre tous les occupants.",
+          "description": "Les besoins en chauffage et en eau chaude sont répartis sur les occupants : plus vous êtes nombreux, plus la consommation par personne baisse à surface fixe.",
           "options": [
-            { "label": "1 personne", "value": "1", "description": "Vous supportez seul l'intégralité de l'empreinte" },
-            { "label": "2 personnes", "value": "2", "description": "Empreinte par personne réduite de moitié" },
-            { "label": "3–4 personnes", "value": "3_4", "description": "Bonne mutualisation des ressources" },
-            { "label": "5 personnes ou plus", "value": "5_plus", "description": "Impact individuel très faible pour ce poste" }
+            { "label": "1 personne", "value": "1", "description": "Vous supportez seul l'intégralité de l'empreinte de ce logement" },
+            { "label": "2 personnes", "value": "2", "description": "Empreinte par personne réduite d'environ moitié pour le logement" },
+            { "label": "3–4 personnes", "value": "3_4", "description": "Bonne mutualisation des besoins" },
+            { "label": "5 personnes ou plus", "value": "5_plus", "description": "Impact individuel plus faible pour le logement à surface donnée" }
           ],
           "carbonMeta": { "dataType": "housing_occupants" }
+        },
+        {
+          "id": "q-housing-other-electricity",
+          "type": "single",
+          "title": "Hors chauffage et eau chaude, comment décririez-vous l'usage électrique de votre foyer ?",
+          "description": "Éclairage, réfrigération, linge, cuisine, multimédia : ce poste complète le bilan logement en France.",
+          "clarification": "Ne comptez pas ici le chauffage ni le cumulus dédiés ; répondez sur le reste (nombre d'appareils, box, consoles, second frigo, etc.).",
+          "options": [
+            { "label": "Plutôt sobre (peu d'appareils, on éteint, équipement récent)", "value": "sobre", "description": "Consommation spécifique électrique modérée" },
+            { "label": "Moyenne, comme la majorité des foyers", "value": "normal", "description": "Ordre de grandeur proche de la médiane française" },
+            { "label": "Élevée (beaucoup d'équipements branchés, maison très « connectée »)", "value": "eleve", "description": "Consommation spécifique électrique élevée" }
+          ],
+          "carbonMeta": { "dataType": "housing_other_electricity" }
         },
         {
           "id": "q-housing-ac",
           "type": "single",
           "title": "Votre logement est-il équipé de la climatisation ?",
-          "description": "La climatisation peut représenter une part significative de la consommation électrique.",
+          "description": "La climatisation ajoute une consommation électrique en été.",
           "options": [
             { "label": "Non", "value": "non" },
             { "label": "Oui, et je l'utilise quelques jours par an", "value": "oui_peu", "description": "Consommation ponctuelle — impact limité" },
             { "label": "Oui, et je l'utilise tout l'été", "value": "oui_beaucoup", "description": "Usage intensif — augmente l'empreinte électrique" }
           ],
           "carbonMeta": { "dataType": "housing_ac_usage" }
-        },
-        {
-          "id": "q-housing-age",
-          "type": "single",
-          "title": "De quand date la construction de votre logement ?",
-          "description": "Les bâtiments d'avant 1975 consomment en moyenne 3× plus que les constructions récentes.",
-          "options": [
-            { "label": "Avant 1975 (avant les réglementations thermiques)", "value": "avant_1975", "description": "Pas de réglementation thermique — isolation souvent faible" },
-            { "label": "Entre 1975 et 2012", "value": "1975_2012", "description": "Isolation variable selon les travaux de rénovation" },
-            { "label": "Après 2012 (RT2012, RE2020, très bien isolé)", "value": "apres_2012", "description": "Bâtiment performant — faible empreinte chauffage" },
-            { "label": "Je ne sais pas", "value": "inconnu" }
-          ],
-          "carbonMeta": { "dataType": "housing_construction_era" }
         }
       ]
     },
@@ -245,6 +293,7 @@
           "type": "single",
           "title": "Quelle part de votre alimentation est locale et de saison ?",
           "description": "Acheter local et de saison réduit les émissions de transport et de production.",
+          "clarification": "• Local : produit dans un rayon de ~150 km, ou français pour ce qui ne pousse pas près de chez vous.\n• De saison : cultivé en pleine terre au moment où vous le mangez, sans serre chauffée.",
           "options": [
             { "label": "Presque toujours (marchés, AMAP, jardin…)", "value": "toujours", "description": "Très bonne pratique pour réduire l'empreinte alimentaire" },
             { "label": "Souvent", "value": "souvent" },
@@ -270,6 +319,7 @@
           "type": "single",
           "title": "Quelle est votre consommation de boissons chaudes (café/thé) ou d'alcool (bière, vin) ?",
           "description": "La production de café représente ~5 à 10 kg CO₂e/kg torréfié.",
+          "clarification": "La question combine boissons chaudes (café, thé) et alcool (bière, vin). Comptez le total cumulé sur une journée moyenne — ex. 2 cafés + 1 verre de vin = modérée.",
           "options": [
             { "label": "Je n'en bois pas ou très occasionnellement", "value": "faible", "description": "Impact quasi nul pour ce poste" },
             { "label": "Modérée (1 à 2 tasses/verres par jour)", "value": "moderee" },
@@ -288,6 +338,7 @@
           "type": "single",
           "title": "Combien de vêtements neufs achetez-vous par an environ ?",
           "description": "Fabriquer un jean neuf émet ~33 kg CO₂e. Préférer l'occasion aide beaucoup.",
+          "clarification": "Pièces neuves uniquement (hauts, pantalons, manteaux, chaussures, accessoires). L'occasion est couverte par la question suivante.",
           "options": [
             { "label": "Très peu (moins de 5 pièces)", "value": "peu", "description": "Consommation sobre — faible impact textile" },
             { "label": "Modéré (5 à 15 pièces)", "value": "moyen" },
@@ -313,6 +364,7 @@
           "type": "single",
           "title": "Quelle est votre pratique de l'achat d'occasion / seconde main ?",
           "description": "Acheter d'occasion évite la production d'un nouvel objet.",
+          "clarification": "Tous types : vêtements (Vinted, friperies), électronique reconditionnée, meubles, livres. La réparation compte aussi.",
           "options": [
             { "label": "Presque toujours (Vinted, brocantes, réparation…)", "value": "toujours", "description": "Économise jusqu'à 50 % de l'empreinte consommation" },
             { "label": "Souvent", "value": "souvent" },
@@ -344,6 +396,7 @@
           "type": "single",
           "title": "À quelle fréquence renouvelez-vous vos appareils numériques (smartphone, PC, tablette…) ?",
           "description": "80 % de l'empreinte d'un smartphone vient de sa fabrication, pas de son usage.",
+          "clarification": "Renouveler = remplacer l'appareil (neuf ou reconditionné). Réparer ne compte pas. Avec plusieurs appareils, prenez la fréquence moyenne.",
           "options": [
             { "label": "Jamais ou très rarement (plus de 10 ans)", "value": "jamais", "description": "Excellent — impact numérique très faible" },
             { "label": "Tous les 5 ans environ", "value": "tous_5ans", "description": "Rythme sobre — bien en dessous de la moyenne" },
@@ -414,6 +467,7 @@
           "type": "single",
           "title": "Quel est le montant approximatif de votre épargne (Livret A, assurance vie, PEA…) ?",
           "description": "L'épargne dans des banques classiques finance souvent des projets incluant des énergies fossiles.",
+          "clarification": "• Inclure : Livret A / LDDS, assurance-vie, PEA, PER, actions.\n• Exclure : compte courant et résidence principale.",
           "options": [
             { "label": "Moins de 10 000 €", "value": "moins_10k", "description": "Épargne faible — impact financé limité" },
             { "label": "Entre 10 000 € et 50 000 €", "value": "10k_50k" },
@@ -426,6 +480,7 @@
           "type": "single",
           "title": "Avez-vous placé votre épargne dans des fonds ou des banques spécifiquement responsables/verts ?",
           "description": "Les banques éthiques excluent les investissements dans les énergies fossiles.",
+          "clarification": "• Cherchez les labels « ISR » ou « Greenfin » sur vos relevés.\n• Banques éthiques : Nef, Crédit Coopératif, Helios, Green-Got.\n• Le LDDS seul ne suffit pas : à classer dans « une partie ».",
           "showIf": { "questionId": "q-savings-amount", "operator": "neq", "value": "moins_10k" },
           "options": [
             { "label": "Non, dans une banque classique", "value": "classique", "description": "Les banques classiques financent souvent des projets fossiles" },

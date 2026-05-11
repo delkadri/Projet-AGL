@@ -150,6 +150,11 @@ export class AuthService {
         );
       }
 
+      const hasOnboardingBilan =
+        (await this.prisma.score_history.count({
+          where: { user_id: user.id },
+        })) > 0;
+
       return {
         id: user.id,
         email: user.email,
@@ -158,6 +163,7 @@ export class AuthService {
         feuilles: user.feuilles,
         niveau: level ? level.level_number : 1,
         onboardingCompleted: user.onboarding_completed,
+        hasOnboardingBilan,
         parcours: user.parcours,
       };
     } catch (error) {

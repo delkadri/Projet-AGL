@@ -145,6 +145,71 @@
         ]
       }
     },
+    "/quiz/national-footprint-reference/{quizId}": {
+      "get": {
+        "operationId": "QuizController_getNationalFootprintReference",
+        "parameters": [
+          {
+            "name": "quizId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "quiz-1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Référence nationale (empreinte moyenne par habitant et par catégorie)",
+        "tags": [
+          "quiz"
+        ]
+      }
+    },
+    "/quiz/onboarding-result": {
+      "get": {
+        "operationId": "QuizController_getOnboardingResult",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Dernier bilan carbone enregistré (recalcul à la volée)",
+        "tags": [
+          "quiz"
+        ]
+      }
+    },
+    "/quiz/score-history/{id}": {
+      "get": {
+        "operationId": "QuizController_getScoreHistoryDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identifiant score_history.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Détail d’un bilan carbone précis (par score_history.id)",
+        "tags": [
+          "quiz"
+        ]
+      }
+    },
     "/quiz/{id}": {
       "get": {
         "operationId": "QuizController_getQuiz",
@@ -164,7 +229,7 @@
           }
         },
         "tags": [
-          "Quiz"
+          "quiz"
         ]
       }
     },
@@ -197,7 +262,7 @@
           }
         },
         "tags": [
-          "Quiz"
+          "quiz"
         ]
       }
     },
@@ -225,12 +290,12 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "409": {
+            "description": "Un score est déjà enregistré pour ce mois civil (UTC) ; un seul bilan par mois et par année."
           }
         },
         "tags": [
-          "Quiz"
+          "quiz"
         ]
       }
     },
@@ -240,18 +305,11 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Quiz du mois ou null si le quiz mensuel a deja ete complete ce mois.",
+            "description": "Enveloppe avec quiz ou null si un bilan (score_history) existe déjà pour le mois civil UTC courant.",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/MonthlyQuizResponseDto"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/MonthlyQuizCurrentDto"
                 }
               }
             }
@@ -262,7 +320,54 @@
             "bearer": []
           }
         ],
-        "summary": "Retourne le quiz mensuel (questions des 4 pires categories) ou null si deja complete",
+        "summary": "Écran quiz du mois : sous-quiz éventuel + métadonnées (dernier score, prochaine ouverture, fraîcheur)",
+        "tags": [
+          "monthly-quiz"
+        ]
+      }
+    },
+    "/monthly-quiz/dev/simulate-next-month": {
+      "post": {
+        "operationId": "MonthlyQuizController_devSimulateNextMonth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "score_history du mois courant clonés en mois précédent puis supprimés ; lastMonthlyQuizAt recalculé.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "scoreRowsShifted": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "monthlyQuizzesUpdated": {
+                      "type": "number",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Aucune donnée du mois courant à simuler."
+          },
+          "403": {
+            "description": "Desactive en production (NODE_ENV=production)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[DEV uniquement] Simule le mois suivant : score_history et verrous du mois UTC courant sont déplacés vers le mois précédent.",
         "tags": [
           "monthly-quiz"
         ]
@@ -356,6 +461,40 @@
           }
         ],
         "summary": "Marquer l'onboarding comme complété",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/me/onboarding/reset-retest": {
+      "post": {
+        "description": "Remet onboarding_completed à false et supprime toutes les entrées score_history de l'utilisateur (y compris quiz mensuel) pour que le prochain onboarding redevienne le « premier » bilan.",
+        "operationId": "UserController_resetOnboardingForRetest",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "description": "Corps optionnel (ex. `{}`) pour compatibilité clients JSON.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "example": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Onboarding réinitialisé, historique des scores effacé."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[TEMP] Réinitialiser onboarding et effacer les scores enregistrés (refaire le quiz)",
         "tags": [
           "users"
         ]
@@ -1091,6 +1230,11 @@
             "type": "boolean",
             "example": true
           },
+          "hasOnboardingBilan": {
+            "type": "boolean",
+            "description": "Au moins un bilan carbone enregistré en base (ex. quiz d’onboarding soumis), indépendamment du choix de parcours.",
+            "example": true
+          },
           "parcours": {
             "nullable": true,
             "allOf": [
@@ -1105,7 +1249,8 @@
           "email",
           "feuilles",
           "niveau",
-          "onboardingCompleted"
+          "onboardingCompleted",
+          "hasOnboardingBilan"
         ]
       },
       "PreviewQuizScoreDto": {
@@ -1262,6 +1407,55 @@
           "categories"
         ]
       },
+      "MonthlyQuizCurrentDto": {
+        "type": "object",
+        "properties": {
+          "quiz": {
+            "nullable": true,
+            "description": "Sous-quiz du mois (4 catégories) si une mise à jour est possible ce mois-ci, sinon null.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonthlyQuizResponseDto"
+              }
+            ]
+          },
+          "lastScoreHistoryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date ISO du dernier score enregistré (score_history.created_at).",
+            "example": "2026-05-01T12:00:00.000Z"
+          },
+          "nextMonthlyQuizAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Prochaine ouverture prévue du quiz mensuel (users.next_monthly_quiz_at), renseignée après une soumission."
+          },
+          "dataFreshness": {
+            "type": "string",
+            "enum": [
+              "none",
+              "recent",
+              "stale"
+            ],
+            "description": "none = aucun historique, recent = dernier score ≤ 21 jours, stale = dernier score > 21 jours."
+          },
+          "baselineAnswers": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "Réponses du dernier enregistrement (score_history) pour préremplir l’UI et résoudre les showIf ; le POST submit n’envoie que les questions mises à jour."
+          }
+        },
+        "required": [
+          "quiz",
+          "lastScoreHistoryAt",
+          "nextMonthlyQuizAt",
+          "dataFreshness",
+          "baselineAnswers"
+        ]
+      },
       "SubmitMonthlyQuizDto": {
         "type": "object",
         "properties": {
@@ -1292,6 +1486,31 @@
           "parcoursId"
         ]
       },
+      "ScoreHistoryCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant de la catégorie",
+            "example": "transport"
+          },
+          "name": {
+            "type": "string",
+            "description": "Libellé de la catégorie",
+            "example": "Transport"
+          },
+          "totalKgCo2ePerYear": {
+            "type": "number",
+            "description": "Total kgCO2e/an pour cette catégorie",
+            "example": 2150.4
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "totalKgCo2ePerYear"
+        ]
+      },
       "ScoreHistoryResponseDto": {
         "type": "object",
         "properties": {
@@ -1310,6 +1529,14 @@
             "type": "string",
             "description": "Date de l'enregistrement",
             "example": "2026-03-16T18:30:00.000Z"
+          },
+          "categories_scores": {
+            "description": "Totaux par catégorie au moment de l’enregistrement (peut être null pour les anciennes entrées).",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScoreHistoryCategoryDto"
+            }
           }
         },
         "required": [

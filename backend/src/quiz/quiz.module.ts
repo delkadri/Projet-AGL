@@ -3,6 +3,7 @@ import { QuizController } from './quiz.controller';
 import { QuizSeederService } from './quiz.seeder.service';
 import { SupabaseModule } from '../supabase/supabase.module';
 import { QuizScoringService } from './quiz-scoring.service';
+import { NationalFootprintReferenceService } from './national-footprint-reference.service';
 import { AdemeBaseCarboneService } from './ademe-base-carbone.service';
 import { TransportScorer } from './scoring/scorers/transport.scorer';
 import { HousingScorer } from './scoring/scorers/housing.scorer';
@@ -23,6 +24,7 @@ import { ServicesScorer } from './scoring/scorers/services.scorer';
     ConsumptionScorer,
     DigitalScorer,
     ServicesScorer,
+    NationalFootprintReferenceService,
     QuizScoringService,
   ],
   exports: [QuizScoringService],

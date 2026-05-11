@@ -13,7 +13,6 @@ export type Parcours = {
   imageUrl?: string
   frequency?: {
     defis: string
-    quizz: string
   }
 }
 
