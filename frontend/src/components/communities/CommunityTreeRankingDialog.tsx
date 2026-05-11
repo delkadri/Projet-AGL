@@ -1,5 +1,6 @@
 import { Trees } from 'lucide-react'
 
+import { formatTimeUntilReset, useRankingNextReset } from '@/api/hooks/useRankingNextReset'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -31,6 +32,8 @@ export function CommunityTreeRankingDialog({
   communityName,
   entries,
 }: CommunityTreeRankingDialogProps) {
+  const { data: resetData } = useRankingNextReset()
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] gap-0 overflow-hidden border-[#c8e6c9] bg-[#f1f8e9] p-0 sm:max-w-md">
@@ -75,6 +78,11 @@ export function CommunityTreeRankingDialog({
           })}
         </ul>
         <div className="border-t border-[#c8e6c9] bg-white px-4 py-3">
+          {resetData && (
+            <p className="mb-2.5 text-center text-xs text-gray-400">
+              {formatTimeUntilReset(resetData.nextReset)}
+            </p>
+          )}
           <Button
             type="button"
             className="w-full bg-[#1b5e20] text-white hover:bg-[#2e7d32]"
