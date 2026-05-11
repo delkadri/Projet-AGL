@@ -216,6 +216,63 @@ export class ChallengeService {
     });
   }
 
+  async getGroupCurrentChallenge(groupId: string) {
+    const group = await this.prisma.groups.findUnique({
+      where: { id: groupId },
+    });
+    if (!group) throw new NotFoundException('Groupe non trouvé');
+
+    const { weekStart, weekEnd } = this.getCurrentWeekBounds();
+
+    const groupChallenge = await this.prisma.group_challenges.findFirst({
+      where: {
+        group_id: groupId,
+        week_start_at: { gte: weekStart },
+        week_end_at: { lte: weekEnd },
+      },
+      include: { challenge: true },
+    });
+
+    if (!groupChallenge) {
+      throw new NotFoundException('Aucun défi assigné pour cette semaine');
+    }
+
+    const [completedCount, totalMembers] = await Promise.all([
+      this.prisma.group_challenge_completions.count({
+        where: { group_challenge_id: groupChallenge.id },
+      }),
+      this.prisma.group_members.count({ where: { group_id: groupId } }),
+    ]);
+
+    return {
+      groupChallengeId: groupChallenge.id,
+      challenge: groupChallenge.challenge,
+      weekStartAt: groupChallenge.week_start_at,
+      weekEndAt: groupChallenge.week_end_at,
+      completedCount,
+      totalMembers,
+      progressRatio: totalMembers > 0 ? completedCount / totalMembers : 0,
+    };
+  }
+
+  async completeCurrentWeekChallenge(userId: string, groupId: string) {
+    const { weekStart, weekEnd } = this.getCurrentWeekBounds();
+
+    const groupChallenge = await this.prisma.group_challenges.findFirst({
+      where: {
+        group_id: groupId,
+        week_start_at: { gte: weekStart },
+        week_end_at: { lte: weekEnd },
+      },
+    });
+
+    if (!groupChallenge) {
+      throw new NotFoundException('Aucun défi assigné pour cette semaine');
+    }
+
+    return this.completeGroupChallenge(userId, groupChallenge.id);
+  }
+
   getNextRankingReset(): Date {
     const now = new Date();
     const year = now.getUTCFullYear();
