@@ -40,11 +40,11 @@ export class GroupController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Rechercher un groupe public par nom' })
-  @ApiQuery({ name: 'name', required: true, example: 'Warriors' })
+  @ApiOperation({ summary: 'Rechercher un groupe public par nom (vide = suggestions)' })
+  @ApiQuery({ name: 'name', required: false, example: 'Warriors' })
   @ApiResponse({ status: 200, description: 'Groupes correspondants' })
-  searchGroups(@Query('name') name: string) {
-    return this.groupService.searchGroups(name ?? '');
+  searchGroups(@CurrentUser() user: any, @Query('name') name?: string) {
+    return this.groupService.searchGroups(name ?? '', user.id);
   }
 
   @Post('join/:code')

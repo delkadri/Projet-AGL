@@ -43,7 +43,7 @@ export class ChatService {
       orderBy: { created_at: 'desc' },
       take: limit,
       include: {
-        user: { select: { id: true, first_name: true, last_name: true } },
+        user: { select: { id: true, first_name: true, last_name: true, email: true } },
       },
     });
 
@@ -65,7 +65,7 @@ export class ChatService {
         content: dto.content,
       },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true } },
+        user: { select: { id: true, first_name: true, last_name: true, email: true } },
       },
     });
 

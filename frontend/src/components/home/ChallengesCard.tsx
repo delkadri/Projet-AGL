@@ -1,16 +1,29 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Target } from 'lucide-react'
 
 import { ChallengeDetailContent } from '@/components/challenges/ChallengeDetailContent'
 import { ChallengeDetailDialog } from '@/components/challenges/ChallengeDetailDialog'
+import { LeafConfetti } from '@/components/home/LeafConfetti'
 import { Button } from '@/components/ui/button'
 import { HOME_DAILY_CHALLENGE } from '@/data/homeChallengeMock'
 
 export default function ChallengesCard() {
   const [detailOpen, setDetailOpen] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
+
+  const handleChallengeAccepted = useCallback(() => {
+    setDetailOpen(false)
+    setShowConfetti(true)
+  }, [])
+
+  const handleConfettiDone = useCallback(() => {
+    setShowConfetti(false)
+  }, [])
 
   return (
     <>
+      <LeafConfetti active={showConfetti} onDone={handleConfettiDone} />
+
       <div className="rounded-2xl bg-[#c8e6c9] p-4 shadow-md">
         <h3 className="mb-2 flex items-center gap-2 text-sm font-bold tracking-wide text-[#1b5e20] uppercase">
           <Target className="h-4 w-4" aria-hidden />
@@ -67,7 +80,7 @@ export default function ChallengesCard() {
             <Button
               type="button"
               className="flex-1 bg-[#2e7d32] text-white hover:bg-[#1b5e20]"
-              onClick={() => setDetailOpen(false)}
+              onClick={handleChallengeAccepted}
             >
               J&apos;ai relevé le défi
             </Button>

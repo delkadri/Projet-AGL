@@ -1,11 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
+import { useCallback, useEffect, useState } from 'react'
 
+import { GroupsService } from '@/api/client/services/GroupsService'
+import { getSupabaseClient } from '@/lib/supabase'
 import type { CommunityChatMessageDto } from '@/types/community'
 
-function chatSocketUrl(): string | undefined {
-  const raw = import.meta.env.VITE_COMMUNITY_CHAT_SOCKET_URL as string | undefined
-  return raw?.trim() || undefined
+function mapMessage(raw: any): CommunityChatMessageDto {
+  const displayName = raw.user
+    ? `${raw.user.first_name ?? ''} ${raw.user.last_name ?? ''}`.trim() ||
+      raw.user.email?.split('@')[0] ||
+      raw.user_id
+    : raw.user_id
+  return {
+    id: raw.id,
+    community_id: raw.group_id,
+    user_id: raw.user_id,
+    display_name: displayName,
+    text: raw.content,
+    created_at:
+      typeof raw.created_at === 'string'
+        ? raw.created_at
+        : new Date(raw.created_at).toISOString(),
+  }
 }
 
 export type UseCommunityChatOptions = {
@@ -17,79 +32,74 @@ export type UseCommunityChatOptions = {
 
 export function useCommunityChat({
   communityId,
-  userId,
-  displayName,
   enabled = true,
 }: UseCommunityChatOptions) {
   const [messages, setMessages] = useState<CommunityChatMessageDto[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [connectionError, setConnectionError] = useState<string | null>(null)
-  const socketRef = useRef<Socket | null>(null)
+
+  const supabase = getSupabaseClient()
+  const hasSupabaseConfig = supabase !== null
 
   useEffect(() => {
     if (!enabled || !communityId) return
 
-    const url = chatSocketUrl()
-    if (!url) {
+    if (!supabase) {
       setConnectionError(
-        'Serveur de chat non configuré. Définissez VITE_COMMUNITY_CHAT_SOCKET_URL et lancez npm run chat-mock.',
+        'Chat non configuré. Définissez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.',
       )
       setIsConnected(false)
       return
     }
 
     setConnectionError(null)
-    const socket = io(url, {
-      auth: { communityId },
-      transports: ['websocket', 'polling'],
-      reconnectionAttempts: 8,
-      reconnectionDelay: 800,
-    })
-    socketRef.current = socket
 
-    socket.on('connect', () => {
-      setIsConnected(true)
-      setConnectionError(null)
-    })
-
-    socket.on('disconnect', () => {
-      setIsConnected(false)
-    })
-
-    socket.on('connect_error', (err: Error) => {
-      setConnectionError(err.message || 'Connexion impossible')
-      setIsConnected(false)
-    })
-
-    socket.on('chat:history', (hist: CommunityChatMessageDto[]) => {
-      if (Array.isArray(hist)) setMessages(hist)
-    })
-
-    socket.on('chat:message', (msg: CommunityChatMessageDto) => {
-      if (!msg?.id) return
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev
-        return [...prev, msg]
+    GroupsService.chatControllerListMessages({ id: communityId })
+      .then((res: any) => {
+        const msgs: CommunityChatMessageDto[] = ([...(res.messages ?? [])])
+          .reverse()
+          .map(mapMessage)
+        setMessages(msgs)
       })
-    })
+      .catch(() => {})
+
+    const channel = supabase
+      .channel(`group:${communityId}`)
+      .on('broadcast', { event: 'new_message' }, ({ payload }: { payload: any }) => {
+        if (!payload?.id) return
+        const msg = mapMessage(payload)
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev
+          return [...prev, msg]
+        })
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setIsConnected(true)
+          setConnectionError(null)
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setIsConnected(false)
+          setConnectionError('Connexion au chat impossible')
+        } else if (status === 'CLOSED') {
+          setIsConnected(false)
+        }
+      })
 
     return () => {
-      socket.disconnect()
-      socketRef.current = null
+      channel.unsubscribe()
     }
-  }, [communityId, enabled])
+  }, [communityId, enabled, supabase])
 
   const sendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
       const trimmed = text.trim()
-      if (!trimmed || !socketRef.current?.connected) return
-      socketRef.current.emit('chat:message', {
-        userId,
-        displayName,
-        text: trimmed,
+      if (!trimmed) return
+      await GroupsService.chatControllerSendMessage({
+        id: communityId,
+        requestBody: { content: trimmed },
       })
     },
-    [userId, displayName],
+    [communityId],
   )
 
   return {
@@ -97,6 +107,6 @@ export function useCommunityChat({
     isConnected,
     connectionError,
     sendMessage,
-    hasSocketConfig: Boolean(chatSocketUrl()),
+    hasSocketConfig: hasSupabaseConfig,
   }
 }

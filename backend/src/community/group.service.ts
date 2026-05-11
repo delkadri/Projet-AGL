@@ -6,13 +6,17 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from 'nestjs-prisma';
+import { ChallengeService } from './challenge.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InterCommunityLeaderboardEntryDto } from './dto/inter-community-leaderboard.dto';
 import { UserGroupMembershipDto } from './dto/user-group-membership.dto';
 
 @Injectable()
 export class GroupService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly challengeService: ChallengeService,
+  ) {}
 
   private async getUserLevel(userId: string): Promise<number> {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
@@ -53,6 +57,8 @@ export class GroupService {
     const membership = await this.prisma.group_members.create({
       data: { group_id: group.id, user_id: userId },
     });
+
+    await this.challengeService.assignWeeklyChallengeToGroup(group.id);
 
     return {
       community: {
@@ -144,20 +150,34 @@ export class GroupService {
     return { groupId, isActive: memberCount >= 3, memberCount };
   }
 
-  async searchGroups(name: string) {
-    return this.prisma.groups.findMany({
+  async searchGroups(name: string, userId: string) {
+    const isFeatured = name.trim() === '';
+    const groups = await this.prisma.groups.findMany({
       where: {
         is_public: true,
-        name: { contains: name, mode: 'insensitive' },
+        ...(isFeatured ? {} : { name: { contains: name, mode: 'insensitive' } }),
       },
       select: {
         id: true,
         name: true,
         description: true,
-        win_streak: true,
         _count: { select: { members: true } },
+        members: {
+          where: { user_id: userId },
+          select: { user_id: true },
+        },
       },
+      ...(isFeatured ? { take: 5 } : {}),
     });
+
+    return groups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      description: g.description ?? '',
+      visibility: 'public' as const,
+      member_count: g._count.members,
+      already_member: g.members.length > 0,
+    }));
   }
 
   async joinGroupById(userId: string, groupId: string) {

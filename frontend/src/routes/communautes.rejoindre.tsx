@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import { useCommunitySearch } from '@/api/hooks/useCommunitySearch'
+import { useFeaturedCommunities } from '@/api/hooks/useFeaturedCommunities'
 import {
   JOIN_ERROR_INVALID_CODE,
   useJoinCommunity,
@@ -27,10 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  getMockFeaturedCommunities,
-  type CommunitySearchHitDto,
-} from '@/data/mockCommunityDirectory'
+import type { CommunitySearchHitDto } from '@/data/mockCommunityDirectory'
 
 export const Route = createFileRoute('/communautes/rejoindre')({
   component: RejoindreCommunautePage,
@@ -52,7 +50,11 @@ function RejoindreCommunautePage() {
     return s
   }, [memberships])
 
-  const featured = useMemo(() => getMockFeaturedCommunities(memberIds), [memberIds])
+  const { data: featuredData } = useFeaturedCommunities()
+  const featured = useMemo(
+    () => (featuredData ?? []).filter((c) => !memberIds.has(c.id)).slice(0, 3),
+    [featuredData, memberIds],
+  )
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQuery(query), 360)
@@ -232,9 +234,6 @@ function RejoindreCommunautePage() {
           </section>
         )}
 
-        <p className="mt-6 text-center text-[11px] leading-snug text-gray-500">
-          Données de démonstration — les appels réseau seront branchés sur l’API plus tard.
-        </p>
       </div>
 
       <Dialog
@@ -258,10 +257,6 @@ function RejoindreCommunautePage() {
                 <p>
                   <span className="font-medium text-gray-800">{privateTarget?.name}</span> nécessite
                   un code d’invitation pour rejoindre le groupe.
-                </p>
-                <p className="mt-2 text-xs text-gray-600">
-                  Démo : codes acceptés <code className="rounded bg-muted px-1">ECOBAT24</code> et{' '}
-                  <code className="rounded bg-muted px-1">ALUMNI26</code>.
                 </p>
               </div>
             </DialogDescription>

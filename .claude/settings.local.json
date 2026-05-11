@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm install *)",
+      "Bash(cd /c/Users/flori/Desktop/\"temp git folder\"/Projet-AGL && find frontend/src/routes -type f -name \"*community*\" -o -name \"*group*\" 2>/dev/null | head -20)",
+      "Bash(cd /c/Users/flori/Desktop/\"temp git folder\"/Projet-AGL && find frontend/src/components -type f \\\\\\( -name \"*challenge*\" -o -name \"*défi*\" -o -name \"*banner*\" \\\\\\) 2>/dev/null | head -20)",
+      "Bash(cd /c/Users/flori/Desktop/\"temp git folder\"/Projet-AGL && grep -r \"défi\\\\s*communautaire\\\\|community\\\\s*challenge\" frontend/src --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.jsx\" --include=\"*.js\" 2>/dev/null | head -20)"
     ]
   }
 }
