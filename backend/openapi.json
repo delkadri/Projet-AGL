@@ -338,6 +338,474 @@
           "parcours"
         ]
       }
+    },
+    "/communities/ranking/next-reset": {
+      "get": {
+        "operationId": "CommunityController_getNextRankingReset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "nextReset": "2026-07-01T00:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Timestamp de la prochaine remise à zéro des classements",
+        "tags": [
+          "communities"
+        ]
+      }
+    },
+    "/groups/me": {
+      "get": {
+        "operationId": "GroupController_getMyGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Groupes retournés"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liste des groupes de l'utilisateur connecté",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/search": {
+      "get": {
+        "operationId": "GroupController_searchGroups",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "Warriors",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Groupes correspondants"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rechercher un groupe public par nom",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/join/{code}": {
+      "post": {
+        "operationId": "GroupController_joinGroupByCode",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Groupe rejoint"
+          },
+          "404": {
+            "description": "Code invalide"
+          },
+          "409": {
+            "description": "Déjà membre"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rejoindre un groupe privé via code d'invitation",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups": {
+      "post": {
+        "operationId": "GroupController_createGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Groupe créé"
+          },
+          "403": {
+            "description": "Niveau insuffisant"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Créer un groupe (niveau ≥ 3 requis)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}": {
+      "get": {
+        "operationId": "GroupController_getGroupDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détails du groupe"
+          },
+          "404": {
+            "description": "Groupe non trouvé"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Détails du groupe (membres, win streak, défi en cours)",
+        "tags": [
+          "groups"
+        ]
+      },
+      "delete": {
+        "operationId": "GroupController_deleteGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Groupe supprimé"
+          },
+          "403": {
+            "description": "Accès refusé"
+          },
+          "404": {
+            "description": "Groupe non trouvé"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dissoudre le groupe (admin uniquement)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}/join": {
+      "post": {
+        "operationId": "GroupController_joinGroupById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Groupe rejoint"
+          },
+          "403": {
+            "description": "Groupe privé"
+          },
+          "404": {
+            "description": "Groupe non trouvé"
+          },
+          "409": {
+            "description": "Déjà membre"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rejoindre un groupe public",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}/members/{userId}": {
+      "delete": {
+        "operationId": "GroupController_removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre exclu"
+          },
+          "403": {
+            "description": "Accès refusé"
+          },
+          "404": {
+            "description": "Groupe non trouvé"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exclure un membre (admin uniquement)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}/challenge": {
+      "get": {
+        "operationId": "GroupController_getGroupChallenge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "groupChallengeId": "uuid",
+                    "challenge": {
+                      "id": "uuid",
+                      "title": "...",
+                      "description": "..."
+                    },
+                    "weekStartAt": "2026-05-11T00:00:00.000Z",
+                    "weekEndAt": "2026-05-17T23:59:59.999Z",
+                    "completedCount": 3,
+                    "totalMembers": 5,
+                    "progressRatio": 0.6
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun défi cette semaine"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Défi de la semaine + barre de progression",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}/challenge/complete": {
+      "post": {
+        "operationId": "GroupController_completeChallenge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Défi complété"
+          },
+          "404": {
+            "description": "Aucun défi cette semaine"
+          },
+          "409": {
+            "description": "Défi déjà complété"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marquer le défi hebdomadaire comme complété",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{id}/messages": {
+      "get": {
+        "operationId": "ChatController_listMessages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "before",
+            "required": false,
+            "in": "query",
+            "description": "Curseur de pagination : ISO date — renvoie les messages strictement antérieurs.",
+            "schema": {
+              "example": "2026-05-11T12:34:56.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages retournés"
+          },
+          "403": {
+            "description": "Non membre du groupe"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Historique paginé des messages du groupe (curseur par date)",
+        "tags": [
+          "groups"
+        ]
+      },
+      "post": {
+        "operationId": "ChatController_sendMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message envoyé"
+          },
+          "403": {
+            "description": "Non membre du groupe"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Envoyer un message (persisté en base + broadcast Supabase Realtime)",
+        "tags": [
+          "groups"
+        ]
+      }
     }
   },
   "info": {
@@ -635,6 +1103,40 @@
           "id",
           "score",
           "created_at"
+        ]
+      },
+      "CreateGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Les Éco-Warriors"
+          },
+          "description": {
+            "type": "string",
+            "example": "Groupe dédié aux défis écologiques"
+          },
+          "is_public": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "name",
+          "is_public"
+        ]
+      },
+      "SendMessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "Salut tout le monde !",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "content"
         ]
       }
     }

@@ -7,7 +7,10 @@ export class CreateGroupDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'Groupe dédié aux défis écologiques', required: false })
+  @ApiProperty({
+    example: 'Groupe dédié aux défis écologiques',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;

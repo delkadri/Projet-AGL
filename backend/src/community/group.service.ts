@@ -35,9 +35,7 @@ export class GroupService {
   async createGroup(userId: string, dto: CreateGroupDto) {
     const niveau = await this.getUserLevel(userId);
     if (niveau < 3) {
-      throw new ForbiddenException(
-        'Niveau 3 requis pour créer un groupe',
-      );
+      throw new ForbiddenException('Niveau 3 requis pour créer un groupe');
     }
 
     const group = await this.prisma.groups.create({
@@ -154,7 +152,7 @@ export class GroupService {
     if (!group) throw new NotFoundException('Groupe non trouvé');
     if (!group.is_public) {
       throw new ForbiddenException(
-        'Ce groupe est privé, utilisez un code d\'invitation',
+        "Ce groupe est privé, utilisez un code d'invitation",
       );
     }
 

@@ -267,7 +267,11 @@ describe('GroupService', () => {
 
       const result = await service.checkGroupActive('g1');
 
-      expect(result).toEqual({ groupId: 'g1', isActive: false, memberCount: 2 });
+      expect(result).toEqual({
+        groupId: 'g1',
+        isActive: false,
+        memberCount: 2,
+      });
     });
 
     it('returns isActive: true when member count >= 3', async () => {
