@@ -47,7 +47,7 @@ export class GroupController {
   }
 
   @Post('join/:code')
-  @ApiOperation({ summary: 'Rejoindre un groupe privé via code d\'invitation' })
+  @ApiOperation({ summary: "Rejoindre un groupe privé via code d'invitation" })
   @ApiResponse({ status: 201, description: 'Groupe rejoint' })
   @ApiResponse({ status: 404, description: 'Code invalide' })
   @ApiResponse({ status: 409, description: 'Déjà membre' })
@@ -64,7 +64,9 @@ export class GroupController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Détails du groupe (membres, win streak, défi en cours)' })
+  @ApiOperation({
+    summary: 'Détails du groupe (membres, win streak, défi en cours)',
+  })
   @ApiResponse({ status: 200, description: 'Détails du groupe' })
   @ApiResponse({ status: 404, description: 'Groupe non trouvé' })
   getGroupDetails(@Param('id') id: string) {

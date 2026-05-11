@@ -29,6 +29,7 @@ model users {
   admin_of_groups             groups[]
   group_memberships           group_members[]
   group_challenge_completions group_challenge_completions[]
+  group_messages              group_messages[]
   created_at                  DateTime                  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at                  DateTime                  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 }
@@ -81,6 +82,7 @@ model groups {
   last_streak_updated_at DateTime?     @db.Timestamptz(6)
   members                group_members[]
   group_challenges       group_challenges[]
+  messages               group_messages[]
   created_at             DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at             DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 }
@@ -126,4 +128,16 @@ model group_challenge_completions {
   completed_at       DateTime         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 
   @@unique([group_challenge_id, user_id])
+}
+
+model group_messages {
+  id         String   @id @default(uuid())
+  group_id   String
+  group      groups   @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  content    String
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@index([group_id, created_at])
 }
