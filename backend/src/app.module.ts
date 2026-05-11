@@ -11,6 +11,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { SeedModule } from './seed/seed.module';
 import { UserModule } from './user/user.module';
 import { ParcoursModule } from './parcours/parcours.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ParcoursModule } from './parcours/parcours.module';
     SeedModule,
     UserModule,
     ParcoursModule,
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
