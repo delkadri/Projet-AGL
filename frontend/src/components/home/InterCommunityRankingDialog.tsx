@@ -1,5 +1,6 @@
 import { Flame, Leaf, Loader2, Trophy } from 'lucide-react'
 
+import { formatTimeUntilReset, useRankingNextReset } from '@/api/hooks/useRankingNextReset'
 import { useInterCommunityLeaderboard } from '@/api/hooks/useInterCommunityLeaderboard'
 import { useUserCommunities } from '@/api/hooks/useUserCommunities'
 import { Button } from '@/components/ui/button'
@@ -152,6 +153,7 @@ type InterCommunityRankingDialogProps = {
 export function InterCommunityRankingDialog({ open, onOpenChange }: InterCommunityRankingDialogProps) {
   const { data: leaderboard, isPending, isError } = useInterCommunityLeaderboard()
   const { data: memberships } = useUserCommunities()
+  const { data: resetData } = useRankingNextReset()
 
   const memberIds = new Set(memberships?.map((m) => m.community.id) ?? [])
 
@@ -196,6 +198,11 @@ export function InterCommunityRankingDialog({ open, onOpenChange }: InterCommuni
         </div>
 
         <div className="border-t border-[#1b5e20]/10 bg-white/60 px-4 py-3">
+          {resetData && (
+            <p className="mb-2.5 text-center text-xs text-gray-400">
+              {formatTimeUntilReset(resetData.nextReset)}
+            </p>
+          )}
           <Button
             type="button"
             variant="outline"
