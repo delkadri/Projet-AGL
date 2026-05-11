@@ -87,11 +87,12 @@ export class MonthlyQuizController {
     const latestScore = await this.prisma.score_history.findFirst({
       where: { user_id: user.id },
       orderBy: { created_at: 'desc' },
-      select: { json_answers: true },
+      select: { categories_scores: true, json_answers: true },
     });
 
     const categories = await this.pickMonthlyCategories(
       quiz,
+      latestScore?.categories_scores as Array<{ id: string; name: string; totalKgCo2ePerYear: number }> | null,
       latestScore?.json_answers as Record<string, unknown> | null,
     );
 
@@ -151,22 +152,18 @@ export class MonthlyQuizController {
 
   private async pickMonthlyCategories(
     quiz: RawQuizPayload,
+    categoriesScores: Array<{ id: string; name: string; totalKgCo2ePerYear: number }> | null,
     answers: Record<string, unknown> | null,
   ): Promise<RawQuizCategory[]> {
-    if (!answers || typeof answers !== 'object') {
+    const scoredCategories = categoriesScores ?? await this.resolveCategoryScores(quiz, answers);
+
+    if (!scoredCategories) {
       return quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
     }
 
-    const preview = await this.quizScoringService.previewScore(
-      quiz.id,
-      answers,
-    );
-
-    const worstIds = preview.categories
+    const worstIds = scoredCategories
       .slice()
-      .sort(
-        (a, b) => (b.totalKgCo2ePerYear ?? 0) - (a.totalKgCo2ePerYear ?? 0),
-      )
+      .sort((a, b) => (b.totalKgCo2ePerYear ?? 0) - (a.totalKgCo2ePerYear ?? 0))
       .slice(0, MONTHLY_CATEGORY_COUNT)
       .map((category) => category.id);
 
@@ -177,11 +174,18 @@ export class MonthlyQuizController {
       .map((categoryId) => categoryById.get(categoryId))
       .filter((category): category is RawQuizCategory => Boolean(category));
 
-    if (selected.length > 0) {
-      return selected;
-    }
+    return selected.length > 0 ? selected : quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
+  }
 
-    return quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
+  private async resolveCategoryScores(
+    quiz: RawQuizPayload,
+    answers: Record<string, unknown> | null,
+  ): Promise<Array<{ id: string; name: string; totalKgCo2ePerYear: number }> | null> {
+    if (!answers || typeof answers !== 'object') {
+      return null;
+    }
+    const preview = await this.quizScoringService.previewScore(quiz.id, answers);
+    return preview.categories;
   }
 
   private async getQuizPayload(quizId: string): Promise<RawQuizPayload> {

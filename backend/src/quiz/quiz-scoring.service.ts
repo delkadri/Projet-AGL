@@ -109,12 +109,21 @@ export class QuizScoringService {
     const categories = this.buildCategoriesBilan(quiz, breakdown);
 
     if (userId) {
+      const categoriesScores = categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        totalKgCo2ePerYear: this.round2(
+          cat.items.reduce((acc, item) => acc + item.valueKgCo2ePerYear, 0),
+        ),
+      }));
+
       await this.prisma.$transaction([
         this.prisma.score_history.create({
           data: {
             user_id: userId,
             score: this.round2(total),
             json_answers: answers as any,
+            categories_scores: categoriesScores,
           }
         }),
         this.prisma.users.update({

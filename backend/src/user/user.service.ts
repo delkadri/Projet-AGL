@@ -3,48 +3,49 @@ import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class UserService {
-    constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-    async updateParcours(userId: string, parcoursId: string) {
-        const parcours = await this.prisma.parcours.findUnique({
-            where: { id: parcoursId },
-        });
+  async updateParcours(userId: string, parcoursId: string) {
+    const parcours = await this.prisma.parcours.findUnique({
+      where: { id: parcoursId },
+    });
 
-        if (!parcours) {
-            throw new NotFoundException('Parcours non trouvé');
-        }
-
-        return this.prisma.users.update({
-            where: { id: userId },
-            data: { parcours_id: parcoursId },
-        });
+    if (!parcours) {
+      throw new NotFoundException('Parcours non trouvé');
     }
 
-    async addFeuilles(userId: string, feuillesToAdd: number) {
-        return this.prisma.users.update({
-            where: { id: userId },
-            data: {
-                feuilles: { increment: feuillesToAdd },
-            },
-        });
-    }
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: { parcours_id: parcoursId },
+    });
+  }
 
-    async completeOnboarding(userId: string) {
-        return this.prisma.users.update({
-            where: { id: userId },
-            data: { onboarding_completed: true },
-        });
-    }
+  async addFeuilles(userId: string, feuillesToAdd: number) {
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        feuilles: { increment: feuillesToAdd },
+      },
+    });
+  }
 
-    async getScoreHistory(userId: string) {
-        return this.prisma.score_history.findMany({
-            where: { user_id: userId },
-            orderBy: { created_at: 'desc' },
-            select: {
-                id: true,
-                score: true,
-                created_at: true,
-            }
-        });
-    }
+  async completeOnboarding(userId: string) {
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: { onboarding_completed: true },
+    });
+  }
+
+  async getScoreHistory(userId: string) {
+    return this.prisma.score_history.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+      select: {
+        id: true,
+        score: true,
+        categories_scores: true,
+        created_at: true,
+      },
+    });
+  }
 }
