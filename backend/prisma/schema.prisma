@@ -24,9 +24,10 @@ model users {
   feuilles             Int             @default(0)
   onboarding_completed Boolean         @default(false)
   parcours_id          String?
-  parcours             parcours?       @relation(fields: [parcours_id], references: [id])
+  parcours             parcours?         @relation(fields: [parcours_id], references: [id])
   score_history        score_history[]
-  created_at           DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user_challenges      user_challenges[]
+  created_at           DateTime          @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at           DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 }
 
@@ -58,4 +59,26 @@ model levels {
   required_feuilles Int      @unique
   created_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model challenges {
+  id                  String             @id @default(uuid())
+  title               String
+  description         String
+  reward_feuilles     Int                @default(10)
+  co2_saving_estimate Float              @default(5.0)
+  created_at          DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at          DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user_challenges     user_challenges[]
+}
+
+model user_challenges {
+  id             String     @id @default(uuid())
+  user_id        String
+  user           users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  challenge_id   String
+  challenge      challenges @relation(fields: [challenge_id], references: [id], onDelete: Cascade)
+  completed_at   DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  
+  @@unique([user_id, challenge_id])
 }
