@@ -19,7 +19,7 @@ function CommunautesPage() {
     <div className="min-h-[calc(100vh-70px)] w-full bg-[#f1f8e9] px-4 pb-24 pt-4">
       <div className="mx-auto max-w-md">
         <header className="mb-5">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Communautés</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Groupes</h1>
         </header>
 
         <Button
@@ -29,7 +29,7 @@ function CommunautesPage() {
           onClick={() => setRankingOpen(true)}
         >
           <BarChart3 className="size-4" />
-          Classement inter-communautés
+          Classement inter-groupes
         </Button>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
@@ -41,7 +41,7 @@ function CommunautesPage() {
           >
             <Link to="/communautes/rejoindre">
               <UserPlus className="size-4" />
-              Rejoindre une communauté
+              Rejoindre un groupe
             </Link>
           </Button>
           <Button
@@ -51,14 +51,14 @@ function CommunautesPage() {
           >
             <Link to="/communautes/creation">
               <Plus className="size-4" />
-              Créer une communauté
+              Créer un groupe
             </Link>
           </Button>
         </div>
 
         <section aria-labelledby="communities-list-heading">
           <h2 id="communities-list-heading" className="sr-only">
-            Mes communautés
+            Mes groupes
           </h2>
 
           {isPending && <CommunitiesListSkeleton />}
@@ -72,7 +72,7 @@ function CommunautesPage() {
           {!isPending && !isError && memberships && memberships.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[#1b5e20]/30 bg-white/80 px-4 py-8 text-center">
               <Users className="mx-auto mb-2 size-10 text-[#1b5e20]/60" aria-hidden />
-              <p className="text-sm font-medium text-gray-800">Aucune communauté pour l’instant</p>
+              <p className="text-sm font-medium text-gray-800">Aucun groupe pour l’instant</p>
               <p className="mt-1 text-xs text-gray-600">
                 Rejoignez ou créez un groupe pour commencer.
               </p>

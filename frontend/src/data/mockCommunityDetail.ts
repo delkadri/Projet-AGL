@@ -32,7 +32,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 28,
       members_total_for_challenge: 42,
       current_user_completed: false,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 3,
@@ -72,7 +72,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 112,
       members_total_for_challenge: 128,
       current_user_completed: true,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 2,
@@ -148,7 +148,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 11,
       members_total_for_challenge: 24,
       current_user_completed: false,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 2,
@@ -183,7 +183,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 156,
       members_total_for_challenge: 201,
       current_user_completed: false,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 0,
@@ -219,7 +219,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 40,
       members_total_for_challenge: 55,
       current_user_completed: false,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 1,
@@ -254,7 +254,7 @@ const DETAIL_BY_ID: Record<string, CommunityDetailDto> = {
       members_completed: 6,
       members_total_for_challenge: 18,
       current_user_completed: false,
-      progress_caption: 'Membres ayant relevé le défi dans la communauté',
+      progress_caption: 'Membres ayant relevé le défi dans le groupe',
     },
     win_streak: {
       count: 5,

@@ -128,16 +128,16 @@ function RejoindreCommunautePage() {
         >
           <Link to="/communautes">
             <ArrowLeft className="size-4" />
-            Retour aux communautés
+            Retour aux groupes
           </Link>
         </Button>
 
         <header className="mb-5">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Rejoindre une communauté
+            Rejoindre un groupe
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-            Recherchez un groupe par nom ou thème, puis rejoignez-le. Les communautés privées
+            Recherchez un groupe par nom ou thème, puis rejoignez-le. Les groupes privés
             demandent un code d’invitation.
           </p>
         </header>
@@ -172,7 +172,7 @@ function RejoindreCommunautePage() {
               Idées pour commencer
             </h2>
             <p className="mb-3 text-xs text-gray-600">
-              Communautés publiques que vous n’avez pas encore rejointes — ou lancez une recherche
+              Groupes publics que vous n’avez pas encore rejoints — ou lancez une recherche
               ci-dessus.
             </p>
             {featured.length === 0 ? (
@@ -250,7 +250,7 @@ function RejoindreCommunautePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 pr-8">
               <Lock className="size-5 shrink-0 text-[#1b5e20]" aria-hidden />
-              Communauté privée
+              Groupe privé
             </DialogTitle>
             <DialogDescription asChild>
               <div>
@@ -398,7 +398,7 @@ function SearchResultCard({
             className="bg-[#1b5e20] text-white hover:bg-[#2e7d32]"
             onClick={onOpenMember}
           >
-            Ouvrir la communauté
+            Ouvrir le groupe
           </Button>
         ) : community.visibility === 'private' ? (
           <Button

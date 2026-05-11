@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Beef, Bike, Leaf, Recycle, Sparkles, type LucideIcon } from 'lucide-react'
 
 import { ChallengeDetailDialog } from '@/components/challenges/ChallengeDetailDialog'
+import { LeafConfetti } from '@/components/home/LeafConfetti'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ChallengeIconKey, CommunityActiveDefiDto } from '@/types/community'
@@ -43,6 +44,15 @@ export function CommunityChallengeBanner({
   className,
 }: CommunityChallengeBannerProps) {
   const [detailOpen, setDetailOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
+
+  const handleConfirm = useCallback(() => {
+    setConfirmOpen(false)
+    onMarkComplete()
+    setShowConfetti(true)
+  }, [onMarkComplete])
+
   const total = Math.max(1, defi.members_total_for_challenge)
   const pct = Math.min(100, Math.round((membersCompleted / total) * 100))
   const { Icon: DefiIcon, bg } = DEFI_ICONS[defi.iconKey]
@@ -50,6 +60,7 @@ export function CommunityChallengeBanner({
 
   return (
     <>
+      <LeafConfetti active={showConfetti} onDone={() => setShowConfetti(false)} />
       <section
         className={cn(
           'relative overflow-hidden rounded-xl border-2 border-[#43a047] bg-linear-to-br from-[#e8f5e9] via-[#c8e6c9]/80 to-[#a5d6a7]/90',
@@ -200,7 +211,7 @@ export function CommunityChallengeBanner({
             disabled={currentUserCompleted}
             onClick={(e) => {
               e.stopPropagation()
-              onMarkComplete()
+              setConfirmOpen(true)
             }}
           >
             {currentUserCompleted ? 'Défi relevé ✓' : "J'ai relevé le défi"}
@@ -221,6 +232,32 @@ export function CommunityChallengeBanner({
           >
             Fermer
           </Button>
+        }
+      />
+
+      <ChallengeDetailDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        challenge={defi}
+        dialogTitle="Confirmer le défi"
+        footer={
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-[#2e7d32] text-[#1b5e20]"
+              onClick={() => setConfirmOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              className="flex-1 bg-[#2e7d32] text-white hover:bg-[#1b5e20]"
+              onClick={handleConfirm}
+            >
+              J&apos;ai relevé le défi
+            </Button>
+          </div>
         }
       />
     </>

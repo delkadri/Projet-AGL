@@ -124,7 +124,7 @@ export async function mockCreateCommunity(
 }
 
 /**
- * Classement inter-communautés (mock). Ordre = rang affiché (1 = meilleure combinaison produit :
+ * Classement inter-groupes (mock). Ordre = rang affiché (1 = meilleure combinaison produit :
  * empreinte moyenne la plus basse, puis série la plus longue en cas d’égalité).
  */
 export const MOCK_INTER_COMMUNITY_LEADERBOARD: InterCommunityLeaderboardEntryDto[] = [

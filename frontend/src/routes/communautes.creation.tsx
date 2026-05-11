@@ -30,7 +30,7 @@ function CreationGroupePage() {
     if (user.niveau >= MIN_LEVEL_CREATE_COMMUNITY) return
     if (!notifiedRedirectRef.current) {
       notifiedRedirectRef.current = true
-      toast.error('Vous devez être niveau 3 pour créer une communauté.', {
+      toast.error('Vous devez être niveau 3 pour créer un groupe.', {
         id: 'communaute-creation-niveau',
       })
       void navigate({ to: '/communautes', replace: true })

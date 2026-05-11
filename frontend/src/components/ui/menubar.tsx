@@ -10,7 +10,7 @@ const Menubar = React.forwardRef<
   <MenubarPrimitive.Root
     ref={ref}
     className={cn(
-      "flex h-16 w-full items-center justify-around bg-[#1b5e20] text-white shadow-[0_-2px_4px_rgba(0,0,0,0.15)]",
+      "flex h-16 w-full items-stretch justify-around bg-[#1b5e20] text-white shadow-[0_-2px_4px_rgba(0,0,0,0.15)]",
       className,
     )}
     {...props}
@@ -29,8 +29,8 @@ const MenubarTrigger = React.forwardRef<
   <MenubarPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex flex-1 flex-col items-center justify-center gap-0.5 px-3 py-2 text-xs font-medium outline-none transition-colors",
-      "data-[state=open]:bg-[#2e7d32] data-[data-active=true]:bg-[#2e7d32] hover:bg-[#2e7d32]/70",
+      "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-3 py-2 text-xs font-medium outline-none transition-colors opacity-60",
+      "data-[state=open]:bg-[#2e7d32] data-[active=true]:opacity-100 data-[active=true]:bg-[#2e7d32] hover:opacity-80 hover:bg-[#2e7d32]/70",
       className,
     )}
     {...props}

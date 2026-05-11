@@ -4,14 +4,13 @@ import { FileText, PlusCircle, Leaf, BarChart3, Users } from 'lucide-react'
 import { useUserCommunities } from '@/api/hooks/useUserCommunities'
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar'
 
-// TODO: Créer les routes /actualites, /objectifs quand les pages seront prêtes
 const navItems = [
-  { to: '/' as const, label: 'Actualités', icon: FileText }, // placeholder
+  { to: '/actualites' as const, label: 'Actualités', icon: FileText },
   { to: '/donnees' as const, label: 'Données', icon: PlusCircle },
   { to: '/' as const, label: 'Accueil', icon: Leaf },
-  { to: '/' as const, label: 'Objectifs', icon: BarChart3 }, // placeholder
-  { to: '/communautes' as const, label: 'Communautés', icon: Users },
-] as const
+  { to: '/objectifs' as const, label: 'Objectifs', icon: BarChart3 },
+  { to: '/communautes' as const, label: 'Groupes', icon: Users },
+]
 
 export default function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -26,22 +25,25 @@ export default function BottomNav() {
           const isActive =
             label === 'Accueil'
               ? pathname === '/'
-              : label === 'Communautés'
+              : label === 'Groupes'
                 ? pathname === '/communautes' || pathname.startsWith('/communautes/')
                 : pathname === to
 
           const showCommunautesDefiBadge =
-            label === 'Communautés' && communautesDefiBadgeCount > 0
+            label === 'Groupes' && communautesDefiBadgeCount > 0
 
           return (
             <MenubarMenu key={label}>
               <MenubarTrigger data-active={isActive}>
+                {isActive && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-white" />
+                )}
                 <Link
                   to={to}
                   className="flex flex-col items-center gap-0.5"
                   aria-label={
                     showCommunautesDefiBadge
-                      ? `Communautés, ${communautesDefiBadgeCount} communauté${communautesDefiBadgeCount > 1 ? 's' : ''} avec un défi à faire`
+                      ? `Groupes, ${communautesDefiBadgeCount} groupe${communautesDefiBadgeCount > 1 ? 's' : ''} avec un défi à faire`
                       : undefined
                   }
                 >

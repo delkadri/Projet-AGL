@@ -42,7 +42,7 @@ export const MOCK_COMMUNITY_DIRECTORY: CommunityDirectoryEntryDto[] = [
     slug: 'eco-innov',
     name: 'Éco-innov Bâtiment A',
     description:
-      'Communauté restreinte : équipe R&D et partenaires du bâtiment A (code fourni par l’admin).',
+      ‘Groupe restreint : équipe R&D et partenaires du bâtiment A (code fourni par l’admin).’,
     member_count: 24,
     created_at: '2025-10-10T09:00:00.000Z',
     updated_at: '2026-03-15T11:00:00.000Z',
@@ -116,7 +116,7 @@ export function getMockDirectoryEntry(
   return MOCK_COMMUNITY_DIRECTORY.find((c) => c.id === communityId)
 }
 
-/** Suggestions lorsque la recherche est vide : communautés publiques non rejointes. */
+/** Suggestions lorsque la recherche est vide : groupes publics non rejoints. */
 export function getMockFeaturedCommunities(
   memberIds: ReadonlySet<string>,
   limit = 3,

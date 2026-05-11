@@ -142,7 +142,7 @@ export function CommunityChat({
       <div className="min-h-0 flex-1 basis-0 space-y-2 overflow-y-auto overscroll-contain px-3 py-3">
         {messages.length === 0 && (
           <p className="py-6 text-center text-xs text-gray-500">
-            Aucun message pour l’instant. Dites bonjour à la communauté !
+            Aucun message pour l’instant. Dites bonjour au groupe !
           </p>
         )}
         {messages.map((m) => (

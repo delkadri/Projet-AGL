@@ -70,7 +70,7 @@ function CommunauteDetailPage() {
           <Button variant="ghost" size="sm" className="-ml-2 mb-3 w-fit shrink-0 text-[#1b5e20]" asChild>
             <Link to="/communautes">
               <ArrowLeft className="size-4" />
-              Retour aux communautés
+              Retour aux groupes
             </Link>
           </Button>
         )}
@@ -78,24 +78,24 @@ function CommunauteDetailPage() {
         {isPending && (
           <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white py-16 shadow-md">
             <Loader2 className="size-8 animate-spin text-[#1b5e20]" aria-hidden />
-            <p className="text-sm text-gray-600">Chargement de la communauté…</p>
+            <p className="text-sm text-gray-600">Chargement du groupe…</p>
           </div>
         )}
 
         {isError && (
           <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            Impossible de charger cette communauté pour le moment.
+            Impossible de charger ce groupe pour le moment.
           </p>
         )}
 
         {!isPending && !isError && detail === null && (
           <div className="rounded-2xl bg-white p-8 text-center shadow-md">
-            <p className="text-sm font-medium text-gray-900">Communauté introuvable</p>
+            <p className="text-sm font-medium text-gray-900">Groupe introuvable</p>
             <p className="mt-2 text-xs text-gray-600">
-              Cet identifiant ne correspond à aucune communauté de démonstration.
+              Cet identifiant ne correspond à aucun groupe de démonstration.
             </p>
             <Button className="mt-6 bg-[#1b5e20] text-white hover:bg-[#2e7d32]" asChild>
-              <Link to="/communautes">Voir mes communautés</Link>
+              <Link to="/communautes">Voir mes groupes</Link>
             </Button>
           </div>
         )}
@@ -105,7 +105,7 @@ function CommunauteDetailPage() {
             <Button variant="ghost" size="sm" className="-ml-1 h-8 w-fit shrink-0 px-2 text-[#1b5e20]" asChild>
               <Link to="/communautes">
                 <ArrowLeft className="size-4" />
-                Retour aux communautés
+                Retour aux groupes
               </Link>
             </Button>
 

@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ObjectifsRouteImport } from './routes/objectifs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as DonneesRouteImport } from './routes/donnees'
 import { Route as CommunautesRouteImport } from './routes/communautes'
 import { Route as CarbonQuizQuestionsRouteImport } from './routes/carbon-quiz-questions'
+import { Route as ActualitesRouteImport } from './routes/actualites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DonneesIndexRouteImport } from './routes/donnees.index'
 import { Route as CommunautesIndexRouteImport } from './routes/communautes.index'
@@ -25,6 +27,11 @@ import { Route as CommunautesCreationRouteImport } from './routes/communautes.cr
 import { Route as CommunautesCommunityIdRouteImport } from './routes/communautes.$communityId'
 import { Route as DonneesScoreIdRouteImport } from './routes/donnees.score.$id'
 
+const ObjectifsRoute = ObjectifsRouteImport.update({
+  id: '/objectifs',
+  path: '/objectifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -48,6 +55,11 @@ const CommunautesRoute = CommunautesRouteImport.update({
 const CarbonQuizQuestionsRoute = CarbonQuizQuestionsRouteImport.update({
   id: '/carbon-quiz-questions',
   path: '/carbon-quiz-questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesRoute = ActualitesRouteImport.update({
+  id: '/actualites',
+  path: '/actualites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -103,11 +115,13 @@ const DonneesScoreIdRoute = DonneesScoreIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/actualites': typeof ActualitesRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
   '/communautes': typeof CommunautesRouteWithChildren
   '/donnees': typeof DonneesRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/objectifs': typeof ObjectifsRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
@@ -120,9 +134,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/actualites': typeof ActualitesRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/objectifs': typeof ObjectifsRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
@@ -136,11 +152,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/actualites': typeof ActualitesRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
   '/communautes': typeof CommunautesRouteWithChildren
   '/donnees': typeof DonneesRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/objectifs': typeof ObjectifsRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
@@ -155,11 +173,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/actualites'
     | '/carbon-quiz-questions'
     | '/communautes'
     | '/donnees'
     | '/inscription'
     | '/login'
+    | '/objectifs'
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
@@ -172,9 +192,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/actualites'
     | '/carbon-quiz-questions'
     | '/inscription'
     | '/login'
+    | '/objectifs'
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
@@ -187,11 +209,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/actualites'
     | '/carbon-quiz-questions'
     | '/communautes'
     | '/donnees'
     | '/inscription'
     | '/login'
+    | '/objectifs'
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
@@ -205,17 +229,26 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActualitesRoute: typeof ActualitesRoute
   CarbonQuizQuestionsRoute: typeof CarbonQuizQuestionsRoute
   CommunautesRoute: typeof CommunautesRouteWithChildren
   DonneesRoute: typeof DonneesRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
+  ObjectifsRoute: typeof ObjectifsRoute
   OnboardingParcoursRoute: typeof OnboardingParcoursRoute
   OnboardingQuizRoute: typeof OnboardingQuizRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/objectifs': {
+      id: '/objectifs'
+      path: '/objectifs'
+      fullPath: '/objectifs'
+      preLoaderRoute: typeof ObjectifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -249,6 +282,13 @@ declare module '@tanstack/react-router' {
       path: '/carbon-quiz-questions'
       fullPath: '/carbon-quiz-questions'
       preLoaderRoute: typeof CarbonQuizQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites': {
+      id: '/actualites'
+      path: '/actualites'
+      fullPath: '/actualites'
+      preLoaderRoute: typeof ActualitesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -359,11 +399,13 @@ const DonneesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActualitesRoute: ActualitesRoute,
   CarbonQuizQuestionsRoute: CarbonQuizQuestionsRoute,
   CommunautesRoute: CommunautesRouteWithChildren,
   DonneesRoute: DonneesRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,
+  ObjectifsRoute: ObjectifsRoute,
   OnboardingParcoursRoute: OnboardingParcoursRoute,
   OnboardingQuizRoute: OnboardingQuizRoute,
 }

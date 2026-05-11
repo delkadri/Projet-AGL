@@ -42,7 +42,7 @@ export function CommunitySuccessDialog({
             Défi communautaire réussi
           </DialogTitle>
           <DialogDescription className="text-base font-medium text-gray-700">
-            Toute la communauté a relevé le défi à temps. Bonus collectif débloqué !
+            Tout le groupe a relevé le défi à temps. Bonus collectif débloqué !
           </DialogDescription>
         </DialogHeader>
         <div className="relative z-[1] rounded-2xl border border-[#a5d6a7] bg-[#c8e6c9]/60 px-4 py-5 text-center">

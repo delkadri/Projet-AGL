@@ -18,7 +18,7 @@ export default function CommunityCard() {
     <div className="rounded-2xl bg-[#c8e6c9] p-4 shadow-md">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#1b5e20]">
         <Users className="h-4 w-4" />
-        Communauté
+        Groupe
       </h3>
       <p className="mb-1 text-sm font-medium text-[#1b5e20]">
         Score carbone moyen de l'équipe : {teamAverage}
@@ -30,10 +30,10 @@ export default function CommunityCard() {
             <span className="font-semibold text-[#1b5e20]">
               {myEntry.rank === 1 ? '1re' : `${myEntry.rank}e`}
             </span>{' '}
-            du classement inter-communautés.
+            du classement inter-groupes.
           </>
         ) : (
-          <>Rejoignez une communauté pour apparaître au classement.</>
+          <>Rejoignez un groupe pour apparaître au classement.</>
         )}
       </p>
       <Button

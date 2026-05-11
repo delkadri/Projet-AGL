@@ -162,7 +162,7 @@ export function InterCommunityRankingDialog({ open, onOpenChange }: InterCommuni
       <DialogContent className="max-h-[min(90vh,640px)] gap-0 overflow-hidden border-[#1b5e20]/20 bg-[#f1f8e9] p-0 sm:max-w-md">
         <DialogHeader className="border-b border-[#1b5e20]/10 bg-[#c8e6c9]/50 px-5 py-4 text-left">
           <DialogTitle className="text-lg font-bold text-[#1b5e20]">
-            Classement inter-communautés
+            Classement inter-groupes
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-700">
             Empreinte carbone moyenne des membres et série de défis réussis ensemble (données
@@ -185,7 +185,7 @@ export function InterCommunityRankingDialog({ open, onOpenChange }: InterCommuni
           )}
 
           {!isPending && !isError && leaderboard && leaderboard.length > 0 && (
-            <ul className="flex flex-col gap-2.5" aria-label="Classement des communautés">
+            <ul className="flex flex-col gap-2.5" aria-label="Classement des groupes">
               {leaderboard.map((entry) => (
                 <LeaderboardRow
                   key={entry.community.id}
