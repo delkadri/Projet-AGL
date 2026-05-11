@@ -30,6 +30,6 @@ export function useOnboardingQuizResult(enabled = true) {
         (await QuizService.quizControllerGetOnboardingResult()) as OnboardingQuizResultPayload
       return r
     },
-    enabled: !!user && !!user.onboardingCompleted && enabled,
+    enabled: !!user && !!user.hasOnboardingBilan && enabled,
   })
 }

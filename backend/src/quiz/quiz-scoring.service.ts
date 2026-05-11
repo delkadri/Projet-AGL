@@ -226,10 +226,7 @@ export class QuizScoringService {
               categories_scores: categoriesScores,
             },
           });
-          await tx.users.update({
-            where: { id: userId },
-            data: { onboarding_completed: true },
-          });
+          /** `onboarding_completed` est réservé à la fin du parcours d’accueil (choix du parcours), via `UserService.completeOnboarding`. */
         },
         { timeout: 25_000, maxWait: 10_000 },
       )

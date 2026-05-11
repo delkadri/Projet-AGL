@@ -5,7 +5,7 @@ import { PrismaService } from 'nestjs-prisma';
 export class SeedService implements OnModuleInit {
   private readonly logger = new Logger(SeedService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async onModuleInit() {
     this.logger.log(
@@ -45,7 +45,7 @@ export class SeedService implements OnModuleInit {
         slug: 'challenge',
         name: 'CHALLENGE',
         description: 'Dynamique sociale. Objectifs et défis motivants',
-        defis_per_period: 1,
+        defis_per_period: 5,
         quizz_per_period: 1,
         period_type: 'DAY',
       },

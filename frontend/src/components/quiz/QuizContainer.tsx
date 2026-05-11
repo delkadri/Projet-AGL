@@ -12,6 +12,8 @@ import type { QuizCalculateScoreResponse } from './QuizResult'
 import { enregistrerQuizDuMoisCommeFait, QUIZ_DU_MOIS_QUIZ_ID } from '@/lib/quiz-du-mois-etat'
 import { MONTHLY_QUIZ_CURRENT_QUERY_KEY } from '@/api/hooks/useMonthlyQuizCurrent'
 import { ONBOARDING_QUIZ_RESULT_QUERY_KEY } from '@/api/hooks/useOnboardingQuizResult'
+import { AUTH_ME_QUERY_KEY } from '@/api/hooks/useAuth'
+import { getCurrentUser } from '@/api/auth'
 import { cn } from '@/lib/utils'
 
 export type QuizFinishAction = {
@@ -27,6 +29,8 @@ type QuizContainerProps = {
   /** Réponses du dernier bilan (quiz mensuel) pour showIf et préremplissage. */
   initialBaselineAnswers?: QuizAnswers
   onFinishQuiz?: QuizFinishAction
+  /** Écran de résultat simplifié (titre + score animé, sans catégories), ex. fin du quiz d’onboarding. */
+  quizResultVariant?: 'default' | 'onboarding'
 }
 
 type VisibleStep = { categoryIndex: number; questionIndex: number }
@@ -87,6 +91,7 @@ export function QuizContainer({
   scoreMode = 'full_quiz',
   initialBaselineAnswers,
   onFinishQuiz,
+  quizResultVariant = 'default',
 }: QuizContainerProps) {
   const queryClient = useQueryClient()
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
@@ -155,6 +160,7 @@ export function QuizContainer({
         ])) as QuizCalculateScoreResponse
         await queryClient.invalidateQueries({ queryKey: MONTHLY_QUIZ_CURRENT_QUERY_KEY })
         await queryClient.invalidateQueries({ queryKey: ONBOARDING_QUIZ_RESULT_QUERY_KEY })
+        await queryClient.fetchQuery({ queryKey: AUTH_ME_QUERY_KEY, queryFn: getCurrentUser })
         setResult(r)
       } else {
         const r = (await Promise.race([
@@ -175,6 +181,7 @@ export function QuizContainer({
         if (quiz.id === QUIZ_DU_MOIS_QUIZ_ID) {
           enregistrerQuizDuMoisCommeFait()
         }
+        await queryClient.fetchQuery({ queryKey: AUTH_ME_QUERY_KEY, queryFn: getCurrentUser })
         setResult(r)
       }
     } catch (err) {
@@ -207,10 +214,13 @@ export function QuizContainer({
 
   if (result) {
     return (
-      <QuizResult
-        result={result}
-        finishAction={onFinishQuiz ?? { label: "Retour à l'accueil", to: '/' }}
-      />
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <QuizResult
+          result={result}
+          finishAction={onFinishQuiz ?? { label: "Retour à l'accueil", to: '/' }}
+          variant={quizResultVariant}
+        />
+      </div>
     )
   }
 

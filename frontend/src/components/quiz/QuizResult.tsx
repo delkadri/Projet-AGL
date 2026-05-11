@@ -106,6 +106,8 @@ type QuizResultProps = {
   /** Bouton affiché en bas du bilan. Si absent : "Retour à l'accueil" vers / */
   finishAction?: { label: string; to: string }
   history?: QuizScoreHistoryPoint[]
+  /** `onboarding` : écran de révélation sans liste des catégories (fin du quiz d’accueil). */
+  variant?: 'default' | 'onboarding'
 }
 
 export function getClimateLevelLabel(level: string): string {
@@ -148,9 +150,14 @@ function getCategoryIcon(categoryId: string, name: string) {
 
 const DEFAULT_FINISH_ACTION = { label: `Retour à l'accueil`, to: '/' } as const
 
-export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: QuizResultProps) {
+export function QuizResult({
+  result,
+  finishAction = DEFAULT_FINISH_ACTION,
+  variant = 'default',
+}: QuizResultProps) {
   const navigate = useNavigate()
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null)
+  const isOnboarding = variant === 'onboarding'
 
   const { score, categories, onboardingBilan } = result
   const totalKg = score.totalKgCo2ePerYear
@@ -176,17 +183,117 @@ export function QuizResult({ result, finishAction = DEFAULT_FINISH_ACTION }: Qui
     return m > 0 ? m * 1.08 : undefined
   }, [categories, onboardingBilan])
 
+  const scoreCircle = (
+    <CarbonScoreCircle
+      score={totalKg}
+      climateLevel={score.climateLevel}
+      message={`Niveau climat : ${getClimateLevelLabel(score.climateLevel)}`}
+      showDetailsHint={false}
+      nationalAverageKg={onboardingBilan?.nationalTotalKgCo2ePerYear}
+      showComparisonsGrid={!isOnboarding}
+      density={isOnboarding ? 'compact' : 'default'}
+      showDecorativeAccent={!isOnboarding}
+    />
+  )
+
+  if (isOnboarding) {
+    return (
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f0f7f0]">
+        <header className="mx-auto w-full max-w-lg shrink-0 px-4 pt-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 [@media(max-height:700px)]:pt-3">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#1A4D3E]/60 sm:text-[11px]">
+            Résultat
+          </p>
+          <h1 className="text-balance text-xl font-bold tracking-tight text-[#1C5138] sm:mt-1 sm:text-2xl">
+            Votre empreinte carbone estimée
+          </h1>
+        </header>
+
+        <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col justify-center overflow-hidden px-4 py-1 [@media(max-height:700px)]:py-1">
+          <div className="relative flex min-h-0 w-full flex-1 flex-col justify-center overflow-hidden">
+            <div
+              className={cn(
+                'relative w-full shrink-0 origin-center animate-in zoom-in-95 fade-in duration-700 ease-out fill-mode-both [animation-delay:90ms]',
+                '[@media(max-height:620px)]:scale-[0.9] [@media(max-height:520px)]:scale-[0.82]',
+                'motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none',
+              )}
+            >
+              {scoreCircle}
+            </div>
+
+            {categories && categories.length > 0 ? (
+              <section
+                className="pointer-events-none mt-3 min-h-0 w-full max-h-[min(32vh,220px)] shrink animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both [animation-delay:120ms] motion-reduce:animate-none motion-reduce:opacity-100 [@media(max-height:700px)]:mt-2 [@media(max-height:700px)]:max-h-[min(26vh,180px)]"
+                aria-label="Aperçu des catégories : noms visibles, montants masqués jusqu’à la suite du parcours."
+              >
+                <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-[#1A4D3E]/65">
+                  Catégories
+                </p>
+                <p className="mt-0.5 text-center text-xs leading-snug text-[#1A4D3E]/75">
+                  Les catégories seront détaillées dans le bilan complet.
+                </p>
+                <ul
+                  className="mt-2 space-y-1.5 overflow-y-auto overscroll-y-contain pr-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  role="list"
+                >
+                  {[...categories]
+                    .map((cat) => {
+                      const catKg = cat.items.reduce((s, i) => s + i.valueKgCo2ePerYear, 0)
+                      return { cat, catKg }
+                    })
+                    .sort((a, b) => b.catKg - a.catKg)
+                    .map(({ cat, catKg }) => {
+                      const pct = totalKg > 0 ? Math.round((catKg / totalKg) * 100) : 0
+                      const barPct = Math.max(8, Math.min(100, pct))
+                      return (
+                        <li
+                          key={cat.id}
+                          className="flex items-center gap-2 rounded-lg border border-[#1A4D3E]/12 bg-white/75 px-2 py-1 shadow-sm ring-1 ring-black/3"
+                        >
+                          <span className="shrink-0 text-[#1A4D3E]/85">
+                            {getCategoryIcon(cat.id, cat.name)}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#1b3d32]">
+                            {cat.name}
+                          </span>
+                          <div className="h-4 w-18 shrink-0 overflow-hidden rounded-full bg-slate-200/85">
+                            <div
+                              className="h-full rounded-full bg-linear-to-r from-[#1A4D3E]/25 to-[#1A4D3E]/50"
+                              style={{ width: `${barPct}%` }}
+                            />
+                          </div>
+                          <span
+                            className="w-9 shrink-0 text-right text-[10px] font-bold tabular-nums text-slate-500 blur-[3px]"
+                            aria-hidden
+                          >
+                            0.0t
+                          </span>
+                        </li>
+                      )
+                    })}
+                </ul>
+              </section>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mx-auto w-full max-w-lg shrink-0 space-y-2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1">
+          <div className="animate-in fade-in slide-in-from-bottom-5 duration-600 fill-mode-both [animation-delay:240ms] motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
+            <Button
+              type="button"
+              className="h-11 w-full rounded-2xl bg-[#1A4D3E] text-[15px] font-semibold text-white shadow-[0_4px_14px_-2px_rgba(26,77,62,0.4)] hover:bg-[#153936] sm:h-12"
+              onClick={() => navigate({ to: finishAction.to })}
+            >
+              {finishAction.label}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex w-full min-h-0 flex-col bg-linear-to-b from-[#e8f5e9] via-[#f1f8e9] to-white pb-6">
-      <div className="mx-auto w-full max-w-lg px-4 py-3">
-        <CarbonScoreCircle
-          score={totalKg}
-          climateLevel={score.climateLevel}
-          message={`Niveau climat : ${getClimateLevelLabel(score.climateLevel)}`}
-          showDetailsHint={false}
-          nationalAverageKg={onboardingBilan?.nationalTotalKgCo2ePerYear}
-        />
-      </div>
+      <div className="mx-auto w-full max-w-lg px-4 py-3">{scoreCircle}</div>
 
       {categories && categories.length > 0 ? (
         <div className="mx-auto w-full max-w-lg space-y-2 px-4 pb-2 pt-3">

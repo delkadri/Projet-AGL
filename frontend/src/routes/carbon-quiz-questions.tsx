@@ -37,7 +37,7 @@ function CarbonQuizQuestionsPage() {
 
   if (isMonthly && isLoading) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-[#f0f7f0] px-4">
+      <div className="flex h-dvh min-h-0 flex-col items-center justify-center gap-3 bg-[#f0f7f0] px-4">
         <p className="text-center text-[#1C5138]">Chargement du quiz…</p>
       </div>
     )
@@ -45,7 +45,7 @@ function CarbonQuizQuestionsPage() {
 
   if (isMonthly && (isError || (data && !data.quiz))) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#f0f7f0] px-4">
+      <div className="flex h-dvh min-h-0 flex-col items-center justify-center gap-4 bg-[#f0f7f0] px-4">
         <p className="max-w-sm text-center text-slate-700">
           {isError
             ? 'Impossible de charger le quiz. Vérifiez votre connexion ou réessayez.'
@@ -59,7 +59,7 @@ function CarbonQuizQuestionsPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#f0f7f0]">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#f0f7f0]">
       <QuizContainer
         quiz={quiz}
         scoreMode={isMonthly ? 'monthly_update' : 'full_quiz'}

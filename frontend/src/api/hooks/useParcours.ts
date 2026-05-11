@@ -16,10 +16,6 @@ function mapParcoursDtoToParcours(dto: ParcoursDto): Parcours {
     dto.defis_per_period === 1
       ? `1 défi/${periodLabel}`
       : `${dto.defis_per_period} défis/${periodLabel}`
-  const quizzLabel =
-    dto.quizz_per_period === 1
-      ? `1 quizz/${periodLabel}`
-      : `${dto.quizz_per_period} quizz/${periodLabel}`
 
   return {
     id: dto.id,
@@ -29,7 +25,6 @@ function mapParcoursDtoToParcours(dto: ParcoursDto): Parcours {
     imageUrl: dto.slug === 'decouverte' ? '/logo-parc-decouv.png' : dto.slug === 'progression' ? '/logo-parv-prog.png' : dto.slug === 'challenge' ? '/logo-parv-challenge.png' : undefined,
     frequency: {
       defis: defisLabel,
-      quizz: quizzLabel,
     },
   }
 }

@@ -10,7 +10,7 @@ import { request as __request } from '../core/request';
 export class MonthlyQuizService {
     /**
      * Écran quiz du mois : sous-quiz éventuel + métadonnées (dernier score, prochaine ouverture, fraîcheur)
-     * @returns MonthlyQuizCurrentDto Enveloppe avec quiz ou null si le mois UTC courant est déjà complété.
+     * @returns MonthlyQuizCurrentDto Enveloppe avec quiz ou null si un bilan (score_history) existe déjà pour le mois civil UTC courant.
      * @throws ApiError
      */
     public static monthlyQuizControllerGetCurrentMonthlyQuiz(): CancelablePromise<MonthlyQuizCurrentDto> {

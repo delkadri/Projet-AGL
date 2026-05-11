@@ -5,7 +5,6 @@ import { ParcoursCard } from './ParcoursCard'
 type DetailTheme = {
   bar: string
   badgePrimary: string
-  badgeSecondary: string
 }
 
 function getDetailTheme(slug: string): DetailTheme {
@@ -14,25 +13,21 @@ function getDetailTheme(slug: string): DetailTheme {
       return {
         bar: 'bg-[#5d8c3e]',
         badgePrimary: 'bg-[#5d8c3e]/15 text-[#3d6228]',
-        badgeSecondary: 'bg-slate-100 text-slate-600',
       }
     case 'progression':
       return {
         bar: 'bg-[#3d6228]',
         badgePrimary: 'bg-[#3d6228]/15 text-[#2a4a1c]',
-        badgeSecondary: 'bg-slate-100 text-slate-600',
       }
     case 'challenge':
       return {
         bar: 'bg-[#2f6b3f]',
         badgePrimary: 'bg-[#2f6b3f]/15 text-[#1e4d2b]',
-        badgeSecondary: 'bg-slate-100 text-slate-600',
       }
     default:
       return {
         bar: 'bg-slate-400',
         badgePrimary: 'bg-slate-100 text-slate-600',
-        badgeSecondary: 'bg-slate-100 text-slate-600',
       }
   }
 }
@@ -57,7 +52,7 @@ export function ParcoursList({
   const selected = parcours.find((p) => p.id === selectedParcoursId) ?? null
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-28 pt-10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-28 pt-10">
       {/* Header */}
       <div className="mb-8 text-center">
         <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#5d8c3e]">
@@ -117,28 +112,18 @@ export function ParcoursList({
                   <div className="p-5">
                     <h2 className="text-xl font-bold text-[#1A4D3E]">{selected.name}</h2>
 
-                    {selected.frequency && (
+                    {selected.frequency?.defis ? (
                       <div className="mt-2.5 flex flex-wrap gap-2">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${getDetailTheme(selected.slug).badgePrimary}`}
                         >
                           {selected.frequency.defis}
                         </span>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${getDetailTheme(selected.slug).badgeSecondary}`}
-                        >
-                          {selected.frequency.quizz}
-                        </span>
                       </div>
-                    )}
+                    ) : null}
 
                     <p className="mt-3 text-sm leading-relaxed text-slate-600">
                       {selected.summary ?? selected.description}
-                    </p>
-
-                    <p className="mt-4 text-[11px] text-slate-400">
-                      Le choix de parcours n&apos;est pas définitif — vous pourrez en changer à tout
-                      moment.
                     </p>
                   </div>
                 </div>

@@ -19,6 +19,10 @@ interface CarbonScoreCircleProps {
   nationalAverageKg?: number
   /** Si false, masque le bloc « À réduire / Moy. nationale » (aperçu accueil, etc.). */
   showComparisonsGrid?: boolean
+  /** Marges et jauge un peu plus serrées (écran onboarding mobile). */
+  density?: 'default' | 'compact'
+  /** Halo décoratif en haut à droite (désactivé sur recap onboarding : overflow + tons rouges). */
+  showDecorativeAccent?: boolean
 }
 
 function formatTonnes(value: number): string {
@@ -35,13 +39,20 @@ type TopAnnotationLayout = {
   national: { leftPct: number; row: number } | null
   maxRow: number
   topZoneMinHeightPx: number
+  bubbleRowPx: number
+  bubbleApproxH: number
 }
 
 /**
  * Rangées dynamiques : bulles alignées sur les % réels de l’échelle (comme les traits sur la barre).
  * Si deux bulles sont trop proches horizontalement, la seconde (plus à droite sur l’échelle) passe en rangée inférieure.
  */
-function layoutTopAnnotations(targetPct: number, nationalPct: number | null): TopAnnotationLayout {
+function layoutTopAnnotations(
+  targetPct: number,
+  nationalPct: number | null,
+  bubbleRowPx: number,
+  bubbleApproxH: number,
+): TopAnnotationLayout {
   const items: Array<{ id: 'target' | 'national'; pct: number }> = [{ id: 'target', pct: targetPct }]
   if (nationalPct != null) items.push({ id: 'national', pct: nationalPct })
   const sorted = [...items].sort((a, b) => a.pct - b.pct)
@@ -71,12 +82,14 @@ function layoutTopAnnotations(targetPct: number, nationalPct: number | null): To
       : null
   const rowsForMax = [targetRow, ...(nationalLayout != null ? [nationalLayout.row] : [])]
   const maxRow = Math.max(0, ...rowsForMax)
-  const topZoneMinHeightPx = (maxRow + 1) * TOP_BUBBLE_ROW_PX + TOP_BUBBLE_APPROX_H + 8
+  const topZoneMinHeightPx = (maxRow + 1) * bubbleRowPx + bubbleApproxH + 8
   return {
     target: { leftPct: targetPlaced.pct, row: targetRow },
     national: nationalLayout,
     maxRow,
     topZoneMinHeightPx,
+    bubbleRowPx,
+    bubbleApproxH,
   }
 }
 
@@ -86,7 +99,13 @@ export function CarbonScoreCircle({
   showDetailsHint = true,
   nationalAverageKg,
   showComparisonsGrid = true,
+  density = 'default',
+  showDecorativeAccent = true,
 }: CarbonScoreCircleProps) {
+  const isCompact = density === 'compact'
+  const bubbleRowPx = isCompact ? 22 : TOP_BUBBLE_ROW_PX
+  const bubbleApproxH = isCompact ? 6 : TOP_BUBBLE_APPROX_H
+
   const tonnes = score >= 100 ? score / 1000 : score
   const nationalTonnes =
     nationalAverageKg != null && Number.isFinite(nationalAverageKg) ? nationalAverageKg / 1000 : null
@@ -108,33 +127,64 @@ export function CarbonScoreCircle({
         ? 'même niveau'
         : `${diffVsNational < 0 ? '-' : '+'}${formatTonnes(Math.abs(diffVsNational))} t d’écart`
   const climateTargetLabel = climateTargetTonnes.toFixed(1).replace('.', ',')
-  const footprintMonthName = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(new Date())
 
-  const topLayout = layoutTopAnnotations(targetPercent, nationalPercent)
+  const topLayout = layoutTopAnnotations(targetPercent, nationalPercent, bubbleRowPx, bubbleApproxH)
+  const br = topLayout.bubbleRowPx
+  const bh = topLayout.bubbleApproxH
 
   return (
     <section
-      className="overflow-visible rounded-[1.7rem] border border-white/80 bg-white shadow-[0_18px_45px_-20px_rgba(26,77,62,0.42)] ring-1 ring-[#1A4D3E]/6"
+      className={cn(
+        'overflow-visible rounded-[1.7rem] border border-white/80 bg-white shadow-[0_18px_45px_-20px_rgba(26,77,62,0.42)] ring-1 ring-[#1A4D3E]/6',
+        isCompact && 'rounded-2xl shadow-[0_12px_32px_-16px_rgba(26,77,62,0.38)]',
+      )}
       aria-label="Synthèse de votre score carbone"
     >
-      <div className="relative isolate overflow-visible px-4 pb-4 pt-4">
-        <div
-          className={cn(
-            'pointer-events-none absolute -right-16 -top-20 size-44 rounded-full bg-linear-to-br opacity-20 blur-2xl',
-            getFootprintScoreToneAccentBlur(tone),
-          )}
-          aria-hidden
-        />
-        <div className="relative flex items-start justify-between gap-3">
+      <div
+        className={cn(
+          'relative isolate overflow-visible px-4 pb-4 pt-4',
+          isCompact && 'px-3 pb-3 pt-3',
+        )}
+      >
+        {showDecorativeAccent ? (
+          <div
+            className={cn(
+              'pointer-events-none absolute -right-16 -top-20 size-44 rounded-full bg-linear-to-br opacity-20 blur-2xl',
+              getFootprintScoreToneAccentBlur(tone),
+            )}
+            aria-hidden
+          />
+        ) : null}
+        <div className="relative flex items-start justify-between gap-2 sm:gap-3">
           <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.15em] text-[#1A4D3E]/70">
-              <Activity className="size-3.5" aria-hidden />
+            <p
+              className={cn(
+                'flex items-center gap-1.5 font-bold uppercase tracking-[0.15em] text-[#1A4D3E]/70',
+                isCompact ? 'text-xs' : 'text-sm',
+              )}
+            >
+              <Activity className={cn(isCompact ? 'size-3' : 'size-3.5')} aria-hidden />
               Empreinte
             </p>
-            <div className={cn('mt-3 flex items-end gap-2', getFootprintScoreToneTextClass(tone))}>
-              <p className="text-5xl font-black leading-none tracking-[-0.06em]">{formatTonnes(tonnes)}</p>
-              <div className="pb-1.5">
-                <p className="text-base font-extrabold leading-none">t</p>
+            <div
+              className={cn(
+                'flex items-end gap-2',
+                isCompact ? 'mt-2' : 'mt-3',
+                getFootprintScoreToneTextClass(tone),
+              )}
+            >
+              <p
+                className={cn(
+                  'font-black leading-none tracking-[-0.06em]',
+                  isCompact ? 'text-4xl' : 'text-5xl',
+                )}
+              >
+                {formatTonnes(tonnes)}
+              </p>
+              <div className={cn(isCompact ? 'pb-1' : 'pb-1.5')}>
+                <p className={cn('font-extrabold leading-none', isCompact ? 'text-sm' : 'text-base')}>
+                  t
+                </p>
                 <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   CO₂e/an
                 </p>
@@ -145,7 +195,8 @@ export function CarbonScoreCircle({
           {message ? (
             <div
               className={cn(
-                'shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ring-1',
+                'shrink-0 rounded-full font-bold ring-1',
+                isCompact ? 'px-2.5 py-1 text-[10px]' : 'px-3 py-1.5 text-[11px]',
                 getFootprintScoreToneBadgeClass(tone),
               )}
             >
@@ -154,8 +205,20 @@ export function CarbonScoreCircle({
           ) : null}
         </div>
 
-        <div className="relative mt-5 overflow-visible rounded-2xl bg-slate-50/90 p-3 ring-1 ring-slate-900/5">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Positionnement</p>
+        <div
+          className={cn(
+            'relative overflow-visible rounded-2xl bg-slate-50/90 ring-1 ring-slate-900/5',
+            isCompact ? 'mt-3 p-2' : 'mt-5 p-3',
+          )}
+        >
+          <p
+            className={cn(
+              'font-bold uppercase tracking-wide text-slate-500',
+              isCompact ? 'mb-1.5 text-[10px]' : 'mb-2 text-[11px]',
+            )}
+          >
+            Positionnement
+          </p>
 
           {/* Jauge : bulles + pointillés alignés sur les mêmes % que les repères sur la barre */}
           <div className="relative w-full overflow-visible">
@@ -169,7 +232,7 @@ export function CarbonScoreCircle({
               <div
                 className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
                 style={{
-                  top: topLayout.target.row * TOP_BUBBLE_ROW_PX + TOP_BUBBLE_APPROX_H,
+                  top: topLayout.target.row * br + bh,
                 }}
                 aria-hidden
               >
@@ -182,7 +245,7 @@ export function CarbonScoreCircle({
                 <div
                   className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
                   style={{
-                    top: topLayout.national.row * TOP_BUBBLE_ROW_PX + TOP_BUBBLE_APPROX_H,
+                    top: topLayout.national.row * br + bh,
                   }}
                   aria-hidden
                 >
@@ -197,7 +260,7 @@ export function CarbonScoreCircle({
                 className="absolute z-2 -translate-x-1/2"
                 style={{
                   left: `${topLayout.target.leftPct}%`,
-                  top: topLayout.target.row * TOP_BUBBLE_ROW_PX,
+                  top: topLayout.target.row * br,
                 }}
               >
                 <span className="inline-flex max-w-22 flex-col items-center rounded-md bg-[#1A4D3E]/90 px-2 py-1 text-center shadow-md ring-1 ring-black/10">
@@ -214,7 +277,7 @@ export function CarbonScoreCircle({
                   className="absolute z-2 -translate-x-1/2"
                   style={{
                     left: `${topLayout.national.leftPct}%`,
-                    top: topLayout.national.row * TOP_BUBBLE_ROW_PX,
+                    top: topLayout.national.row * br,
                   }}
                 >
                   <span className="inline-flex max-w-22 flex-col items-center rounded-md bg-slate-800/75 px-2 py-1 text-center shadow-md ring-1 ring-black/10">
@@ -273,13 +336,13 @@ export function CarbonScoreCircle({
 
             <div
               className="relative z-1 mt-0 w-full overflow-visible pb-1"
-              style={{ minHeight: TOP_BUBBLE_APPROX_H + TOP_BUBBLE_ROW_PX + 6 }}
+              style={{ minHeight: bh + br + 6 }}
               aria-hidden
             >
               {/* Pointillés : du bas de la barre jusqu’au haut de la bulle « Vous » (descendant). */}
               <div
                 className="pointer-events-none absolute inset-x-0 top-0 z-0"
-                style={{ bottom: TOP_BUBBLE_APPROX_H }}
+                style={{ bottom: bh }}
                 aria-hidden
               >
                 <div
@@ -327,15 +390,25 @@ export function CarbonScoreCircle({
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between text-[10px] font-semibold text-slate-500">
+          <div
+            className={cn(
+              'flex justify-between font-semibold text-slate-500',
+              isCompact ? 'mt-1.5 text-[9px]' : 'mt-2 text-[10px]',
+            )}
+          >
             <span>0 t</span>
             <span>{formatTonnes(scaleMax)} t</span>
           </div>
         </div>
 
         {showComparisonsGrid ? (
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl border border-emerald-900/8 bg-emerald-50/80 p-3">
+          <div className={cn('grid grid-cols-2 gap-2', isCompact ? 'mt-2' : 'mt-3')}>
+            <div
+              className={cn(
+                'rounded-2xl border border-emerald-900/8 bg-emerald-50/80',
+                isCompact ? 'p-2' : 'p-3',
+              )}
+            >
               <div className="flex items-center gap-2 text-[#1A4D3E]">
                 <Target className="size-4" aria-hidden />
                 <p className="text-[10px] font-bold uppercase tracking-wide">À réduire</p>
@@ -346,7 +419,12 @@ export function CarbonScoreCircle({
               <p className="text-[11px] leading-tight text-slate-600">pour atteindre 7,1 t en 2030</p>
             </div>
 
-            <div className="rounded-2xl border border-slate-900/8 bg-slate-50 p-3">
+            <div
+              className={cn(
+                'rounded-2xl border border-slate-900/8 bg-slate-50',
+                isCompact ? 'p-2' : 'p-3',
+              )}
+            >
               <div className="flex items-center gap-2 text-slate-700">
                 {isBelowNational ? (
                   <TrendingDown className="size-4 text-emerald-600" aria-hidden />
@@ -366,7 +444,12 @@ export function CarbonScoreCircle({
         ) : null}
 
         {showDetailsHint ? (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white/75 px-3 py-2 text-xs font-semibold leading-snug text-[#1A4D3E] ring-1 ring-[#1A4D3E]/8">
+          <div
+            className={cn(
+              'flex items-center gap-2 rounded-2xl bg-white/75 font-semibold leading-snug text-[#1A4D3E] ring-1 ring-[#1A4D3E]/8',
+              isCompact ? 'mt-2 px-2.5 py-1.5 text-[11px]' : 'mt-3 px-3 py-2 text-xs',
+            )}
+          >
             <Leaf className="size-4 shrink-0" aria-hidden />
             Détail par poste ci-dessous.
           </div>

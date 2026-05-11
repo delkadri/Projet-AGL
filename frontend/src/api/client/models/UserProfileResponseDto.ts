@@ -11,6 +11,10 @@ export type UserProfileResponseDto = {
     feuilles: number;
     niveau: number;
     onboardingCompleted: boolean;
+    /**
+     * Au moins un bilan carbone enregistré en base (ex. quiz d’onboarding soumis), indépendamment du choix de parcours.
+     */
+    hasOnboardingBilan: boolean;
     parcours?: ParcoursDto | null;
 };
 

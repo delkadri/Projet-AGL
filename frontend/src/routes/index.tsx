@@ -5,28 +5,12 @@ import {
   ChallengesCard,
   CommunityCard,
 } from '@/components/home'
-
-export function getStoredUser() {
-  if (typeof window === 'undefined') return null
-
-  try {
-    const raw = window.localStorage.getItem('auth')
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as {
-      user?: { onboardingCompleted?: boolean }
-      accessToken?: string
-    }
-    if (!parsed.user || !parsed.accessToken) return null
-    return parsed.user
-  } catch {
-    return null
-  }
-}
+import { readStoredAuthUser } from '@/lib/stored-auth-user'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
   beforeLoad: () => {
-    const user = getStoredUser()
+    const user = readStoredAuthUser()
 
     if (!user) {
       throw redirect({ to: '/login' })
@@ -34,7 +18,8 @@ export const Route = createFileRoute('/')({
 
     const onboardingCompleted = !!user.onboardingCompleted
     if (!onboardingCompleted) {
-      throw redirect({ to: '/onboarding/quiz' })
+      const hasBilan = !!user.hasOnboardingBilan
+      throw redirect({ to: hasBilan ? '/onboarding/parcours' : '/onboarding/quiz' })
     }
     // Sinon on reste sur / et on affiche la page home
   },
