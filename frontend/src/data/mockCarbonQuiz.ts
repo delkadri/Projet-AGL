@@ -1,11 +1,14 @@
 // TODO: remplacer par appel API (ex: getCarbonQuiz())
 export const mockCarbonQuiz = {
   id: 'carbon-quiz-1',
-  title: 'QUIZZ DE LA SEMAINE',
+  title: 'Quiz du mois',
+  /** Court texte affiché sous le titre (écran Données / quiz du mois). */
   description:
-    'Le quizz de la semaine vous permet de mettre à jour votre score carbone et de le consulter.',
+    'Quelques questions pour mettre à jour votre empreinte carbone et suivre vos progrès sur le mois.',
+  /** Affichée sous « Quiz ouvert » sur l’écran Données / quiz du mois. */
+  encouragementQuizOuvert:
+    'Quelques minutes suffisent pour mettre à jour votre empreinte — lancez-vous !',
   duration: 5, // en minutes
-  imageUrl: '/planet.png', // Image de planète écologique
-  buttonLabel: 'Mettre a jour mon score carbone',
-  estimatedMinutes: '5 minutes',
+  imageUrl: '/planet.png',
+  estimatedMinutes: '5 min',
 }

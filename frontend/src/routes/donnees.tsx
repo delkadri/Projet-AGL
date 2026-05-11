@@ -1,73 +1,62 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { mockCarbonQuiz } from '@/data/mockCarbonQuiz'
-import { Clock } from 'lucide-react'
-import BottomNav from '@/components/home/BottomNav'
+import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router'
 
+import { cn } from '@/lib/utils'
+
+/**
+ * Layout segment « Données » : menu (Quiz du mois / Votre score carbone) + `<Outlet />`.
+ * Voir `donnees.index.tsx` (carte MAJ) et `donnees.bilan-onboarding.tsx`.
+ */
 export const Route = createFileRoute('/donnees')({
-  component: DonneesPage,
+  component: DonneesLayout,
 })
 
-function DonneesPage() {
-  const navigate = useNavigate()
-
-  const handleStartQuiz = () => {
-    // TODO: Implement API call to fetch carbon quiz data
-    // TODO: Initialize quiz state and redirect to quiz questions
-    navigate({ to: '/carbon-quiz-questions' })
-  }
+function DonneesSectionNav() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const isQuizDuMois = pathname === '/donnees' || pathname === '/donnees/'
+  const isScoreCarbone =
+    pathname.startsWith('/donnees/bilan-onboarding') ||
+    pathname.startsWith('/donnees/score/')
 
   return (
-    <div className="min-h-[calc(100vh-70px)] bg-[#f1f8e9] w-full px-4 py-8 flex flex-col">
-      <div className="flex-1 flex items-center justify-center pb-20">
-        <div className="w-full max-w-sm">
-          {/* Card Container */}
-          <div className="rounded-2xl bg-white shadow-lg overflow-hidden">
-            {/* Content Section - Title First */}
-            <div className="p-6 pb-0">
-              {/* Title */}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 text-center">
-                  {mockCarbonQuiz.title}
-                </h1>
-              </div>
-            </div>
+    <div className="shrink-0 bg-transparent px-3 pt-2 pb-1">
+      <nav
+        className="mx-auto flex max-w-md gap-1 rounded-2xl bg-white/55 p-1 shadow-sm ring-1 ring-[#1A4D3E]/6 backdrop-blur-md"
+        aria-label="Sections mise à jour des données"
+      >
+        <Link
+          to="/donnees"
+          className={cn(
+            'flex-1 rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200',
+            isQuizDuMois
+              ? 'bg-[#1A4D3E] text-white shadow-md shadow-[#1A4D3E]/20'
+              : 'text-[#1A4D3E]/85 hover:bg-white/70',
+          )}
+        >
+          Quiz du mois
+        </Link>
+        <Link
+          to="/donnees/bilan-onboarding"
+          className={cn(
+            'flex-1 rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200',
+            isScoreCarbone
+              ? 'bg-[#1A4D3E] text-white shadow-md shadow-[#1A4D3E]/20'
+              : 'text-[#1A4D3E]/85 hover:bg-white/70',
+          )}
+        >
+          Votre score carbone
+        </Link>
+      </nav>
+    </div>
+  )
+}
 
-            {/* Image Section */}
-            <div className="w-full h-96 flex items-center justify-center p-4 rounded-xl">
-              <img
-                src={mockCarbonQuiz.imageUrl}
-                alt="Planet"
-                className="w-full h-full object-contain rounded-xl"
-              />
-            </div>
-
-            {/* Content Section */}
-            <div className="p-6 space-y-5">
-
-              {/* Description */}
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {mockCarbonQuiz.description}
-              </p>
-
-              {/* Duration */}
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Clock className="w-5 h-5" style={{ color: '#1A4D3E' }} />
-                <b><span>Durée : {mockCarbonQuiz.estimatedMinutes}</span></b>
-              </div>
-
-              {/* Button */}
-              <Button
-                onClick={handleStartQuiz}
-                className="w-full bg-[#1A4D3E] hover:bg-[#153936] text-white font-semibold py-3 rounded-lg transition-colors"
-              >
-                {mockCarbonQuiz.buttonLabel}
-              </Button>
-            </div>
-          </div>
-        </div>
+function DonneesLayout() {
+  return (
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent">
+      <DonneesSectionNav />
+      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden overscroll-y-none">
+        <Outlet />
       </div>
-      <BottomNav />
     </div>
   )
 }

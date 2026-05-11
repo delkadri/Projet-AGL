@@ -7,6 +7,9 @@ import {
   round2,
 } from '../scoring.types';
 
+/** kg CO₂e / kWh — mix réseau France (aligné chauffage électrique / Base Carbone). */
+const ELEC_GRID_KG_PER_KWH = 0.052;
+
 @Injectable()
 export class HousingScorer {
   private readonly logger = new Logger(HousingScorer.name);
@@ -14,11 +17,14 @@ export class HousingScorer {
   constructor(private readonly ademe: AdemeBaseCarboneService) {}
 
   async compute(ctx: ScorerContext): Promise<BreakdownItem[]> {
-    const results = await Promise.all([
-      this.computeHeating(ctx),
-      Promise.resolve(this.computeAC(ctx)),
-    ]);
-    return results.filter((item): item is BreakdownItem => item !== null);
+    const heating = await this.computeHeating(ctx);
+    const hotWater = heating ? this.computeHotWater(ctx, heating) : null;
+    const ac = this.computeAC(ctx);
+    const otherElectricity = this.computeOtherElectricity(ctx);
+
+    return [heating, hotWater, ac, otherElectricity].filter(
+      (item): item is BreakdownItem => item !== null,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -50,16 +56,23 @@ export class HousingScorer {
       questionByDataType.get('housing_construction_era'),
       answers,
     );
+    const buildingType = getSingleAnswer(
+      questionByDataType.get('housing_building_type'),
+      answers,
+    );
 
     if (!surfaceBand || !heatingType) return null;
 
     const surfaceM2 = this.toSurfaceM2(surfaceBand);
     const occupants = this.toOccupants(occupantsBand);
-    // Consommation annuelle par m² : année de construction (norme énergétique) si connue, sinon isolation
-    const annualKwhPerM2 = this.toAnnualKwhPerM2(insulationBand, constructionEra);
-    const annualKwh = (surfaceM2 * annualKwhPerM2) / occupants;
+    const annualKwhPerM2 = this.toAnnualKwhPerM2(
+      insulationBand,
+      constructionEra,
+    );
+    const buildingCoeff = this.toBuildingHeatingCoeff(buildingType);
+    const annualKwh =
+      ((surfaceM2 * annualKwhPerM2) / occupants) * buildingCoeff;
 
-    // Facteur ADEME attendu en kgCO2e/kWh ; bornes : [0.001, 1.0]
     const factorLookup = await this.ademe.findFactorByKeywords(
       this.getHeatingKeywords(heatingType),
       { expectedUnitHint: '/kWh', minFactor: 0.001, maxFactor: 1.0 },
@@ -91,7 +104,97 @@ export class HousingScorer {
         ademeReference: factorLookup
           ? `${factorLookup.source.baseName ?? '?'} / ${factorLookup.source.attributeName ?? '?'}`
           : undefined,
-        formula: `${surfaceM2} m² × ${annualKwhPerM2} kWh/m²/an ÷ ${occupants} occupants = ${round2(annualKwh)} kWh/an × ${factor} ${factorUnit} = ${emission} kgCO2e/an`,
+        formula: `${surfaceM2} m² × ${annualKwhPerM2} kWh/m²/an ÷ ${occupants} occ. × coeff bâtiment ${buildingCoeff} = ${round2(annualKwh)} kWh/an × ${factor} ${factorUnit} = ${emission} kgCO2e/an`,
+      },
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Eau chaude sanitaire
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Uniquement si la question `housing_hot_water` est renseignée (rétrocompatibilité
+   * avec les anciens quiz sans ce poste).
+   */
+  private computeHotWater(
+    ctx: ScorerContext,
+    heating: BreakdownItem,
+  ): BreakdownItem | null {
+    const { answers, questionByDataType, dataTypeToCategoryId } = ctx;
+    const q = questionByDataType.get('housing_hot_water');
+    if (!q || answers[q.id] === undefined || answers[q.id] === null) {
+      return null;
+    }
+
+    const mode = getSingleAnswer(q, answers);
+    if (!mode) return null;
+
+    const occupantsBand = getSingleAnswer(
+      questionByDataType.get('housing_occupants'),
+      answers,
+    );
+    const heatingType = getSingleAnswer(
+      questionByDataType.get('heating_type'),
+      answers,
+    );
+    const occupants = this.toOccupants(occupantsBand);
+    const heatingKg = heating.valueKgCo2ePerYear;
+
+    const kg = this.toHotWaterKg(mode, heatingType ?? '', heatingKg, occupants);
+    if (kg <= 0) return null;
+
+    const categoryId = dataTypeToCategoryId.get('housing_hot_water') ?? '';
+
+    return {
+      key: 'housing-hot-water',
+      label: 'Eau chaude sanitaire',
+      valueKgCo2ePerYear: round2(kg),
+      categoryId,
+      debug: {
+        factorSource: 'ademe-empreinte',
+        factorValue: round2(kg),
+        factorUnit: 'kgCO2e/an (estimation bilan logement)',
+        ademeReference: 'Ordres de grandeur ADEME / usages résidentiels',
+        formula: `mode="${mode}", chauffage=${heatingType ?? '?'} → ${round2(kg)} kgCO2e/an`,
+      },
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Électricité spécifique (hors chauffage / ECS déjà comptés ailleurs)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Uniquement si `housing_other_electricity` est présent (nouveau quiz).
+   */
+  private computeOtherElectricity(ctx: ScorerContext): BreakdownItem | null {
+    const { answers, questionByDataType, dataTypeToCategoryId } = ctx;
+    const q = questionByDataType.get('housing_other_electricity');
+    if (!q || answers[q.id] === undefined || answers[q.id] === null) {
+      return null;
+    }
+
+    const band = getSingleAnswer(q, answers);
+    if (!band) return null;
+
+    const kwhHousehold =
+      band === 'sobre' ? 1100 : band === 'eleve' ? 3100 : 1900;
+    const emission = round2(kwhHousehold * ELEC_GRID_KG_PER_KWH);
+    const categoryId =
+      dataTypeToCategoryId.get('housing_other_electricity') ?? '';
+
+    return {
+      key: 'housing-other-electricity',
+      label: 'Électricité (froid, lumière, cuisine, multimédia…)',
+      valueKgCo2ePerYear: emission,
+      categoryId,
+      debug: {
+        factorSource: 'ademe-empreinte',
+        factorValue: ELEC_GRID_KG_PER_KWH,
+        factorUnit: 'kgCO2e/kWh (mix France)',
+        ademeReference: 'Consommation spécifique résidentielle indicative',
+        formula: `${kwhHousehold} kWh/an × ${ELEC_GRID_KG_PER_KWH} kgCO2e/kWh = ${emission} kgCO2e/an`,
       },
     };
   }
@@ -130,6 +233,67 @@ export class HousingScorer {
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
+
+  /** Coefficient sur le besoin chauffage annuel (déperditions) selon le type de bâtiment. */
+  private toBuildingHeatingCoeff(buildingType?: string): number {
+    switch (buildingType) {
+      case 'appartement':
+        return 0.88;
+      case 'maison_mitoyenne':
+        return 1.0;
+      case 'maison_isolee':
+        return 1.1;
+      default:
+        return 1.0;
+    }
+  }
+
+  private toHotWaterKg(
+    mode: string,
+    heatingType: string,
+    heatingKg: number,
+    occupants: number,
+  ): number {
+    switch (mode) {
+      case 'meme_que_chauffage':
+        return this.hotWaterSameAsHeating(heatingType, heatingKg, occupants);
+      case 'ballon_electrique':
+        return occupants * 920 * ELEC_GRID_KG_PER_KWH;
+      case 'pac_eau_chaude':
+        return round2(occupants * 240 * ELEC_GRID_KG_PER_KWH);
+      case 'solaire':
+        return 22;
+      case 'ne_sais_pas':
+        return occupants * 38;
+      default:
+        return occupants * 35;
+    }
+  }
+
+  private hotWaterSameAsHeating(
+    heatingType: string,
+    heatingKg: number,
+    occupants: number,
+  ): number {
+    switch (heatingType) {
+      case 'gaz':
+        return round2(heatingKg * 0.24);
+      case 'fioul':
+        return round2(heatingKg * 0.22);
+      case 'electricite':
+        return round2(
+          Math.min(420, Math.max(95, heatingKg * 0.1 + occupants * 35)),
+        );
+      case 'pac':
+        return round2(heatingKg * 0.07 + occupants * 28);
+      case 'bois':
+        return round2(occupants * 58);
+      case 'reseau_chaleur':
+        return round2(heatingKg * 0.17);
+      default:
+        return round2(occupants * 40);
+    }
+  }
 
   private toSurfaceM2(band?: string): number {
     switch (band) {

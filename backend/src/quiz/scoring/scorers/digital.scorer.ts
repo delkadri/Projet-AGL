@@ -134,8 +134,7 @@ export class DigitalScorer {
      */
     const factorKgPerHour = 0.035;
     const emission = round2(annualHours * factorKgPerHour);
-    const categoryId =
-      dataTypeToCategoryId.get('visio_hours_per_week') ?? '';
+    const categoryId = dataTypeToCategoryId.get('visio_hours_per_week') ?? '';
 
     if (hoursPerWeek === 0) return null;
 

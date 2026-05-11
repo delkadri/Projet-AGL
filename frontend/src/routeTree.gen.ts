@@ -15,12 +15,15 @@ import { Route as DonneesRouteImport } from './routes/donnees'
 import { Route as CommunautesRouteImport } from './routes/communautes'
 import { Route as CarbonQuizQuestionsRouteImport } from './routes/carbon-quiz-questions'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DonneesIndexRouteImport } from './routes/donnees.index'
 import { Route as CommunautesIndexRouteImport } from './routes/communautes.index'
 import { Route as OnboardingQuizRouteImport } from './routes/onboarding/quiz'
 import { Route as OnboardingParcoursRouteImport } from './routes/onboarding/parcours'
+import { Route as DonneesBilanOnboardingRouteImport } from './routes/donnees.bilan-onboarding'
 import { Route as CommunautesRejoindreRouteImport } from './routes/communautes.rejoindre'
 import { Route as CommunautesCreationRouteImport } from './routes/communautes.creation'
 import { Route as CommunautesCommunityIdRouteImport } from './routes/communautes.$communityId'
+import { Route as DonneesScoreIdRouteImport } from './routes/donnees.score.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -52,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DonneesIndexRoute = DonneesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DonneesRoute,
+} as any)
 const CommunautesIndexRoute = CommunautesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -66,6 +74,11 @@ const OnboardingParcoursRoute = OnboardingParcoursRouteImport.update({
   id: '/onboarding/parcours',
   path: '/onboarding/parcours',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DonneesBilanOnboardingRoute = DonneesBilanOnboardingRouteImport.update({
+  id: '/bilan-onboarding',
+  path: '/bilan-onboarding',
+  getParentRoute: () => DonneesRoute,
 } as any)
 const CommunautesRejoindreRoute = CommunautesRejoindreRouteImport.update({
   id: '/rejoindre',
@@ -82,48 +95,61 @@ const CommunautesCommunityIdRoute = CommunautesCommunityIdRouteImport.update({
   path: '/$communityId',
   getParentRoute: () => CommunautesRoute,
 } as any)
+const DonneesScoreIdRoute = DonneesScoreIdRouteImport.update({
+  id: '/score/$id',
+  path: '/score/$id',
+  getParentRoute: () => DonneesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
   '/communautes': typeof CommunautesRouteWithChildren
-  '/donnees': typeof DonneesRoute
+  '/donnees': typeof DonneesRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
+  '/donnees/bilan-onboarding': typeof DonneesBilanOnboardingRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes/': typeof CommunautesIndexRoute
+  '/donnees/': typeof DonneesIndexRoute
+  '/donnees/score/$id': typeof DonneesScoreIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
-  '/donnees': typeof DonneesRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
+  '/donnees/bilan-onboarding': typeof DonneesBilanOnboardingRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes': typeof CommunautesIndexRoute
+  '/donnees': typeof DonneesIndexRoute
+  '/donnees/score/$id': typeof DonneesScoreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
   '/communautes': typeof CommunautesRouteWithChildren
-  '/donnees': typeof DonneesRoute
+  '/donnees': typeof DonneesRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
   '/communautes/$communityId': typeof CommunautesCommunityIdRoute
   '/communautes/creation': typeof CommunautesCreationRoute
   '/communautes/rejoindre': typeof CommunautesRejoindreRoute
+  '/donnees/bilan-onboarding': typeof DonneesBilanOnboardingRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
   '/communautes/': typeof CommunautesIndexRoute
+  '/donnees/': typeof DonneesIndexRoute
+  '/donnees/score/$id': typeof DonneesScoreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,22 +163,27 @@ export interface FileRouteTypes {
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
+    | '/donnees/bilan-onboarding'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes/'
+    | '/donnees/'
+    | '/donnees/score/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/carbon-quiz-questions'
-    | '/donnees'
     | '/inscription'
     | '/login'
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
+    | '/donnees/bilan-onboarding'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes'
+    | '/donnees'
+    | '/donnees/score/$id'
   id:
     | '__root__'
     | '/'
@@ -164,16 +195,19 @@ export interface FileRouteTypes {
     | '/communautes/$communityId'
     | '/communautes/creation'
     | '/communautes/rejoindre'
+    | '/donnees/bilan-onboarding'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
     | '/communautes/'
+    | '/donnees/'
+    | '/donnees/score/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CarbonQuizQuestionsRoute: typeof CarbonQuizQuestionsRoute
   CommunautesRoute: typeof CommunautesRouteWithChildren
-  DonneesRoute: typeof DonneesRoute
+  DonneesRoute: typeof DonneesRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
   OnboardingParcoursRoute: typeof OnboardingParcoursRoute
@@ -224,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/donnees/': {
+      id: '/donnees/'
+      path: '/'
+      fullPath: '/donnees/'
+      preLoaderRoute: typeof DonneesIndexRouteImport
+      parentRoute: typeof DonneesRoute
+    }
     '/communautes/': {
       id: '/communautes/'
       path: '/'
@@ -244,6 +285,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/parcours'
       preLoaderRoute: typeof OnboardingParcoursRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/donnees/bilan-onboarding': {
+      id: '/donnees/bilan-onboarding'
+      path: '/bilan-onboarding'
+      fullPath: '/donnees/bilan-onboarding'
+      preLoaderRoute: typeof DonneesBilanOnboardingRouteImport
+      parentRoute: typeof DonneesRoute
     }
     '/communautes/rejoindre': {
       id: '/communautes/rejoindre'
@@ -266,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunautesCommunityIdRouteImport
       parentRoute: typeof CommunautesRoute
     }
+    '/donnees/score/$id': {
+      id: '/donnees/score/$id'
+      path: '/score/$id'
+      fullPath: '/donnees/score/$id'
+      preLoaderRoute: typeof DonneesScoreIdRouteImport
+      parentRoute: typeof DonneesRoute
+    }
   }
 }
 
@@ -287,11 +342,26 @@ const CommunautesRouteWithChildren = CommunautesRoute._addFileChildren(
   CommunautesRouteChildren,
 )
 
+interface DonneesRouteChildren {
+  DonneesBilanOnboardingRoute: typeof DonneesBilanOnboardingRoute
+  DonneesIndexRoute: typeof DonneesIndexRoute
+  DonneesScoreIdRoute: typeof DonneesScoreIdRoute
+}
+
+const DonneesRouteChildren: DonneesRouteChildren = {
+  DonneesBilanOnboardingRoute: DonneesBilanOnboardingRoute,
+  DonneesIndexRoute: DonneesIndexRoute,
+  DonneesScoreIdRoute: DonneesScoreIdRoute,
+}
+
+const DonneesRouteWithChildren =
+  DonneesRoute._addFileChildren(DonneesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CarbonQuizQuestionsRoute: CarbonQuizQuestionsRoute,
   CommunautesRoute: CommunautesRouteWithChildren,
-  DonneesRoute: DonneesRoute,
+  DonneesRoute: DonneesRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,
   OnboardingParcoursRoute: OnboardingParcoursRoute,

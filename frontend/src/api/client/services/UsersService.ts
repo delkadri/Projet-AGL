@@ -37,6 +37,27 @@ export class UsersService {
         });
     }
     /**
+     * [TEMP] Réinitialiser onboarding et effacer les scores enregistrés (refaire le quiz)
+     * Remet onboarding_completed à false et supprime toutes les entrées score_history de l'utilisateur (y compris quiz mensuel) pour que le prochain onboarding redevienne le « premier » bilan.
+     * @returns any Onboarding réinitialisé, historique des scores effacé.
+     * @throws ApiError
+     */
+    public static userControllerResetOnboardingForRetest({
+        requestBody,
+    }: {
+        /**
+         * Corps optionnel (ex. `{}`) pour compatibilité clients JSON.
+         */
+        requestBody?: Record<string, any>,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/users/me/onboarding/reset-retest',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * Récupérer l'historique des scores carbone de l'utilisateur
      * @returns ScoreHistoryResponseDto Historique des scores récupéré avec succès
      * @throws ApiError

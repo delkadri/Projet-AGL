@@ -40,14 +40,14 @@ export class ServicesScorer {
 
     return {
       key: 'services-savings',
-      label: 'Impact de l\'épargne (activités financées)',
+      label: "Impact de l'épargne (activités financées)",
       valueKgCo2ePerYear: round2(emission),
       categoryId,
       debug: {
         factorSource: 'ademe-empreinte',
         factorValue: emission,
         factorUnit: 'kgCO2e/an',
-        ademeReference: 'ADEME — Empreinte carbone de l\'épargne',
+        ademeReference: "ADEME — Empreinte carbone de l'épargne",
         formula: `Épargne ${volume}, orientation ${greenRatio ?? 'n/a'} → ${round2(emission)} kgCO2e/an`,
       },
     };

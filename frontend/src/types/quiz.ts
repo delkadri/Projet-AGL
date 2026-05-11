@@ -30,6 +30,8 @@ export type QuestionSingle = {
   title: string
   /** Optional short educational text about the carbon impact context for this question. */
   description?: string
+  /** Optional help text that explains how to interpret the question itself (scope, units, edge cases…). */
+  clarification?: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
   /** If set, this question is only shown when the condition is satisfied. */
@@ -43,6 +45,8 @@ export type QuestionMultiple = {
   title: string
   /** Optional short educational text about the carbon impact context for this question. */
   description?: string
+  /** Optional help text that explains how to interpret the question itself (scope, units, edge cases…). */
+  clarification?: string
   options: QuizOption[]
   carbonMeta?: QuestionCarbonMeta
   showIf?: QuestionShowIf
@@ -55,6 +59,8 @@ export type QuestionNumber = {
   title: string
   /** Optional short educational text about the carbon impact context for this question. */
   description?: string
+  /** Optional help text that explains how to interpret the question itself (scope, units, edge cases…). */
+  clarification?: string
   min: number
   max: number
   carbonMeta?: QuestionCarbonMeta
