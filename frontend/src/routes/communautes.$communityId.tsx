@@ -38,7 +38,7 @@ function CommunauteDetailPage() {
     celebrationShownRef.current = false
     setShowBurst(false)
     setSuccessOpen(false)
-  }, [detail?.community.id, detail?.active_defi?.id])
+  }, [detail?.community?.id, detail?.active_defi?.id])
 
   const handleMarkComplete = () => {
     if (!defiProgress || defiProgress.userDone || !detail?.active_defi) return
@@ -100,7 +100,7 @@ function CommunauteDetailPage() {
           </div>
         )}
 
-        {!isPending && detail && defiProgress && (
+        {!isPending && detail?.community && (
           <div className="flex min-h-0 min-w-0 max-h-full flex-1 basis-0 flex-col gap-2 overflow-hidden">
             <Button variant="ghost" size="sm" className="-ml-1 h-8 w-fit shrink-0 px-2 text-[#1b5e20]" asChild>
               <Link to="/communautes">
@@ -109,15 +109,17 @@ function CommunauteDetailPage() {
               </Link>
             </Button>
 
-            <div className="shrink-0">
-              <CommunityChallengeBanner
-                defi={detail.active_defi}
-                membersCompleted={defiProgress.membersCompleted}
-                currentUserCompleted={defiProgress.userDone}
-                onMarkComplete={handleMarkComplete}
-                showBonusBurst={showBurst}
-              />
-            </div>
+            {detail.active_defi && defiProgress && (
+              <div className="shrink-0">
+                <CommunityChallengeBanner
+                  defi={detail.active_defi}
+                  membersCompleted={defiProgress.membersCompleted}
+                  currentUserCompleted={defiProgress.userDone}
+                  onMarkComplete={handleMarkComplete}
+                  showBonusBurst={showBurst}
+                />
+              </div>
+            )}
 
             <CommunityChat
               communityId={detail.community.id}
@@ -132,7 +134,7 @@ function CommunauteDetailPage() {
         )}
       </div>
 
-      {!isPending && detail && defiProgress && (
+      {!isPending && detail?.community && (
         <>
           <CommunityTreeRankingDialog
             open={rankingOpen}
@@ -141,11 +143,13 @@ function CommunauteDetailPage() {
             entries={detail.tree_ranking}
           />
 
-          <CommunitySuccessDialog
-            open={successOpen}
-            onOpenChange={setSuccessOpen}
-            bonusFeuilles={detail.active_defi.bonus_feuilles}
-          />
+          {detail.active_defi && defiProgress && (
+            <CommunitySuccessDialog
+              open={successOpen}
+              onOpenChange={setSuccessOpen}
+              bonusFeuilles={detail.active_defi.bonus_feuilles}
+            />
+          )}
         </>
       )}
 

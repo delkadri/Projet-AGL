@@ -19,6 +19,7 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { ChallengeService } from './challenge.service';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { UserGroupMembershipDto } from './dto/user-group-membership.dto';
 import { GroupService } from './group.service';
 
 @ApiTags('groups')
@@ -33,8 +34,8 @@ export class GroupController {
 
   @Get('me')
   @ApiOperation({ summary: "Liste des groupes de l'utilisateur connecté" })
-  @ApiResponse({ status: 200, description: 'Groupes retournés' })
-  getMyGroups(@CurrentUser() user: any) {
+  @ApiResponse({ status: 200, type: [UserGroupMembershipDto] })
+  getMyGroups(@CurrentUser() user: any): Promise<UserGroupMembershipDto[]> {
     return this.groupService.getMyGroups(user.id);
   }
 
@@ -57,7 +58,7 @@ export class GroupController {
 
   @Post()
   @ApiOperation({ summary: 'Créer un groupe (niveau ≥ 3 requis)' })
-  @ApiResponse({ status: 201, description: 'Groupe créé' })
+  @ApiResponse({ status: 201, type: UserGroupMembershipDto })
   @ApiResponse({ status: 403, description: 'Niveau insuffisant' })
   createGroup(@CurrentUser() user: any, @Body() dto: CreateGroupDto) {
     return this.groupService.createGroup(user.id, dto);
@@ -69,8 +70,8 @@ export class GroupController {
   })
   @ApiResponse({ status: 200, description: 'Détails du groupe' })
   @ApiResponse({ status: 404, description: 'Groupe non trouvé' })
-  getGroupDetails(@Param('id') id: string) {
-    return this.groupService.getGroupDetails(id);
+  getGroupDetails(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.groupService.getGroupDetails(id, user.id);
   }
 
   @Post(':id/join')

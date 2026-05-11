@@ -7,6 +7,8 @@ import {
 import { randomUUID } from 'crypto';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { InterCommunityLeaderboardEntryDto } from './dto/inter-community-leaderboard.dto';
+import { UserGroupMembershipDto } from './dto/user-group-membership.dto';
 
 @Injectable()
 export class GroupService {
@@ -32,7 +34,7 @@ export class GroupService {
     if (existing) throw new ConflictException('Déjà membre de ce groupe');
   }
 
-  async createGroup(userId: string, dto: CreateGroupDto) {
+  async createGroup(userId: string, dto: CreateGroupDto): Promise<UserGroupMembershipDto> {
     const niveau = await this.getUserLevel(userId);
     if (niveau < 3) {
       throw new ForbiddenException('Niveau 3 requis pour créer un groupe');
@@ -48,11 +50,24 @@ export class GroupService {
       },
     });
 
-    await this.prisma.group_members.create({
+    const membership = await this.prisma.group_members.create({
       data: { group_id: group.id, user_id: userId },
     });
 
-    return group;
+    return {
+      community: {
+        id: group.id,
+        name: group.name,
+        description: group.description ?? '',
+        member_count: 1,
+        is_private: !group.is_public,
+        created_at: group.created_at.toISOString(),
+        updated_at: group.updated_at.toISOString(),
+      },
+      role: 'ADMIN',
+      joined_at: membership.joined_at.toISOString(),
+      has_pending_defi: false,
+    };
   }
 
   async joinGroupByName(userId: string, name: string) {
@@ -165,7 +180,17 @@ export class GroupService {
     return group;
   }
 
-  async getGroupDetails(groupId: string) {
+  async getGroupDetails(groupId: string, userId: string) {
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setUTCDate(now.getUTCDate() + diffToMonday);
+    weekStart.setUTCHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+    weekEnd.setUTCHours(23, 59, 59, 999);
+
     const group = await this.prisma.groups.findUnique({
       where: { id: groupId },
       include: {
@@ -173,14 +198,165 @@ export class GroupService {
           include: {
             user: { select: { first_name: true, last_name: true } },
           },
+          orderBy: { arbres: 'desc' },
+        },
+        group_challenges: {
+          where: {
+            week_start_at: { gte: weekStart },
+            week_end_at: { lte: weekEnd },
+          },
+          include: {
+            challenge: true,
+            completions: true,
+          },
         },
       },
     });
     if (!group) throw new NotFoundException('Groupe non trouvé');
-    return group;
+
+    const activeChallenge = group.group_challenges[0] ?? null;
+    const memberCount = group.members.length;
+
+    const treeRanking = group.members.map((m, i) => ({
+      rank: i + 1,
+      user_id: m.user_id,
+      display_name:
+        [m.user.first_name, m.user.last_name].filter(Boolean).join(' ') ||
+        'Anonyme',
+      tree_score: m.arbres,
+    }));
+
+    const streakStatus =
+      group.win_streak === 0
+        ? 'broken'
+        : group.last_streak_updated_at &&
+            group.last_streak_updated_at >= weekStart
+          ? 'active'
+          : 'at_risk';
+
+    const activeDefi = activeChallenge
+      ? {
+          id: activeChallenge.id,
+          title: activeChallenge.challenge.title,
+          description: activeChallenge.challenge.description,
+          points: 0,
+          iconKey: 'leaf' as const,
+          ends_at: activeChallenge.week_end_at.toISOString(),
+          bonus_feuilles: 0,
+          members_completed: activeChallenge.completions.length,
+          members_total_for_challenge: memberCount,
+          current_user_completed: activeChallenge.completions.some(
+            (c) => c.user_id === userId,
+          ),
+        }
+      : null;
+
+    return {
+      community: {
+        id: group.id,
+        slug: group.id,
+        name: group.name,
+        description: group.description ?? '',
+        member_count: memberCount,
+        is_private: !group.is_public,
+        created_at: group.created_at.toISOString(),
+        updated_at: group.updated_at.toISOString(),
+      },
+      active_defi: activeDefi,
+      win_streak: {
+        count: group.win_streak,
+        status: streakStatus,
+        challenge_ends_at:
+          activeChallenge?.week_end_at.toISOString() ??
+          weekEnd.toISOString(),
+        last_full_completion_at: null,
+      },
+      tree_ranking: treeRanking,
+    };
   }
 
-  async getMyGroups(userId: string) {
+  async getLeaderboard(): Promise<InterCommunityLeaderboardEntryDto[]> {
+    const groups = await this.prisma.groups.findMany({
+      where: { status: 'active' },
+      select: {
+        id: true,
+        name: true,
+        win_streak: true,
+        last_streak_updated_at: true,
+        members: {
+          select: {
+            user: {
+              select: {
+                score_history: { select: { score: true } },
+              },
+            },
+          },
+        },
+        _count: { select: { members: true } },
+      },
+    });
+
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setUTCDate(now.getUTCDate() + diffToMonday);
+    weekStart.setUTCHours(0, 0, 0, 0);
+
+    const entries = groups.map((group) => {
+      const allScores = group.members.flatMap((m) =>
+        m.user.score_history.map((s) => s.score),
+      );
+      const avg =
+        allScores.length > 0
+          ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+          : 0;
+
+      let streakStatus: 'active' | 'at_risk' | 'broken';
+      if (group.win_streak === 0) {
+        streakStatus = 'broken';
+      } else if (
+        group.last_streak_updated_at &&
+        group.last_streak_updated_at >= weekStart
+      ) {
+        streakStatus = 'active';
+      } else {
+        streakStatus = 'at_risk';
+      }
+
+      return {
+        community: {
+          id: group.id,
+          slug: group.id,
+          name: group.name,
+          member_count: group._count.members,
+        },
+        average_carbon_tco2e_per_year: avg,
+        win_streak: { count: group.win_streak, status: streakStatus },
+      };
+    });
+
+    entries.sort((a, b) => {
+      const diff =
+        a.average_carbon_tco2e_per_year - b.average_carbon_tco2e_per_year;
+      if (diff !== 0) return diff;
+      return b.win_streak.count - a.win_streak.count;
+    });
+
+    return entries.map((entry, i) => ({ rank: i + 1, ...entry }));
+  }
+
+  async getMyGroups(userId: string): Promise<UserGroupMembershipDto[]> {
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setUTCDate(now.getUTCDate() + diffToMonday);
+    weekStart.setUTCHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+    weekEnd.setUTCHours(23, 59, 59, 999);
+
     const memberships = await this.prisma.group_members.findMany({
       where: { user_id: userId },
       include: {
@@ -190,12 +366,46 @@ export class GroupService {
             name: true,
             description: true,
             is_public: true,
-            win_streak: true,
             admin_id: true,
+            created_at: true,
+            updated_at: true,
+            _count: { select: { members: true } },
+            group_challenges: {
+              where: {
+                week_start_at: { gte: weekStart },
+                week_end_at: { lte: weekEnd },
+              },
+              select: {
+                id: true,
+                completions: {
+                  where: { user_id: userId },
+                  select: { id: true },
+                },
+              },
+            },
           },
         },
       },
     });
-    return memberships.map((m) => m.group);
+
+    return memberships.map((m) => {
+      const weeklyChallenge = m.group.group_challenges[0] ?? null;
+      return {
+        community: {
+          id: m.group.id,
+          name: m.group.name,
+          description: m.group.description ?? '',
+          member_count: m.group._count.members,
+          is_private: !m.group.is_public,
+          created_at: m.group.created_at.toISOString(),
+          updated_at: m.group.updated_at.toISOString(),
+        },
+        role: m.group.admin_id === userId ? 'ADMIN' : 'MEMBER',
+        joined_at: m.joined_at.toISOString(),
+        has_pending_defi:
+          weeklyChallenge !== null &&
+          weeklyChallenge.completions.length === 0,
+      };
+    });
   }
 }

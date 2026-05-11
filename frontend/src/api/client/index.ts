@@ -9,11 +9,13 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { CalculateQuizScoreDto } from './models/CalculateQuizScoreDto';
+export type { CreateGroupDto } from './models/CreateGroupDto';
 export type { LoginDto } from './models/LoginDto';
 export type { ParcoursDto } from './models/ParcoursDto';
 export type { PreviewQuizScoreDto } from './models/PreviewQuizScoreDto';
 export type { RegisterDto } from './models/RegisterDto';
 export type { ScoreHistoryResponseDto } from './models/ScoreHistoryResponseDto';
+export type { SendMessageDto } from './models/SendMessageDto';
 export type { SessionDto } from './models/SessionDto';
 export type { UpdateParcoursDto } from './models/UpdateParcoursDto';
 export type { UserDto } from './models/UserDto';
@@ -21,6 +23,8 @@ export type { UserProfileResponseDto } from './models/UserProfileResponseDto';
 
 export { AppService } from './services/AppService';
 export { AuthService } from './services/AuthService';
+export { CommunitiesService } from './services/CommunitiesService';
+export { GroupsService } from './services/GroupsService';
 export { HealthService } from './services/HealthService';
 export { ParcoursService } from './services/ParcoursService';
 export { QuizService } from './services/QuizService';
