@@ -1,30 +1,85 @@
-# Community module
+# Flux temps réel des messages de groupe
 
-Gestion des groupes, défis hebdomadaires et chat temps réel.
+## Vue d'ensemble
 
-## Chat de groupe (TER-49)
+```
+┌──────────┐    1. POST /groups/:id/messages    ┌──────────┐
+│ Client A │ ─────────────────────────────────► │ NestJS   │
+│ (auteur) │                                    │ Backend  │
+└──────────┘                                    └────┬─────┘
+                                                     │
+                                       2. Vérif membre + persist Prisma
+                                                     │
+                                                     ▼
+                                            ┌────────────────┐
+                                            │   PostgreSQL   │
+                                            │ group_messages │
+                                            └────────────────┘
+                                                     │
+                                                     │ 3. broadcast
+                                                     ▼
+                                            ┌────────────────────┐
+                                            │ Supabase Realtime  │
+                                            │ channel:           │
+                                            │  group:{groupId}   │
+                                            └─────────┬──────────┘
+                                                      │ 4. push WS
+                  ┌───────────────────────────────────┼──────────┐
+                  ▼                                   ▼          ▼
+            ┌──────────┐                       ┌──────────┐  ┌──────────┐
+            │ Client A │                       │ Client B │  │ Client C │
+            │ (abonné) │                       │ (abonné) │  │ (abonné) │
+            └──────────┘                       └──────────┘  └──────────┘
+```
 
-### Modèle de données
+## Étapes en détail
 
-Table `group_messages` (Prisma model `group_messages`) :
+**1. Envoi (REST classique)**
+Le client A fait `POST /groups/:id/messages` avec son JWT Supabase dans le header. Pas de WebSocket pour ça — c'est une requête HTTP normale.
 
-| Colonne     | Type        | Description                              |
-|-------------|-------------|------------------------------------------|
-| `id`        | uuid        | PK                                       |
-| `group_id`  | uuid (FK)   | Groupe destinataire                      |
-| `user_id`   | uuid (FK)   | Auteur                                   |
-| `content`   | text        | Contenu du message (max 2000 caractères) |
-| `created_at`| timestamptz | UTC, défaut DB                           |
+**2. Validation + persistance**
+`SupabaseAuthGuard` valide le JWT → `ChatService.sendMessage` :
+- `assertIsMember` vérifie que l'utilisateur est dans `group_members` (sinon 403).
+- Prisma insère la ligne dans `group_messages` avec `user_id`, `group_id`, `content`.
+- Le message persisté (avec l'objet `user`) est retourné dans la réponse HTTP au client A.
 
-Index composite `(group_id, created_at)` pour la pagination par curseur.
+**3. Broadcast**
+Avant de retourner, le backend appelle :
+```ts
+supabase.channel(`group:${groupId}`).send({
+  type: 'broadcast',
+  event: 'new_message',
+  payload: message,
+})
+```
+Cet appel ouvre (ou réutilise) une connexion vers le serveur Supabase Realtime et lui dit *"envoie ce payload à tous les clients abonnés au channel `group:{id}` avec l'event `new_message`"*.
 
-### Endpoints REST
+**4. Distribution WebSocket**
+Supabase Realtime gère la partie WS pour nous. Chaque client (A, B, C) a préalablement fait côté frontend :
+```ts
+supabase.channel(`group:${groupId}`)
+  .on('broadcast', { event: 'new_message' }, ({ payload }) => { ... })
+  .subscribe()
+```
+→ ça ouvre **une connexion WebSocket persistante** vers `wss://<project>.supabase.co/realtime/v1/...`, multiplexée sur tous les channels auxquels le client est abonné.
 
-Tous protégés par `SupabaseAuthGuard` et réservés aux membres du groupe (403 sinon).
+Quand Supabase reçoit le broadcast du backend, il pousse l'event à tous les sockets abonnés au channel `group:{id}`. Les handlers `.on('broadcast', ...)` se déclenchent côté client → le nouveau message apparaît dans l'UI sans refresh.
 
-#### `GET /groups/:id/messages`
+## Points clés
 
-Historique paginé, ordre décroissant.
+- **Le WebSocket existe**, mais il est géré par Supabase, pas par toi. NestJS ne maintient aucune connexion socket.
+- **Double trajet pour l'auteur** : il reçoit son message une fois via la réponse HTTP du POST, et une seconde fois via le broadcast. À toi de gérer la dédup côté frontend (par `message.id`) ou de l'ignorer si tu update l'UI immédiatement en optimistic.
+- **Persistance et temps réel sont découplés** : si Supabase Realtime tombe, le message est quand même en base (le `broadcast` log un warning mais ne fait pas échouer le POST). Au prochain `GET /messages`, l'historique sera complet.
+- **Sécurité** : l'écriture/lecture est protégée par le guard NestJS + `assertIsMember`. Le channel broadcast lui-même est ouvert — quelqu'un qui devine le `groupId` peut écouter (mais ne peut ni écrire ni lire l'historique sans token).
+- **Pas de "rooms" à gérer côté backend** : Supabase Realtime fait le routage par nom de channel.
+
+---
+
+## Référence API
+
+### `GET /groups/:id/messages`
+
+Historique paginé, ordre décroissant. Protégé par `SupabaseAuthGuard` + check d'appartenance.
 
 Query :
 - `limit` (1–100, défaut 50)
@@ -47,47 +102,24 @@ Réponse :
 }
 ```
 
-Pour récupérer la page suivante : `GET /groups/:id/messages?before={nextCursor}`. `nextCursor` est `null` quand la page n'est pas pleine (fin de l'historique).
+Page suivante : `GET /groups/:id/messages?before={nextCursor}`. `nextCursor` est `null` quand la fin de l'historique est atteinte.
 
-#### `POST /groups/:id/messages`
+### `POST /groups/:id/messages`
 
-Body : `{ "content": "Salut !" }`.
+Body : `{ "content": "Salut !" }` (max 2000 caractères).
 
-Le backend :
-1. Vérifie l'appartenance au groupe.
-2. Persiste le message via Prisma.
-3. Diffuse l'event `new_message` sur le channel Supabase Realtime `group:{id}`.
+Renvoie le message persisté (même forme que dans `GET`) et déclenche le broadcast Realtime.
 
-Renvoie le message persisté (même forme que dans `GET`).
+## Modèle de données
 
-### Abonnement Realtime côté client
+Table `group_messages` :
 
-```ts
-import { createClient } from '@supabase/supabase-js'
+| Colonne     | Type        | Description                              |
+|-------------|-------------|------------------------------------------|
+| `id`        | uuid        | PK                                       |
+| `group_id`  | uuid (FK)   | Groupe destinataire                      |
+| `user_id`   | uuid (FK)   | Auteur                                   |
+| `content`   | text        | Contenu du message (max 2000 caractères) |
+| `created_at`| timestamptz | UTC, défaut DB                           |
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-const channel = supabase
-  .channel(`group:${groupId}`)
-  .on('broadcast', { event: 'new_message' }, ({ payload }) => {
-    // payload est le message persisté (avec user)
-    appendMessage(payload)
-  })
-  .subscribe()
-
-// au démontage :
-supabase.removeChannel(channel)
-```
-
-### Sécurité
-
-L'accès à l'historique (`GET`) et l'écriture (`POST`) sont protégés côté NestJS par `SupabaseAuthGuard` + un check d'appartenance (`group_members`).
-
-⚠️ Le channel de broadcast Supabase est **public** : un client qui devine `groupId` peut s'abonner et recevoir les events temps réel. Les actions d'écriture restent impossibles sans token valide et appartenance au groupe. Si la confidentialité du contenu temps réel devient critique, basculer sur des Postgres Changes + policies RLS.
-
-### Migrations
-
-```bash
-cd backend
-npx prisma migrate dev --name add_group_messages
-```
+Index composite `(group_id, created_at)` pour la pagination par curseur.
