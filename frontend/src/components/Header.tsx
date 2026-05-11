@@ -11,7 +11,7 @@ export default function Header() {
       : user?.email?.split('@')[0] ?? 'Utilisateur'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#e8f5e9] px-3 pt-2 pb-0 mb-0">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#e8f5e9] px-3 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-0 mb-0">
       <div className="flex items-center justify-between gap-0 p-0.5">
         <Link to="/" className="flex items-center">
           <img

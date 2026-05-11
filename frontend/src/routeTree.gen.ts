@@ -12,10 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as DonneesRouteImport } from './routes/donnees'
+import { Route as CommunautesRouteImport } from './routes/communautes'
 import { Route as CarbonQuizQuestionsRouteImport } from './routes/carbon-quiz-questions'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunautesIndexRouteImport } from './routes/communautes.index'
 import { Route as OnboardingQuizRouteImport } from './routes/onboarding/quiz'
 import { Route as OnboardingParcoursRouteImport } from './routes/onboarding/parcours'
+import { Route as CommunautesRejoindreRouteImport } from './routes/communautes.rejoindre'
+import { Route as CommunautesCreationRouteImport } from './routes/communautes.creation'
+import { Route as CommunautesCommunityIdRouteImport } from './routes/communautes.$communityId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -32,6 +37,11 @@ const DonneesRoute = DonneesRouteImport.update({
   path: '/donnees',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunautesRoute = CommunautesRouteImport.update({
+  id: '/communautes',
+  path: '/communautes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarbonQuizQuestionsRoute = CarbonQuizQuestionsRouteImport.update({
   id: '/carbon-quiz-questions',
   path: '/carbon-quiz-questions',
@@ -41,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CommunautesIndexRoute = CommunautesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CommunautesRoute,
 } as any)
 const OnboardingQuizRoute = OnboardingQuizRouteImport.update({
   id: '/onboarding/quiz',
@@ -52,15 +67,35 @@ const OnboardingParcoursRoute = OnboardingParcoursRouteImport.update({
   path: '/onboarding/parcours',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunautesRejoindreRoute = CommunautesRejoindreRouteImport.update({
+  id: '/rejoindre',
+  path: '/rejoindre',
+  getParentRoute: () => CommunautesRoute,
+} as any)
+const CommunautesCreationRoute = CommunautesCreationRouteImport.update({
+  id: '/creation',
+  path: '/creation',
+  getParentRoute: () => CommunautesRoute,
+} as any)
+const CommunautesCommunityIdRoute = CommunautesCommunityIdRouteImport.update({
+  id: '/$communityId',
+  path: '/$communityId',
+  getParentRoute: () => CommunautesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
+  '/communautes': typeof CommunautesRouteWithChildren
   '/donnees': typeof DonneesRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/communautes/$communityId': typeof CommunautesCommunityIdRoute
+  '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
+  '/communautes/': typeof CommunautesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,29 +103,43 @@ export interface FileRoutesByTo {
   '/donnees': typeof DonneesRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/communautes/$communityId': typeof CommunautesCommunityIdRoute
+  '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
+  '/communautes': typeof CommunautesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/carbon-quiz-questions': typeof CarbonQuizQuestionsRoute
+  '/communautes': typeof CommunautesRouteWithChildren
   '/donnees': typeof DonneesRoute
   '/inscription': typeof InscriptionRoute
   '/login': typeof LoginRoute
+  '/communautes/$communityId': typeof CommunautesCommunityIdRoute
+  '/communautes/creation': typeof CommunautesCreationRoute
+  '/communautes/rejoindre': typeof CommunautesRejoindreRoute
   '/onboarding/parcours': typeof OnboardingParcoursRoute
   '/onboarding/quiz': typeof OnboardingQuizRoute
+  '/communautes/': typeof CommunautesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/carbon-quiz-questions'
+    | '/communautes'
     | '/donnees'
     | '/inscription'
     | '/login'
+    | '/communautes/$communityId'
+    | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
+    | '/communautes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -98,22 +147,32 @@ export interface FileRouteTypes {
     | '/donnees'
     | '/inscription'
     | '/login'
+    | '/communautes/$communityId'
+    | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
+    | '/communautes'
   id:
     | '__root__'
     | '/'
     | '/carbon-quiz-questions'
+    | '/communautes'
     | '/donnees'
     | '/inscription'
     | '/login'
+    | '/communautes/$communityId'
+    | '/communautes/creation'
+    | '/communautes/rejoindre'
     | '/onboarding/parcours'
     | '/onboarding/quiz'
+    | '/communautes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CarbonQuizQuestionsRoute: typeof CarbonQuizQuestionsRoute
+  CommunautesRoute: typeof CommunautesRouteWithChildren
   DonneesRoute: typeof DonneesRoute
   InscriptionRoute: typeof InscriptionRoute
   LoginRoute: typeof LoginRoute
@@ -144,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DonneesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communautes': {
+      id: '/communautes'
+      path: '/communautes'
+      fullPath: '/communautes'
+      preLoaderRoute: typeof CommunautesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/carbon-quiz-questions': {
       id: '/carbon-quiz-questions'
       path: '/carbon-quiz-questions'
@@ -157,6 +223,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/communautes/': {
+      id: '/communautes/'
+      path: '/'
+      fullPath: '/communautes/'
+      preLoaderRoute: typeof CommunautesIndexRouteImport
+      parentRoute: typeof CommunautesRoute
     }
     '/onboarding/quiz': {
       id: '/onboarding/quiz'
@@ -172,12 +245,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingParcoursRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communautes/rejoindre': {
+      id: '/communautes/rejoindre'
+      path: '/rejoindre'
+      fullPath: '/communautes/rejoindre'
+      preLoaderRoute: typeof CommunautesRejoindreRouteImport
+      parentRoute: typeof CommunautesRoute
+    }
+    '/communautes/creation': {
+      id: '/communautes/creation'
+      path: '/creation'
+      fullPath: '/communautes/creation'
+      preLoaderRoute: typeof CommunautesCreationRouteImport
+      parentRoute: typeof CommunautesRoute
+    }
+    '/communautes/$communityId': {
+      id: '/communautes/$communityId'
+      path: '/$communityId'
+      fullPath: '/communautes/$communityId'
+      preLoaderRoute: typeof CommunautesCommunityIdRouteImport
+      parentRoute: typeof CommunautesRoute
+    }
   }
 }
+
+interface CommunautesRouteChildren {
+  CommunautesCommunityIdRoute: typeof CommunautesCommunityIdRoute
+  CommunautesCreationRoute: typeof CommunautesCreationRoute
+  CommunautesRejoindreRoute: typeof CommunautesRejoindreRoute
+  CommunautesIndexRoute: typeof CommunautesIndexRoute
+}
+
+const CommunautesRouteChildren: CommunautesRouteChildren = {
+  CommunautesCommunityIdRoute: CommunautesCommunityIdRoute,
+  CommunautesCreationRoute: CommunautesCreationRoute,
+  CommunautesRejoindreRoute: CommunautesRejoindreRoute,
+  CommunautesIndexRoute: CommunautesIndexRoute,
+}
+
+const CommunautesRouteWithChildren = CommunautesRoute._addFileChildren(
+  CommunautesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CarbonQuizQuestionsRoute: CarbonQuizQuestionsRoute,
+  CommunautesRoute: CommunautesRouteWithChildren,
   DonneesRoute: DonneesRoute,
   InscriptionRoute: InscriptionRoute,
   LoginRoute: LoginRoute,

@@ -17,18 +17,24 @@ model quizzes {
 }
 
 model users {
-  id                   String          @id @default(uuid())
-  email                String          @unique
-  first_name           String?
-  last_name            String?
-  feuilles             Int             @default(0)
-  onboarding_completed Boolean         @default(false)
-  last_monthly_quiz_at DateTime?
-  parcours_id          String?
-  parcours             parcours?       @relation(fields: [parcours_id], references: [id])
-  score_history        score_history[]
-  created_at           DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at           DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  id                          String                    @id @default(uuid())
+  email                       String                    @unique
+  first_name                  String?
+  last_name                   String?
+  feuilles                    Int                       @default(0)
+  onboarding_completed        Boolean                   @default(false)
+  lastMonthlyQuizAt           DateTime?                 @map("last_monthly_quiz_at") @db.Timestamptz(6)
+  nextMonthlyQuizAt           DateTime?                 @map("next_monthly_quiz_at") @db.Timestamptz(6)
+  parcours_id                 String?
+  parcours                    parcours?                 @relation(fields: [parcours_id], references: [id])
+  score_history               score_history[]
+  monthlyQuizzes              MonthlyQuiz[]
+  admin_of_groups             groups[]
+  group_memberships           group_members[]
+  group_challenge_completions group_challenge_completions[]
+  group_messages              group_messages[]
+  created_at                  DateTime                  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at                  DateTime                  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 }
 
 model score_history {
@@ -38,6 +44,34 @@ model score_history {
   score        Float
   json_answers Json?
   created_at   DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model MonthlyQuiz {
+  id          String              @id @default(uuid())
+  userId      String              @map("user_id")
+  user        users               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizData    Json                @map("quiz_data")
+  scheduledAt DateTime            @map("scheduled_at") @db.Timestamptz(6)
+  completedAt DateTime?           @map("completed_at") @db.Timestamptz(6)
+  status      String              @default("scheduled")
+  answers     MonthlyQuizAnswer[]
+
+  @@index([userId])
+  @@index([scheduledAt])
+  @@index([userId, scheduledAt])
+  @@map("monthly_quizzes")
+}
+
+model MonthlyQuizAnswer {
+  id            String       @id @default(uuid())
+  monthlyQuizId String       @map("monthly_quiz_id")
+  monthlyQuiz   MonthlyQuiz  @relation(fields: [monthlyQuizId], references: [id], onDelete: Cascade)
+  questionId    String       @map("question_id")
+  answer        Json
+
+  @@index([monthlyQuizId])
+  @@unique([monthlyQuizId, questionId])
+  @@map("monthly_quiz_answers")
 }
 
 model parcours {
@@ -59,4 +93,82 @@ model levels {
   required_feuilles Int      @unique
   created_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+enum GroupStatus {
+  active
+  inactive
+}
+
+model groups {
+  id                     String        @id @default(uuid())
+  name                   String
+  description            String?
+  is_public              Boolean       @default(true)
+  invite_code            String        @unique @default(uuid())
+  admin_id               String
+  admin                  users         @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+  status                 GroupStatus   @default(active)
+  win_streak             Int           @default(0)
+  last_streak_updated_at DateTime?     @db.Timestamptz(6)
+  members                group_members[]
+  group_challenges       group_challenges[]
+  messages               group_messages[]
+  created_at             DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at             DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model group_members {
+  id         String   @id @default(uuid())
+  group_id   String
+  group      groups   @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  arbres     Int      @default(0)
+  joined_at  DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@unique([group_id, user_id])
+}
+
+model challenges {
+  id               String             @id @default(uuid())
+  title            String
+  description      String
+  group_challenges group_challenges[]
+  created_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model group_challenges {
+  id            String                      @id @default(uuid())
+  group_id      String
+  group         groups                      @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  challenge_id  String
+  challenge     challenges                  @relation(fields: [challenge_id], references: [id])
+  week_start_at DateTime                    @db.Timestamptz(6)
+  week_end_at   DateTime                    @db.Timestamptz(6)
+  completions   group_challenge_completions[]
+  created_at    DateTime                    @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model group_challenge_completions {
+  id                 String           @id @default(uuid())
+  group_challenge_id String
+  group_challenge    group_challenges @relation(fields: [group_challenge_id], references: [id], onDelete: Cascade)
+  user_id            String
+  user               users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  completed_at       DateTime         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@unique([group_challenge_id, user_id])
+}
+
+model group_messages {
+  id         String   @id @default(uuid())
+  group_id   String
+  group      groups   @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  content    String
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@index([group_id, created_at])
 }

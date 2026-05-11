@@ -12,6 +12,8 @@ import { SeedModule } from './seed/seed.module';
 import { UserModule } from './user/user.module';
 import { ParcoursModule } from './parcours/parcours.module';
 import { MonthlyQuizModule } from './monthly-quiz/monthly-quiz.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -29,8 +31,10 @@ import { MonthlyQuizModule } from './monthly-quiz/monthly-quiz.module';
     SeedModule,
     UserModule,
     ParcoursModule,
+    CommunityModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

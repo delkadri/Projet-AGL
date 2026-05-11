@@ -69,7 +69,7 @@ export class MonthlyQuizController {
   ): Promise<MonthlyQuizResponseDto | null> {
     const dbUser = await this.prisma.users.findUnique({
       where: { id: user.id },
-      select: { id: true, last_monthly_quiz_at: true },
+      select: { id: true, lastMonthlyQuizAt: true },
     });
 
     if (!dbUser) {
@@ -77,8 +77,8 @@ export class MonthlyQuizController {
     }
 
     if (
-      dbUser.last_monthly_quiz_at &&
-      this.isSameUtcMonth(dbUser.last_monthly_quiz_at, new Date())
+      dbUser.lastMonthlyQuizAt &&
+      this.isSameUtcMonth(dbUser.lastMonthlyQuizAt, new Date())
     ) {
       return null;
     }
@@ -125,12 +125,12 @@ export class MonthlyQuizController {
   ) {
     const dbUser = await this.prisma.users.findUnique({
       where: { id: user.id },
-      select: { last_monthly_quiz_at: true },
+      select: { lastMonthlyQuizAt: true },
     });
 
     if (
-      dbUser?.last_monthly_quiz_at &&
-      this.isSameUtcMonth(dbUser.last_monthly_quiz_at, new Date())
+      dbUser?.lastMonthlyQuizAt &&
+      this.isSameUtcMonth(dbUser.lastMonthlyQuizAt, new Date())
     ) {
       throw new ConflictException('Quiz mensuel deja complete ce mois.');
     }
@@ -143,7 +143,7 @@ export class MonthlyQuizController {
 
     await this.prisma.users.update({
       where: { id: user.id },
-      data: { last_monthly_quiz_at: new Date() },
+      data: { lastMonthlyQuizAt: new Date() },
     });
 
     return result;
