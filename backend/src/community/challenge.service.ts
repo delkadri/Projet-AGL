@@ -215,4 +215,17 @@ export class ChallengeService {
       data: { arbres: 0 },
     });
   }
+
+  getNextRankingReset(): Date {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const resetMonths = [0, 3, 6, 9]; // Jan, Apr, Jul, Oct
+
+    for (const month of resetMonths) {
+      const candidate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+      if (candidate > now) return candidate;
+    }
+
+    return new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0));
+  }
 }
