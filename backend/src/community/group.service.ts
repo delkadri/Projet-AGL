@@ -130,4 +130,74 @@ export class GroupService {
     });
     return { groupId, isActive: memberCount >= 3, memberCount };
   }
+
+  async searchGroups(name: string) {
+    return this.prisma.groups.findMany({
+      where: {
+        is_public: true,
+        name: { contains: name, mode: 'insensitive' },
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        win_streak: true,
+        _count: { select: { members: true } },
+      },
+    });
+  }
+
+  async joinGroupById(userId: string, groupId: string) {
+    const group = await this.prisma.groups.findUnique({
+      where: { id: groupId },
+    });
+    if (!group) throw new NotFoundException('Groupe non trouvé');
+    if (!group.is_public) {
+      throw new ForbiddenException(
+        'Ce groupe est privé, utilisez un code d\'invitation',
+      );
+    }
+
+    await this.assertNotAlreadyMember(groupId, userId);
+
+    await this.prisma.group_members.create({
+      data: { group_id: groupId, user_id: userId },
+    });
+
+    return group;
+  }
+
+  async getGroupDetails(groupId: string) {
+    const group = await this.prisma.groups.findUnique({
+      where: { id: groupId },
+      include: {
+        members: {
+          include: {
+            user: { select: { first_name: true, last_name: true } },
+          },
+        },
+      },
+    });
+    if (!group) throw new NotFoundException('Groupe non trouvé');
+    return group;
+  }
+
+  async getMyGroups(userId: string) {
+    const memberships = await this.prisma.group_members.findMany({
+      where: { user_id: userId },
+      include: {
+        group: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            is_public: true,
+            win_streak: true,
+            admin_id: true,
+          },
+        },
+      },
+    });
+    return memberships.map((m) => m.group);
+  }
 }
