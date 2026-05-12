@@ -8,7 +8,7 @@ export const Route = createFileRoute('/objectifs')({
 
 function ObjectifsPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#EAF9EA]">
+    <div className="min-h-screen bg-[#EAF9EA]">
       <ObjectivesList />
       <BottomNav />
     </div>

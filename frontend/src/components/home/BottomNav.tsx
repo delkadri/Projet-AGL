@@ -10,7 +10,6 @@ const navItems = [
   { to: '/' as const, label: 'Accueil', icon: Leaf },
   { to: '/objectifs' as const, label: 'Objectifs', icon: BarChart3 },
   { to: '/communautes' as const, label: 'Groupes', icon: Users },
-  { to: '/' as const, label: 'Communautés', icon: Users }, // placeholder
 ] as const
 
 export default function BottomNav() {

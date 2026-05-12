@@ -67,10 +67,9 @@ export function ObjectivesList() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-6 pb-24">
-      <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_auto_minmax(0,1fr)] overflow-hidden gap-4">
-        
-        <div className="overflow-hidden">
+    <div className="px-4 pt-6 pb-24">
+      <div className="flex flex-col gap-4">
+        <div>
           <h1 className="text-3xl font-bold text-[#1C5138] mb-1">Mes Objectifs</h1>
           <p className="text-sm text-gray-600">
             Complétez des défis pour gagner des feuilles et réduire votre empreinte carbone
@@ -125,7 +124,7 @@ export function ObjectivesList() {
         </div>
 
         {/* liste des challenges */}
-        <div className="min-h-0 overflow-hidden">
+        <div>
           {isLoading && (
             <div className="flex items-center justify-center py-12">
               <p className="text-gray-500">Chargement des objectifs...</p>
@@ -133,7 +132,7 @@ export function ObjectivesList() {
           )}
 
           {!isLoading && sortedChallenges.length > 0 && (
-            <div className="flex flex-col gap-3 overflow-y-auto h-full">
+            <div className="flex flex-col gap-3">
               {sortedChallenges.map((challenge) => (
                 <ChallengeCard
                   key={challenge.id}
