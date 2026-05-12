@@ -10,7 +10,7 @@ const navItems = [
   { to: '/' as const, label: 'Accueil', icon: Leaf },
   { to: '/objectifs' as const, label: 'Objectifs', icon: BarChart3 },
   { to: '/communautes' as const, label: 'Groupes', icon: Users },
-]
+] as const
 
 export default function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
