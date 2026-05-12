@@ -40,7 +40,9 @@ export class GroupController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Rechercher un groupe public par nom (vide = suggestions)' })
+  @ApiOperation({
+    summary: 'Rechercher un groupe public par nom (vide = suggestions)',
+  })
   @ApiQuery({ name: 'name', required: false, example: 'Warriors' })
   @ApiResponse({ status: 200, description: 'Groupes correspondants' })
   searchGroups(@CurrentUser() user: any, @Query('name') name?: string) {

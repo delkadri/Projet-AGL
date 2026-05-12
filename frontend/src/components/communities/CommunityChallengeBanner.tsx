@@ -29,6 +29,8 @@ type CommunityChallengeBannerProps = {
   membersCompleted: number
   currentUserCompleted: boolean
   onMarkComplete: () => void
+  /** Pendant l’appel API de complétion du défi */
+  isCompletingChallenge?: boolean
   showBonusBurst: boolean
   compact?: boolean
   mini?: boolean
@@ -40,6 +42,7 @@ export function CommunityChallengeBanner({
   membersCompleted,
   currentUserCompleted,
   onMarkComplete,
+  isCompletingChallenge = false,
   showBonusBurst,
   className,
 }: CommunityChallengeBannerProps) {
@@ -208,13 +211,17 @@ export function CommunityChallengeBanner({
                 ? 'border-[#1b5e20]/40 bg-white/80 text-[#1b5e20] hover:bg-[#e8f5e9] disabled:opacity-100'
                 : 'bg-[#1b5e20] text-white hover:bg-[#2e7d32]',
             )}
-            disabled={currentUserCompleted}
+            disabled={currentUserCompleted || isCompletingChallenge}
             onClick={(e) => {
               e.stopPropagation()
               setConfirmOpen(true)
             }}
           >
-            {currentUserCompleted ? 'Défi relevé ✓' : "J'ai relevé le défi"}
+            {currentUserCompleted
+              ? 'Défi relevé ✓'
+              : isCompletingChallenge
+                ? 'Enregistrement…'
+                : "J'ai relevé le défi"}
           </Button>
         </div>
       </section>
@@ -253,9 +260,10 @@ export function CommunityChallengeBanner({
             <Button
               type="button"
               className="flex-1 bg-[#2e7d32] text-white hover:bg-[#1b5e20]"
+              disabled={isCompletingChallenge}
               onClick={handleConfirm}
             >
-              J&apos;ai relevé le défi
+              {isCompletingChallenge ? 'Enregistrement…' : "J'ai relevé le défi"}
             </Button>
           </div>
         }

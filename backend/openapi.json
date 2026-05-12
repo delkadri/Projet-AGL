@@ -500,6 +500,37 @@
         ]
       }
     },
+    "/users/me/simple-challenge/complete": {
+      "post": {
+        "description": "Crédite les feuilles de récompense du défi simple, au plus une fois par jour (UTC).",
+        "operationId": "UserController_completeSimpleDailyChallenge",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Défi enregistré, feuilles mises à jour.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleChallengeCompleteResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Défi déjà relevé pour ce jour UTC."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Relever le défi quotidien (carte Accueil)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/users/me/scores": {
       "get": {
         "operationId": "UserController_getScoreHistory",
@@ -555,6 +586,31 @@
         ]
       }
     },
+    "/communities/leaderboard": {
+      "get": {
+        "operationId": "CommunityController_getLeaderboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InterCommunityLeaderboardEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Classement inter-communautés",
+        "tags": [
+          "communities"
+        ]
+      }
+    },
     "/communities/ranking/next-reset": {
       "get": {
         "operationId": "CommunityController_getNextRankingReset",
@@ -585,7 +641,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Groupes retournés"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGroupMembershipDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -605,7 +671,7 @@
         "parameters": [
           {
             "name": "name",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "example": "Warriors",
@@ -623,7 +689,7 @@
             "bearer": []
           }
         ],
-        "summary": "Rechercher un groupe public par nom",
+        "summary": "Rechercher un groupe public par nom (vide = suggestions)",
         "tags": [
           "groups"
         ]
@@ -680,7 +746,14 @@
         },
         "responses": {
           "201": {
-            "description": "Groupe créé"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGroupMembershipDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "Niveau insuffisant"
@@ -1242,6 +1315,12 @@
                 "$ref": "#/components/schemas/ParcoursDto"
               }
             ]
+          },
+          "lastSimpleChallengeCompletedAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "Horodatage ISO de la dernière complétion du défi Accueil (limite une fois par jour UTC).",
+            "example": "2026-05-12T08:30:00.000Z"
           }
         },
         "required": [
@@ -1486,6 +1565,23 @@
           "parcoursId"
         ]
       },
+      "SimpleChallengeCompleteResponseDto": {
+        "type": "object",
+        "properties": {
+          "feuilles": {
+            "type": "number",
+            "example": 550
+          },
+          "lastSimpleChallengeCompletedAt": {
+            "type": "string",
+            "example": "2026-05-12T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "feuilles",
+          "lastSimpleChallengeCompletedAt"
+        ]
+      },
       "ScoreHistoryCategoryDto": {
         "type": "object",
         "properties": {
@@ -1543,6 +1639,134 @@
           "id",
           "score",
           "created_at"
+        ]
+      },
+      "LeaderboardCommunityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "member_count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "member_count"
+        ]
+      },
+      "LeaderboardWinStreakDto": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "at_risk",
+              "broken"
+            ]
+          }
+        },
+        "required": [
+          "count",
+          "status"
+        ]
+      },
+      "InterCommunityLeaderboardEntryDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number"
+          },
+          "community": {
+            "$ref": "#/components/schemas/LeaderboardCommunityDto"
+          },
+          "average_carbon_tco2e_per_year": {
+            "type": "number"
+          },
+          "win_streak": {
+            "$ref": "#/components/schemas/LeaderboardWinStreakDto"
+          }
+        },
+        "required": [
+          "rank",
+          "community",
+          "average_carbon_tco2e_per_year",
+          "win_streak"
+        ]
+      },
+      "GroupSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "member_count": {
+            "type": "number"
+          },
+          "is_private": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "member_count",
+          "is_private",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserGroupMembershipDto": {
+        "type": "object",
+        "properties": {
+          "community": {
+            "$ref": "#/components/schemas/GroupSummaryDto"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "joined_at": {
+            "type": "string"
+          },
+          "has_pending_defi": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "community",
+          "role",
+          "joined_at",
+          "has_pending_defi"
         ]
       },
       "CreateGroupDto": {

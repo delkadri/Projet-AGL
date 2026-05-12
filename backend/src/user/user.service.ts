@@ -1,13 +1,15 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import { INDIVIDUAL_CHALLENGE_FEUILLES } from '../rewards.constants';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async updateParcours(userId: string, parcoursId: string) {
     const parcours = await this.prisma.parcours.findUnique({
@@ -31,6 +33,42 @@ export class UserService {
         feuilles: { increment: feuillesToAdd },
       },
     });
+  }
+
+  /** Défi « simple » (carte Accueil) : +INDIVIDUAL_CHALLENGE_FEUILLES, une fois par jour UTC. */
+  async completeSimpleDailyChallenge(userId: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true, last_simple_challenge_completed_at: true },
+    });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
+    const now = new Date();
+    const startOfUtcDay = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+
+    if (
+      user.last_simple_challenge_completed_at &&
+      user.last_simple_challenge_completed_at >= startOfUtcDay
+    ) {
+      throw new ConflictException('Défi déjà relevé aujourd’hui');
+    }
+
+    const updated = await this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        feuilles: { increment: INDIVIDUAL_CHALLENGE_FEUILLES },
+        last_simple_challenge_completed_at: now,
+      },
+      select: { feuilles: true, last_simple_challenge_completed_at: true },
+    });
+
+    return {
+      feuilles: updated.feuilles,
+      lastSimpleChallengeCompletedAt:
+        updated.last_simple_challenge_completed_at!.toISOString(),
+    };
   }
 
   async completeOnboarding(userId: string) {

@@ -1,8 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
-import { useCommunityDetail } from '@/api/hooks/useCommunityDetail'
+import { ApiError } from '@/api/client'
+import { useCompleteGroupChallenge } from '@/api/hooks/useCompleteGroupChallenge'
+import {
+  communityDetailQueryKey,
+  useCommunityDetail,
+} from '@/api/hooks/useCommunityDetail'
+import { AUTH_ME_QUERY_KEY } from '@/api/hooks/useAuth'
 import { useAuth } from '@/auth/AuthContext'
 import BottomNav from '@/components/home/BottomNav'
 import { CommunityChallengeBanner } from '@/components/communities/CommunityChallengeBanner'
@@ -11,6 +19,8 @@ import { CommunitySuccessDialog } from '@/components/communities/CommunitySucces
 import { CommunityTreeRankingDialog } from '@/components/communities/CommunityTreeRankingDialog'
 import { Button } from '@/components/ui/button'
 import { displayNameFromUser } from '@/lib/displayName'
+import { getUserFacingApiMessage } from '@/lib/api-user-message'
+import type { CommunityDetailDto } from '@/types/community'
 
 export const Route = createFileRoute('/communautes/$communityId')({
   component: CommunauteDetailPage,
@@ -19,6 +29,8 @@ export const Route = createFileRoute('/communautes/$communityId')({
 function CommunauteDetailPage() {
   const { communityId } = Route.useParams()
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const completeChallenge = useCompleteGroupChallenge()
   const { data: detail, isPending, isError } = useCommunityDetail(communityId)
   const [rankingOpen, setRankingOpen] = useState(false)
   const [defiProgress, setDefiProgress] = useState<{
@@ -38,25 +50,57 @@ function CommunauteDetailPage() {
     celebrationShownRef.current = false
     setShowBurst(false)
     setSuccessOpen(false)
-  }, [detail?.community?.id, detail?.active_defi?.id])
+  }, [
+    detail?.community?.id,
+    detail?.active_defi?.id,
+    detail?.active_defi?.members_completed,
+    detail?.active_defi?.current_user_completed,
+  ])
 
-  const handleMarkComplete = () => {
+  const handleMarkComplete = async () => {
     if (!defiProgress || defiProgress.userDone || !detail?.active_defi) return
     const cap = detail.active_defi.members_total_for_challenge
     const prevCount = defiProgress.membersCompleted
-    const nextCount = Math.min(cap, prevCount + 1)
-    const becomesCollectiveSuccess = prevCount < cap && nextCount >= cap
 
-    setDefiProgress({
-      userDone: true,
-      membersCompleted: nextCount,
-    })
-
-    if (becomesCollectiveSuccess && !celebrationShownRef.current) {
-      celebrationShownRef.current = true
-      setShowBurst(true)
-      window.setTimeout(() => setSuccessOpen(true), 450)
-      window.setTimeout(() => setShowBurst(false), 2400)
+    try {
+      await completeChallenge.mutateAsync({ groupId: communityId })
+      void queryClient.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY })
+      await queryClient.refetchQueries({ queryKey: communityDetailQueryKey(communityId) })
+      const fresh = queryClient.getQueryData<CommunityDetailDto | null>(
+        communityDetailQueryKey(communityId),
+      )
+      if (fresh?.active_defi) {
+        setDefiProgress({
+          userDone: fresh.active_defi.current_user_completed,
+          membersCompleted: fresh.active_defi.members_completed,
+        })
+        const nowCount = fresh.active_defi.members_completed
+        const becomesCollectiveSuccess = prevCount < cap && nowCount >= cap
+        if (becomesCollectiveSuccess && !celebrationShownRef.current) {
+          celebrationShownRef.current = true
+          setShowBurst(true)
+          window.setTimeout(() => setSuccessOpen(true), 450)
+          window.setTimeout(() => setShowBurst(false), 2400)
+        }
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        await queryClient.refetchQueries({ queryKey: communityDetailQueryKey(communityId) })
+        const fresh = queryClient.getQueryData<CommunityDetailDto | null>(
+          communityDetailQueryKey(communityId),
+        )
+        if (fresh?.active_defi) {
+          setDefiProgress({
+            userDone: fresh.active_defi.current_user_completed,
+            membersCompleted: fresh.active_defi.members_completed,
+          })
+        }
+        return
+      }
+      const msg =
+        getUserFacingApiMessage(err) ??
+        'Impossible d’enregistrer le défi. Réessayez dans un instant.'
+      toast.error(msg)
     }
   }
 
@@ -115,7 +159,10 @@ function CommunauteDetailPage() {
                   defi={detail.active_defi}
                   membersCompleted={defiProgress.membersCompleted}
                   currentUserCompleted={defiProgress.userDone}
-                  onMarkComplete={handleMarkComplete}
+                  onMarkComplete={() => {
+                    void handleMarkComplete()
+                  }}
+                  isCompletingChallenge={completeChallenge.isPending}
                   showBonusBurst={showBurst}
                 />
               </div>

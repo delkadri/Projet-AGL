@@ -5,7 +5,7 @@ import { PrismaService } from 'nestjs-prisma';
 export class SeedService implements OnModuleInit {
   private readonly logger = new Logger(SeedService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit() {
     this.logger.log(

@@ -33,7 +33,10 @@ import {
   MonthlyQuizCurrentDto,
   MonthlyQuizDataFreshness,
 } from './dto/monthly-quiz-current.dto';
-import { MonthlyQuizCategoryDto, MonthlyQuizResponseDto } from './dto/monthly-quiz-response.dto';
+import {
+  MonthlyQuizCategoryDto,
+  MonthlyQuizResponseDto,
+} from './dto/monthly-quiz-response.dto';
 import { SubmitMonthlyQuizDto } from './dto/submit-monthly-quiz.dto';
 
 const DEFAULT_QUIZ_ID = 'quiz-1';
@@ -58,7 +61,7 @@ export class MonthlyQuizController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly quizScoringService: QuizScoringService,
-  ) { }
+  ) {}
 
   @Get('current')
   @ApiOperation({
@@ -112,7 +115,9 @@ export class MonthlyQuizController {
 
     const lastScoreHistoryAt = latestHistory?.created_at.toISOString() ?? null;
     const nextMonthlyQuizAt = dbUser.nextMonthlyQuizAt?.toISOString() ?? null;
-    const dataFreshness = this.computeDataFreshness(latestHistory?.created_at ?? null);
+    const dataFreshness = this.computeDataFreshness(
+      latestHistory?.created_at ?? null,
+    );
     const baselineAnswers = this.asAnswerRecord(latestHistory?.json_answers);
 
     /** Aligné sur `calculateScore` : au plus une ligne `score_history` par mois civil UTC. */
@@ -218,7 +223,7 @@ export class MonthlyQuizController {
     const result = await this.prisma.$transaction(async (tx) => {
       let scoreRowsShifted = 0;
       for (let i = 0; i < histories.length; i++) {
-        const row = histories[i]!;
+        const row = histories[i];
         const shifted = new Date(
           this.shiftToPreviousUtcMonth(row.created_at).getTime() + i * 1000,
         );
@@ -318,7 +323,7 @@ export class MonthlyQuizController {
   })
   @ApiOkResponse({
     description:
-      'Score carbone recalcule et enregistre dans l\'historique utilisateur.',
+      "Score carbone recalcule et enregistre dans l'historique utilisateur.",
   })
   @ApiConflictResponse({
     description: 'Quiz mensuel deja complete ce mois.',
@@ -375,7 +380,9 @@ export class MonthlyQuizController {
     );
   }
 
-  private computeDataFreshness(lastCreatedAt: Date | null): MonthlyQuizDataFreshness {
+  private computeDataFreshness(
+    lastCreatedAt: Date | null,
+  ): MonthlyQuizDataFreshness {
     if (!lastCreatedAt) {
       return 'none';
     }
@@ -393,10 +400,15 @@ export class MonthlyQuizController {
 
   private async pickMonthlyCategories(
     quiz: RawQuizPayload,
-    categoriesScores: Array<{ id: string; name: string; totalKgCo2ePerYear: number }> | null,
+    categoriesScores: Array<{
+      id: string;
+      name: string;
+      totalKgCo2ePerYear: number;
+    }> | null,
     answers: Record<string, unknown> | null,
   ): Promise<RawQuizCategory[]> {
-    const scoredCategories = categoriesScores ?? await this.resolveCategoryScores(quiz, answers);
+    const scoredCategories =
+      categoriesScores ?? (await this.resolveCategoryScores(quiz, answers));
 
     if (!scoredCategories) {
       return quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
@@ -415,17 +427,26 @@ export class MonthlyQuizController {
       .map((categoryId) => categoryById.get(categoryId))
       .filter((category): category is RawQuizCategory => Boolean(category));
 
-    return selected.length > 0 ? selected : quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
+    return selected.length > 0
+      ? selected
+      : quiz.categories.slice(0, MONTHLY_CATEGORY_COUNT);
   }
 
   private async resolveCategoryScores(
     quiz: RawQuizPayload,
     answers: Record<string, unknown> | null,
-  ): Promise<Array<{ id: string; name: string; totalKgCo2ePerYear: number }> | null> {
+  ): Promise<Array<{
+    id: string;
+    name: string;
+    totalKgCo2ePerYear: number;
+  }> | null> {
     if (!answers || typeof answers !== 'object') {
       return null;
     }
-    const preview = await this.quizScoringService.previewScore(quiz.id, answers);
+    const preview = await this.quizScoringService.previewScore(
+      quiz.id,
+      answers,
+    );
     return preview.categories;
   }
 
@@ -499,7 +520,9 @@ export class MonthlyQuizController {
   }
 
   private utcMonthStart(ref: Date): Date {
-    return new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), 1, 0, 0, 0, 0));
+    return new Date(
+      Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), 1, 0, 0, 0, 0),
+    );
   }
 
   private utcMonthEnd(ref: Date): Date {

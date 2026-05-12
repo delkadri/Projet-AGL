@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ScoreHistoryResponseDto } from '../models/ScoreHistoryResponseDto';
+import type { SimpleChallengeCompleteResponseDto } from '../models/SimpleChallengeCompleteResponseDto';
 import type { UpdateParcoursDto } from '../models/UpdateParcoursDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -55,6 +56,21 @@ export class UsersService {
             url: '/users/me/onboarding/reset-retest',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * Relever le défi quotidien (carte Accueil)
+     * Crédite les feuilles de récompense du défi simple, au plus une fois par jour (UTC).
+     * @returns SimpleChallengeCompleteResponseDto Défi enregistré, feuilles mises à jour.
+     * @throws ApiError
+     */
+    public static userControllerCompleteSimpleDailyChallenge(): CancelablePromise<SimpleChallengeCompleteResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/users/me/simple-challenge/complete',
+            errors: {
+                409: `Défi déjà relevé pour ce jour UTC.`,
+            },
         });
     }
     /**

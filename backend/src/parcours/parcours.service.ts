@@ -3,7 +3,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { ParcoursDto } from '../auth/dto/user-profile.dto';
 @Injectable()
 export class ParcoursService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAllParcours(): Promise<ParcoursDto[]> {
     return this.prisma.parcours.findMany({

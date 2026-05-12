@@ -4,27 +4,27 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
-    private readonly logger = new Logger(SupabaseService.name);
-    private client: SupabaseClient | null = null;
+  private readonly logger = new Logger(SupabaseService.name);
+  private client: SupabaseClient | null = null;
 
-    constructor(private configService: ConfigService) { }
+  constructor(private configService: ConfigService) {}
 
-    onModuleInit() {
-        const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-        const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
+  onModuleInit() {
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
 
-        if (!supabaseUrl || !supabaseKey) {
-            this.logger.error(
-                'SUPABASE_URL or SUPABASE_KEY is not defined in the environment variables.',
-            );
-            return;
-        }
-
-        this.client = createClient(supabaseUrl, supabaseKey);
-        this.logger.log('Supabase client initialized successfully');
+    if (!supabaseUrl || !supabaseKey) {
+      this.logger.error(
+        'SUPABASE_URL or SUPABASE_KEY is not defined in the environment variables.',
+      );
+      return;
     }
 
-    getClient(): SupabaseClient | null {
-        return this.client;
-    }
+    this.client = createClient(supabaseUrl, supabaseKey);
+    this.logger.log('Supabase client initialized successfully');
+  }
+
+  getClient(): SupabaseClient | null {
+    return this.client;
+  }
 }

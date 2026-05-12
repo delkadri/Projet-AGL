@@ -4,14 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import {
+  GROUP_COLLECTIVE_BONUS_FEUILLES,
+  INDIVIDUAL_CHALLENGE_FEUILLES,
+} from '../rewards.constants';
 
-const CHALLENGE_COMPLETION_FEUILLES = 20;
-const GROUP_BONUS_FEUILLES = 50;
 const RECENT_CHALLENGE_WEEKS = 4;
 
 @Injectable()
 export class ChallengeService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   private getCurrentWeekBounds(): { weekStart: Date; weekEnd: Date } {
     const now = new Date();
@@ -107,7 +109,7 @@ export class ChallengeService {
 
     await this.prisma.users.update({
       where: { id: userId },
-      data: { feuilles: { increment: CHALLENGE_COMPLETION_FEUILLES } },
+      data: { feuilles: { increment: INDIVIDUAL_CHALLENGE_FEUILLES } },
     });
 
     await this.prisma.group_members.update({
@@ -146,7 +148,7 @@ export class ChallengeService {
 
     await this.prisma.users.updateMany({
       where: { id: { in: userIds } },
-      data: { feuilles: { increment: GROUP_BONUS_FEUILLES } },
+      data: { feuilles: { increment: GROUP_COLLECTIVE_BONUS_FEUILLES } },
     });
 
     await this.prisma.groups.update({

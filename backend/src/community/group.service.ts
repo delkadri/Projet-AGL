@@ -6,6 +6,10 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from 'nestjs-prisma';
+import {
+  GROUP_COLLECTIVE_BONUS_FEUILLES,
+  INDIVIDUAL_CHALLENGE_FEUILLES,
+} from '../rewards.constants';
 import { ChallengeService } from './challenge.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InterCommunityLeaderboardEntryDto } from './dto/inter-community-leaderboard.dto';
@@ -38,7 +42,10 @@ export class GroupService {
     if (existing) throw new ConflictException('Déjà membre de ce groupe');
   }
 
-  async createGroup(userId: string, dto: CreateGroupDto): Promise<UserGroupMembershipDto> {
+  async createGroup(
+    userId: string,
+    dto: CreateGroupDto,
+  ): Promise<UserGroupMembershipDto> {
     const niveau = await this.getUserLevel(userId);
     if (niveau < 3) {
       throw new ForbiddenException('Niveau 3 requis pour créer un groupe');
@@ -155,7 +162,9 @@ export class GroupService {
     const groups = await this.prisma.groups.findMany({
       where: {
         is_public: true,
-        ...(isFeatured ? {} : { name: { contains: name, mode: 'insensitive' } }),
+        ...(isFeatured
+          ? {}
+          : { name: { contains: name, mode: 'insensitive' } }),
       },
       select: {
         id: true,
@@ -216,7 +225,9 @@ export class GroupService {
       include: {
         members: {
           include: {
-            user: { select: { first_name: true, last_name: true } },
+            user: {
+              select: { first_name: true, last_name: true, email: true },
+            },
           },
           orderBy: { arbres: 'desc' },
         },
@@ -237,14 +248,19 @@ export class GroupService {
     const activeChallenge = group.group_challenges[0] ?? null;
     const memberCount = group.members.length;
 
-    const treeRanking = group.members.map((m, i) => ({
-      rank: i + 1,
-      user_id: m.user_id,
-      display_name:
-        [m.user.first_name, m.user.last_name].filter(Boolean).join(' ') ||
-        'Anonyme',
-      tree_score: m.arbres,
-    }));
+    const treeRanking = group.members.map((m, i) => {
+      const fullName = [m.user.first_name, m.user.last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const displayName = fullName || m.user.email?.split('@')[0] || 'Anonyme';
+      return {
+        rank: i + 1,
+        user_id: m.user_id,
+        display_name: displayName,
+        tree_score: m.arbres,
+      };
+    });
 
     const streakStatus =
       group.win_streak === 0
@@ -259,10 +275,10 @@ export class GroupService {
         id: activeChallenge.id,
         title: activeChallenge.challenge.title,
         description: activeChallenge.challenge.description,
-        points: 0,
-        iconKey: 'leaf' as const,
-        ends_at: activeChallenge.week_end_at.toISOString(),
-        bonus_feuilles: 500,
+          points: INDIVIDUAL_CHALLENGE_FEUILLES,
+          iconKey: 'leaf' as const,
+          ends_at: activeChallenge.week_end_at.toISOString(),
+          bonus_feuilles: GROUP_COLLECTIVE_BONUS_FEUILLES,
         members_completed: activeChallenge.completions.length,
         members_total_for_challenge: memberCount,
         current_user_completed: activeChallenge.completions.some(
@@ -287,8 +303,7 @@ export class GroupService {
         count: group.win_streak,
         status: streakStatus,
         challenge_ends_at:
-          activeChallenge?.week_end_at.toISOString() ??
-          weekEnd.toISOString(),
+          activeChallenge?.week_end_at.toISOString() ?? weekEnd.toISOString(),
         last_full_completion_at: null,
       },
       tree_ranking: treeRanking,
@@ -423,8 +438,7 @@ export class GroupService {
         role: m.group.admin_id === userId ? 'ADMIN' : 'MEMBER',
         joined_at: m.joined_at.toISOString(),
         has_pending_defi:
-          weeklyChallenge !== null &&
-          weeklyChallenge.completions.length === 0,
+          weeklyChallenge !== null && weeklyChallenge.completions.length === 0,
       };
     });
   }

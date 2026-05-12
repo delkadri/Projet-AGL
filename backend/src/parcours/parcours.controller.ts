@@ -6,7 +6,7 @@ import { ParcoursDto } from '../auth/dto/user-profile.dto'; // Réutilisation du
 @ApiTags('parcours')
 @Controller('parcours')
 export class ParcoursController {
-  constructor(private readonly parcoursService: ParcoursService) { }
+  constructor(private readonly parcoursService: ParcoursService) {}
 
   @Get()
   @ApiOperation({ summary: 'Récupérer la liste des parcours disponibles' })

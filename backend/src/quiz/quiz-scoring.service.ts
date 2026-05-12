@@ -40,7 +40,7 @@ export class QuizScoringService {
     private readonly digitalScorer: DigitalScorer,
     private readonly servicesScorer: ServicesScorer,
     private readonly nationalFootprintReference: NationalFootprintReferenceService,
-  ) { }
+  ) {}
 
   /** Charge la structure du quiz (DB ou fichier local `quiz-init.json`). */
   async getQuizPayload(quizId: string): Promise<QuizPayload> {
@@ -132,7 +132,7 @@ export class QuizScoringService {
     // ── Diagnostic ──────────────────────────────────────────────────────────
     this.logger.log(
       `[Score] Quiz chargé: ${quiz.id} — ${quiz.categories.length} catégories, ` +
-      `${quiz.categories.flatMap((c) => c.questions).length} questions`,
+        `${quiz.categories.flatMap((c) => c.questions).length} questions`,
     );
     this.logger.log(
       `[Score] Réponses reçues (${Object.keys(answers).length} clés): ${JSON.stringify(answers)}`,
@@ -201,35 +201,35 @@ export class QuizScoringService {
 
     const persistTx = userId
       ? this.prisma.$transaction(
-        async (tx) => {
-          const now = new Date();
-          const monthStart = this.utcMonthStart(now);
-          const monthEnd = this.utcMonthEnd(now);
-          const existingThisUtcMonth = await tx.score_history.findFirst({
-            where: {
-              user_id: userId,
-              created_at: { gte: monthStart, lte: monthEnd },
-            },
-            select: { id: true },
-          });
-          if (existingThisUtcMonth) {
-            throw new ConflictException(
-              'Un bilan a déjà été enregistré pour ce mois civil (UTC). Un seul enregistrement par mois et par année est autorisé.',
-            );
-          }
+          async (tx) => {
+            const now = new Date();
+            const monthStart = this.utcMonthStart(now);
+            const monthEnd = this.utcMonthEnd(now);
+            const existingThisUtcMonth = await tx.score_history.findFirst({
+              where: {
+                user_id: userId,
+                created_at: { gte: monthStart, lte: monthEnd },
+              },
+              select: { id: true },
+            });
+            if (existingThisUtcMonth) {
+              throw new ConflictException(
+                'Un bilan a déjà été enregistré pour ce mois civil (UTC). Un seul enregistrement par mois et par année est autorisé.',
+              );
+            }
 
-          await tx.score_history.create({
-            data: {
-              user_id: userId,
-              score: this.round2(total),
-              json_answers: answers as any,
-              categories_scores: categoriesScores,
-            },
-          });
-          /** `onboarding_completed` est réservé à la fin du parcours d’accueil (choix du parcours), via `UserService.completeOnboarding`. */
-        },
-        { timeout: 25_000, maxWait: 10_000 },
-      )
+            await tx.score_history.create({
+              data: {
+                user_id: userId,
+                score: this.round2(total),
+                json_answers: answers as any,
+                categories_scores: categoriesScores,
+              },
+            });
+            /** `onboarding_completed` est réservé à la fin du parcours d’accueil (choix du parcours), via `UserService.completeOnboarding`. */
+          },
+          { timeout: 25_000, maxWait: 10_000 },
+        )
       : Promise.resolve(null);
 
     const [onboardingBilan] = await Promise.all([onboardingPromise, persistTx]);
@@ -385,15 +385,7 @@ export class QuizScoringService {
 
   private utcMonthEnd(ref: Date): Date {
     return new Date(
-      Date.UTC(
-        ref.getUTCFullYear(),
-        ref.getUTCMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-        999,
-      ),
+      Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth() + 1, 0, 23, 59, 59, 999),
     );
   }
 }

@@ -43,7 +43,7 @@ export function CommunityTreeRankingDialog({
             Classement des arbres
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            Score inspiré des feuilles TerraScore — {communityName}
+            Un arbre est gagné par défi réussi dans {communityName}
           </DialogDescription>
         </DialogHeader>
         <ul className="max-h-[55vh] overflow-y-auto px-3 py-3">
@@ -68,7 +68,6 @@ export function CommunityTreeRankingDialog({
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-gray-900">{e.display_name}</p>
-                  <p className="text-xs text-gray-500">Arbres — score communautaire</p>
                 </div>
                 <span className="shrink-0 text-sm font-semibold tabular-nums text-[#1b5e20]">
                   {e.tree_score}

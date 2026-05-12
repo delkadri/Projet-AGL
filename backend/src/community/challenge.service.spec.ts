@@ -176,7 +176,7 @@ describe('ChallengeService', () => {
 
       expect(mockPrisma.users.update).toHaveBeenCalledWith({
         where: { id: 'u1' },
-        data: { feuilles: { increment: 20 } },
+        data: { feuilles: { increment: 100 } },
       });
       expect(mockPrisma.group_members.update).toHaveBeenCalledWith({
         where: { group_id_user_id: { group_id: 'g1', user_id: 'u1' } },

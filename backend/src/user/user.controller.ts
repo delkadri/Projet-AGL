@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { SimpleChallengeCompleteResponseDto } from './dto/simple-challenge-complete.response.dto';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UpdateParcoursDto } from './dto/update-parcours.dto';
@@ -68,6 +69,25 @@ export class UserController {
       throw new UnauthorizedException('Token invalide : identifiant manquant.');
     }
     return this.userService.resetOnboardingForRetest(user.id);
+  }
+
+  @Post('me/simple-challenge/complete')
+  @ApiOperation({
+    summary: 'Relever le défi quotidien (carte Accueil)',
+    description:
+      'Crédite les feuilles de récompense du défi simple, au plus une fois par jour (UTC).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Défi enregistré, feuilles mises à jour.',
+    type: SimpleChallengeCompleteResponseDto,
+  })
+  @ApiResponse({ status: 409, description: 'Défi déjà relevé pour ce jour UTC.' })
+  async completeSimpleDailyChallenge(@CurrentUser() user: any) {
+    if (!user?.id) {
+      throw new UnauthorizedException('Token invalide : identifiant manquant.');
+    }
+    return this.userService.completeSimpleDailyChallenge(user.id);
   }
 
   @Get('me/scores')

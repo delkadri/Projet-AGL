@@ -17,7 +17,8 @@ export class MonthlyQuizCurrentDto {
     type: String,
     format: 'date-time',
     nullable: true,
-    description: 'Date ISO du dernier score enregistré (score_history.created_at).',
+    description:
+      'Date ISO du dernier score enregistré (score_history.created_at).',
     example: '2026-05-01T12:00:00.000Z',
   })
   lastScoreHistoryAt!: string | null;

@@ -4,8 +4,8 @@ import { UserService } from './user.service';
 import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
-    imports: [SupabaseModule],
-    controllers: [UserController],
-    providers: [UserService]
+  imports: [SupabaseModule],
+  controllers: [UserController],
+  providers: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

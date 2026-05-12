@@ -29,7 +29,7 @@ type QuizContainerProps = {
   /** Réponses du dernier bilan (quiz mensuel) pour showIf et préremplissage. */
   initialBaselineAnswers?: QuizAnswers
   onFinishQuiz?: QuizFinishAction
-  /** Écran de résultat simplifié (titre + score animé, sans catégories), ex. fin du quiz d’onboarding. */
+  /** Écran de résultat onboarding : en-tête + score + détail catégories scrollable, CTA fixé en bas. */
   quizResultVariant?: 'default' | 'onboarding'
 }
 

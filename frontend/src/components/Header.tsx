@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { User } from 'lucide-react'
+import { Leaf, User } from 'lucide-react'
 import { useAuth } from '@/auth/AuthContext'
 
 export default function Header() {
@@ -9,6 +9,7 @@ export default function Header() {
     user?.firstName || user?.lastName
       ? `${user.firstName ? String(user.firstName) : ''} ${user.lastName ? String(user.lastName) : ''}`.trim()
       : user?.email?.split('@')[0] ?? 'Utilisateur'
+  const feuillesCount = new Intl.NumberFormat('fr-FR').format(user?.feuilles ?? 0)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#e8f5e9] px-3 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-0 mb-0">
@@ -21,6 +22,13 @@ export default function Header() {
           />
         </Link>
         <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] shadow-sm ring-1 ring-[#1b5e20]/10"
+            aria-label={`${feuillesCount} feuilles`}
+          >
+            <Leaf className="h-4 w-4 fill-[#66bb6a]/30" aria-hidden />
+            <span>{feuillesCount}</span>
+          </div>
           <div className="text-right">
             <p className="text-sm font-medium text-black">{displayName}</p>
             <p className="text-xs text-black">

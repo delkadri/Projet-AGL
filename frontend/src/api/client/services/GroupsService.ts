@@ -4,30 +4,31 @@
 /* eslint-disable */
 import type { CreateGroupDto } from '../models/CreateGroupDto';
 import type { SendMessageDto } from '../models/SendMessageDto';
+import type { UserGroupMembershipDto } from '../models/UserGroupMembershipDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class GroupsService {
     /**
      * Liste des groupes de l'utilisateur connecté
-     * @returns any Groupes retournés
+     * @returns UserGroupMembershipDto
      * @throws ApiError
      */
-    public static groupControllerGetMyGroups(): CancelablePromise<any> {
+    public static groupControllerGetMyGroups(): CancelablePromise<Array<UserGroupMembershipDto>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/groups/me',
         });
     }
     /**
-     * Rechercher un groupe public par nom
+     * Rechercher un groupe public par nom (vide = suggestions)
      * @returns any Groupes correspondants
      * @throws ApiError
      */
     public static groupControllerSearchGroups({
         name,
     }: {
-        name: string,
+        name?: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -61,14 +62,14 @@ export class GroupsService {
     }
     /**
      * Créer un groupe (niveau ≥ 3 requis)
-     * @returns any Groupe créé
+     * @returns UserGroupMembershipDto
      * @throws ApiError
      */
     public static groupControllerCreateGroup({
         requestBody,
     }: {
         requestBody: CreateGroupDto,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<UserGroupMembershipDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/groups',

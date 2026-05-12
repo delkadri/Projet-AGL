@@ -165,6 +165,8 @@ export class AuthService {
         onboardingCompleted: user.onboarding_completed,
         hasOnboardingBilan,
         parcours: user.parcours,
+        lastSimpleChallengeCompletedAt:
+          user.last_simple_challenge_completed_at?.toISOString() ?? null,
       };
     } catch (error) {
       this.logger.error('getCurrentUser failed', error);

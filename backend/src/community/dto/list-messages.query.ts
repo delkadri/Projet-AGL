@@ -13,7 +13,8 @@ export class ListMessagesQuery {
 
   @ApiPropertyOptional({
     example: '2026-05-11T12:34:56.000Z',
-    description: 'Curseur de pagination : ISO date — renvoie les messages strictement antérieurs.',
+    description:
+      'Curseur de pagination : ISO date — renvoie les messages strictement antérieurs.',
   })
   @IsOptional()
   @IsISO8601()

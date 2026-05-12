@@ -20,14 +20,14 @@ async function generateSwagger() {
   const document = SwaggerModule.createDocument(app, config);
 
   const outputPath = join(__dirname, '..', 'openapi.json');
-  writeFileSync(outputPath, JSON.stringify(document, null, 2), { encoding: 'utf8' });
+  writeFileSync(outputPath, JSON.stringify(document, null, 2), {
+    encoding: 'utf8',
+  });
 
   await app.close();
 }
 
 generateSwagger().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error('Failed to generate OpenAPI document', err);
   process.exit(1);
 });
-

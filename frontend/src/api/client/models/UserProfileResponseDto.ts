@@ -16,5 +16,9 @@ export type UserProfileResponseDto = {
      */
     hasOnboardingBilan: boolean;
     parcours?: ParcoursDto | null;
+    /**
+     * Horodatage ISO de la dernière complétion du défi Accueil (limite une fois par jour UTC).
+     */
+    lastSimpleChallengeCompletedAt?: string | null;
 };
 

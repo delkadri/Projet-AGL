@@ -21,7 +21,7 @@ export class ChatService {
       where: { group_id_user_id: { group_id: groupId, user_id: userId } },
     });
     if (!membership) {
-      throw new ForbiddenException('Vous n\'êtes pas membre de ce groupe');
+      throw new ForbiddenException("Vous n'êtes pas membre de ce groupe");
     }
   }
 
@@ -43,7 +43,9 @@ export class ChatService {
       orderBy: { created_at: 'desc' },
       take: limit,
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true } },
+        user: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
 
@@ -65,7 +67,9 @@ export class ChatService {
         content: dto.content,
       },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true } },
+        user: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
 
