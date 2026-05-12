@@ -1,31 +1,22 @@
 import { useState } from 'react'
-import { useCurrentUserQuery } from '@/api/hooks/useAuth'
-import {
-  useCompleteChallengeMutation,
-  useUserChallengesQuery,
-} from '@/api/hooks/useChallenges'
+import { mockChallenges } from '@/data/mockChallenges'
 import { ChallengeCard } from './ChallengeCard'
 import { ChallengeDetailsPopup } from './ChallengeDetailsPopup'
 
 export function ObjectivesList() {
+  const [challenges, setChallenges] = useState(mockChallenges)
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null)
-  const currentUserQuery = useCurrentUserQuery()
-  const userChallengesQuery = useUserChallengesQuery()
-  const completeChallengeMutation = useCompleteChallengeMutation()
 
-  const challenges = userChallengesQuery.data?.challenges ?? []
   const selectedChallenge =
     challenges.find((challenge) => challenge.id === selectedChallengeId) ?? null
-  const isLoading = userChallengesQuery.isLoading || currentUserQuery.isLoading
-  const isError = userChallengesQuery.isError
-  const currentUser = currentUserQuery.data
+  const isLoading = false
 
   const leavesForNextLevel = 1000
   const completedChallengeLeaves = challenges
     .filter((c) => c.completed)
     .reduce((sum, c) => sum + c.leafReward, 0)
-  const currentLeavesEarned = currentUser?.feuilles ?? completedChallengeLeaves
-  const userLevel = currentUser?.niveau ?? Math.floor(currentLeavesEarned / leavesForNextLevel) + 1
+  const currentLeavesEarned = 320 + completedChallengeLeaves
+  const userLevel = Math.floor(currentLeavesEarned / leavesForNextLevel) + 1
   const leavesProgress = (currentLeavesEarned % leavesForNextLevel / leavesForNextLevel) * 100
 
   // Calcul challenges de la semaine
@@ -61,7 +52,18 @@ export function ObjectivesList() {
   })
 
   const handleCompleteChallenge = async (challengeId: string) => {
-    await completeChallengeMutation.mutateAsync(challengeId)
+    setChallenges((currentChallenges) =>
+      currentChallenges.map((challenge) =>
+        challenge.id === challengeId
+          ? {
+              ...challenge,
+              completed: true,
+              completedAt: new Date().toISOString(),
+              progress: 100,
+            }
+          : challenge,
+      ),
+    )
   }
 
   return (
@@ -142,22 +144,7 @@ export function ObjectivesList() {
             </div>
           )}
 
-          {!isLoading && isError && (
-            <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <p className="text-gray-600 text-center">
-                Impossible de charger vos objectifs pour le moment.
-              </p>
-              <button
-                type="button"
-                onClick={() => void userChallengesQuery.refetch()}
-                className="rounded-lg bg-[#1C5138] px-4 py-2 text-sm font-semibold text-white"
-              >
-                Réessayer
-              </button>
-            </div>
-          )}
-
-          {!isLoading && !isError && sortedChallenges.length === 0 && (
+          {!isLoading && sortedChallenges.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <p className="text-4xl">🎯</p>
               <p className="text-gray-600 text-center">
