@@ -8,8 +8,8 @@ export function useScoreHistory() {
   const { data: user } = useCurrentUserQuery()
 
   return useQuery({
-    queryKey: SCORE_HISTORY_QUERY_KEY,
+    queryKey: [...SCORE_HISTORY_QUERY_KEY, user?.id] as const,
     queryFn: () => UsersService.userControllerGetScoreHistory(),
-    enabled: !!user,
+    enabled: !!user?.id,
   })
 }

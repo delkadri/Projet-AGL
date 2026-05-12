@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import { ChevronRight, Leaf } from 'lucide-react'
+import { ChevronRight, Leaf, Loader2 } from 'lucide-react'
 
+import { useCurrentUserQuery } from '@/api/hooks/useAuth'
 import { useScoreHistory } from '@/api/hooks/useScoreHistory'
 import { useOnboardingQuizResult } from '@/api/hooks/useOnboardingQuizResult'
 import { getClimateLevelLabel, type QuizOnboardingBilan } from '@/components/quiz/QuizResult'
@@ -45,21 +46,32 @@ function formatTonnesDisplay(t: number): string {
 }
 
 export default function CarbonScoreCard() {
+  const { isPending: authPending, data: authUser } = useCurrentUserQuery()
   const onboarding = useOnboardingQuizResult()
-  const { data: scoreHistory, isLoading: scoreHistoryLoading } = useScoreHistory()
+  const scoreHistoryQuery = useScoreHistory()
+  const { data: scoreHistory } = scoreHistoryQuery
 
   const onboardingBilan = onboarding.data?.onboardingBilan as QuizOnboardingBilan | undefined
   const nationalTotalKg = onboardingBilan?.nationalTotalKgCo2ePerYear ?? FRENCH_AVERAGE_KG
 
-  const loading =
-    onboarding.isLoading || (onboarding.isError && !onboarding.data && scoreHistoryLoading)
+  const authBootstrapping = authPending && authUser === undefined
+
+  const scoreWaiting = scoreHistoryQuery.isEnabled && scoreHistoryQuery.isPending
+  const onboardingWaiting = onboarding.isEnabled && onboarding.isPending
+
+  const loading = authBootstrapping || scoreWaiting || onboardingWaiting
 
   if (loading) {
     return (
       <div
-        className="h-40 animate-pulse rounded-3xl bg-linear-to-br from-emerald-50/90 via-white to-slate-50/80 p-4 shadow-[0_12px_40px_-16px_rgba(26,77,62,0.22)] ring-1 ring-[#1A4D3E]/8"
-        aria-hidden
-      />
+        className="flex min-h-[168px] flex-col items-center justify-center gap-3 rounded-3xl bg-linear-to-br from-white via-emerald-50/35 to-white p-6 shadow-[0_12px_40px_-16px_rgba(26,77,62,0.22)] ring-1 ring-[#1A4D3E]/10"
+        role="status"
+        aria-busy="true"
+        aria-label="Chargement du score carbone"
+      >
+        <Loader2 className="size-8 shrink-0 animate-spin text-[#1A4D3E]" aria-hidden />
+        <p className="text-center text-sm font-medium text-slate-600">Chargement du score carbone…</p>
+      </div>
     )
   }
 
@@ -178,33 +190,35 @@ export default function CarbonScoreCard() {
 
       <div className="relative mt-4">
         <div
-          className="relative h-2 w-full overflow-hidden rounded-full bg-slate-200/90"
+          className="relative h-5 w-full"
           role="img"
           aria-label={`Empreinte ${formatTonnesDisplay(totalT)} tonnes par an, repère moyenne nationale vers ${formatTonnesDisplay(nationalT)} tonnes.`}
         >
+          <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-slate-200/90">
+            <div
+              className={cn('absolute inset-y-0 left-0 rounded-full bg-linear-to-r', getFootprintScoreToneGaugeGradient(tone))}
+              style={{ width: `${gaugePct}%` }}
+            />
+          </div>
           <div
-            className={cn('absolute inset-y-0 left-0 rounded-full bg-linear-to-r', getFootprintScoreToneGaugeGradient(tone))}
-            style={{ width: `${gaugePct}%` }}
-          />
-          <div
-            className="pointer-events-none absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow ring-2 ring-[#1A4D3E]/45"
+            className="pointer-events-none absolute top-1/2 z-[1] size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#1A4D3E]/50 bg-white shadow-sm"
             style={{ left: `${target2030Pct}%` }}
             title={`Objectif 2030 : ${TARGET_2030_T.toFixed(1).replace('.', ',')} t`}
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow ring-2 ring-slate-500/40"
+            className="pointer-events-none absolute top-1/2 z-[1] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-slate-500/55 bg-white shadow-sm"
             style={{ left: `${nationalPct}%` }}
             title={`Moyenne nationale ~ ${formatTonnesDisplay(nationalT)} t`}
             aria-hidden
           />
         </div>
-        <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-400">
-          <span>0</span>
-          <span className="text-center text-slate-500">
+        <div className="mt-1.5 flex justify-between gap-1 text-[10px] font-medium text-slate-400">
+          <span className="shrink-0">0</span>
+          <span className="min-w-0 truncate text-center text-slate-500" title={`7,1 t (objectif 2030) · ${formatTonnesDisplay(nationalT)} t (moyenne nationale)`}>
             7,1 t · {formatTonnesDisplay(nationalT)} t
           </span>
-          <span>{GAUGE_MAX_T} t</span>
+          <span className="shrink-0">{GAUGE_MAX_T} t</span>
         </div>
       </div>
 

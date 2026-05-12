@@ -33,6 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout: () => {
         logout()
         queryClient.removeQueries({ queryKey: AUTH_ME_QUERY_KEY })
+        queryClient.removeQueries({ queryKey: ['score_history'] })
+        queryClient.removeQueries({ queryKey: ['quiz', 'onboarding-result'] })
       },
     }),
     [queryClient, isLoading, user],

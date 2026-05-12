@@ -11,7 +11,7 @@ const RECENT_CHALLENGE_WEEKS = 4;
 
 @Injectable()
 export class ChallengeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private getCurrentWeekBounds(): { weekStart: Date; weekEnd: Date } {
     const now = new Date();

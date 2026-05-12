@@ -16,7 +16,7 @@ export class GroupService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly challengeService: ChallengeService,
-  ) {}
+  ) { }
 
   private async getUserLevel(userId: string): Promise<number> {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
@@ -250,25 +250,25 @@ export class GroupService {
       group.win_streak === 0
         ? 'broken'
         : group.last_streak_updated_at &&
-            group.last_streak_updated_at >= weekStart
+          group.last_streak_updated_at >= weekStart
           ? 'active'
           : 'at_risk';
 
     const activeDefi = activeChallenge
       ? {
-          id: activeChallenge.id,
-          title: activeChallenge.challenge.title,
-          description: activeChallenge.challenge.description,
-          points: 0,
-          iconKey: 'leaf' as const,
-          ends_at: activeChallenge.week_end_at.toISOString(),
-          bonus_feuilles: 0,
-          members_completed: activeChallenge.completions.length,
-          members_total_for_challenge: memberCount,
-          current_user_completed: activeChallenge.completions.some(
-            (c) => c.user_id === userId,
-          ),
-        }
+        id: activeChallenge.id,
+        title: activeChallenge.challenge.title,
+        description: activeChallenge.challenge.description,
+        points: 0,
+        iconKey: 'leaf' as const,
+        ends_at: activeChallenge.week_end_at.toISOString(),
+        bonus_feuilles: 500,
+        members_completed: activeChallenge.completions.length,
+        members_total_for_challenge: memberCount,
+        current_user_completed: activeChallenge.completions.some(
+          (c) => c.user_id === userId,
+        ),
+      }
       : null;
 
     return {

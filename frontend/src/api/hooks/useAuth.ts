@@ -4,6 +4,9 @@ import type { ApiError } from '@/api/client'
 import { getCurrentUser, login, logout, register, type CurrentUser } from '@/api/auth'
 
 const AUTH_ME_QUERY_KEY = ['auth', 'me'] as const
+/** Préfixes alignés sur useScoreHistory / useOnboardingQuizResult (invalidation partielle). */
+const SCORE_HISTORY_QUERY_PREFIX = ['score_history'] as const
+const ONBOARDING_QUIZ_RESULT_QUERY_PREFIX = ['quiz', 'onboarding-result'] as const
 
 export function useCurrentUserQuery() {
   return useQuery<CurrentUser>({
@@ -20,6 +23,8 @@ export function useLoginMutation() {
     mutationFn: login,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY })
+      void queryClient.invalidateQueries({ queryKey: SCORE_HISTORY_QUERY_PREFIX })
+      void queryClient.invalidateQueries({ queryKey: ONBOARDING_QUIZ_RESULT_QUERY_PREFIX })
     },
   })
 }
@@ -31,6 +36,8 @@ export function useRegisterMutation() {
     mutationFn: register,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY })
+      void queryClient.invalidateQueries({ queryKey: SCORE_HISTORY_QUERY_PREFIX })
+      void queryClient.invalidateQueries({ queryKey: ONBOARDING_QUIZ_RESULT_QUERY_PREFIX })
     },
   })
 }

@@ -24,12 +24,12 @@ export function useOnboardingQuizResult(enabled = true) {
   const { data: user } = useCurrentUserQuery()
 
   return useQuery({
-    queryKey: ONBOARDING_QUIZ_RESULT_QUERY_KEY,
+    queryKey: [...ONBOARDING_QUIZ_RESULT_QUERY_KEY, user?.id] as const,
     queryFn: async () => {
       const r =
         (await QuizService.quizControllerGetOnboardingResult()) as OnboardingQuizResultPayload
       return r
     },
-    enabled: !!user && !!user.hasOnboardingBilan && enabled,
+    enabled: !!user?.id && !!user.hasOnboardingBilan && enabled,
   })
 }
